@@ -21,19 +21,9 @@ export default function PrintDualThermal({
 }: PrintDualThermalProps) {
   const [activeMode, setActiveMode] = useState<'PRINT_BOTH' | 'PRINT_BILL' | 'PRINT_KOT'>(initialMode);
 
+  
   useEffect(() => {
-    // 1. Listen for print completion (native browser afterprint event)
-    const handleAfterPrint = () => {
-      if (onClose) {
-        setTimeout(() => {
-          onClose();
-        }, 300);
-      }
-    };
-
-    window.addEventListener("afterprint", handleAfterPrint);
-
-    // 2. Trigger instant 1-click print without blocking delay
+    // Trigger auto-print with small render delay to allow 2X logo & DOM to paint
     if (autoPrint) {
       const timer = setTimeout(() => {
         try {
@@ -46,22 +36,16 @@ export default function PrintDualThermal({
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             action: activeMode,
-            orderId: billData?.order.humanOrderId,
+            orderId: billData?.order?.humanOrderId,
             notes: `Auto-printed via ${activeMode}`,
           }),
         }).catch(console.error);
-      }, 150);
+      }, 300);
 
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener("afterprint", handleAfterPrint);
-      };
+      return () => clearTimeout(timer);
     }
+  }, [autoPrint, activeMode, billData]);
 
-    return () => {
-      window.removeEventListener("afterprint", handleAfterPrint);
-    };
-  }, [autoPrint, activeMode, billData, onClose]);
 
   // Keyboard shortcut: Escape to close
   useEffect(() => {
