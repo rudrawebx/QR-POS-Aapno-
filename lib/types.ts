@@ -9,6 +9,37 @@ export type UserRole =
   | 'WAITER'
   | 'ACCOUNTANT';
 
+export type OrderStatus =
+  | 'draft'
+  | 'awaiting_payment'
+  | 'payment_processing'
+  | 'paid'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready'
+  | 'completed'
+  | 'cancelled'
+  | 'refunded'
+  | 'payment_failed';
+
+export type PaymentStatus =
+  | 'created'
+  | 'pending'
+  | 'authorized'
+  | 'captured'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded'
+  | 'partially_refunded';
+
+export interface CashConfirmationPayload {
+  staffId: string;
+  staffName: string;
+  receivedAmount: number;
+  changeAmount: number;
+  notes?: string;
+}
+
 export interface CartItemModifier {
   id: string;
   name: string;

@@ -54,6 +54,7 @@ export async function GET(request: Request) {
         dbInvoices = await prisma.invoice.findMany({
           where: {
             restaurantId,
+            paymentStatus: "PAID",
             createdAt: { gte: startDate, lte: endDate },
           },
           include: {
@@ -75,7 +76,7 @@ export async function GET(request: Request) {
 
     (liveMemInvoices || []).forEach((inv) => {
       const invDate = new Date(inv.createdAt);
-      if (invDate >= startDate && invDate <= endDate) {
+      if (invDate >= startDate && invDate <= endDate && (inv.paymentStatus === "PAID" || !inv.paymentStatus)) {
         combinedInvoicesMap.set(inv.id || inv.humanInvoiceNumber, inv);
       }
     });

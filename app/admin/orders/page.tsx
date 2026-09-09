@@ -162,21 +162,61 @@ export default function AdminOrdersPage() {
   };
 
   const handlePrintBoth = (order: any) => {
+    if (order.paymentStatus !== 'PAID') {
+      alert('Security Protection: Cannot generate or print Tax Bill & KOT for unpaid/pending orders.');
+      return;
+    }
     const { billData, kotData } = buildPrintData(order);
     setActiveDualPrint({ billData, kotData, mode: 'PRINT_BOTH' });
   };
 
   const handlePrintBill = (order: any) => {
+    if (order.paymentStatus !== 'PAID') {
+      alert('Security Protection: Cannot print Tax Bill for unpaid/pending orders.');
+      return;
+    }
     const { billData } = buildPrintData(order);
     setActiveDualPrint({ billData, mode: 'PRINT_BILL' });
   };
 
   const handlePrintKot = (order: any) => {
+    if (order.paymentStatus !== 'PAID') {
+      alert('Security Protection: Cannot print KOT for unpaid/pending orders.');
+      return;
+    }
     const { kotData } = buildPrintData(order);
     setActiveDualPrint({ kotData, mode: 'PRINT_KOT' });
   };
 
+  const handleConfirmCashOrder = async (order: any) => {
+    if (!confirm(`Confirm Cash Payment of ₹${order.grandTotal} received by Cashier for order ${order.humanOrderId}?`)) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          orderId: order.id,
+          action: 'CONFIRM_CASH',
+          isStaffCashConfirmed: true,
+          staffId: 'ADMIN_MGR',
+          receivedAmount: order.grandTotal,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        fetchOrders();
+      } else {
+        alert(data.error || 'Failed to confirm cash order');
+      }
+    } catch (err) {
+      console.error('Error confirming cash order:', err);
+    }
+  };
+
   const columns = [
+    { key: 'AWAITING_PAYMENT', title: 'Pending Payment', color: 'border-amber-500 bg-amber-50/50 text-amber-900', icon: Clock },
     { key: 'CONFIRMED', title: 'Paid & Fired', color: 'border-emerald-600 bg-emerald-50/50 text-emerald-900', icon: CheckCircle2 },
     { key: 'PREPARING', title: 'Handi & Tandoor', color: 'border-amber-600 bg-amber-50/50 text-amber-900', icon: ChefHat },
     { key: 'READY', title: 'Ready for Car / Pickup', color: 'border-[#AA1B2A] bg-red-50/50 text-[#AA1B2A]', icon: Bell },
@@ -199,45 +239,59 @@ export default function AdminOrdersPage() {
               <ShoppingCart className="w-5 h-5" />
             </div>
             <div>
-              <h1 className="font-black text-sm text-[#331E17] flex items-center gap-2">
-                <span>QSR &amp; Car Service Live Orders</span>
-                <span className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-[#FEFBF5] text-[10px] font-black px-2.5 py-0.5 rounded-full">
-                  {orders.filter((o) => o.status !== 'COMPLETED' && o.status !== 'CANCELLED').length} Active
-                </span>
-              </h1>
+              <h1 className="text-lg font-black text-[#331E17]">Live Order Operations</h1>
               <p className="text-xs text-[#745E55]">
-                Verified UPI/Razorpay orders • Instant dual 80mm GST Bill &amp; Kitchen KOT thermal printing
+                Real-time Kitchen &amp; Car Service KOT pipeline with strict payment verification
               </p>
             </div>
           </div>
 
-          {/* Filters (Period & Order Type) */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Period Tabs */}
-            <div className="flex items-center gap-1 bg-[#F7F2EA] p-1 rounded-2xl text-xs font-bold border border-[#E8E1D6]">
-              {[
-                { id: 'TODAY', label: 'Today' },
-                { id: 'YESTERDAY', label: 'Yesterday' },
-                { id: '7DAYS', label: '7 Days' },
-                { id: '30DAYS', label: '30 Days' },
-                { id: 'ALL', label: 'All Time' },
-              ].map((r) => (
-                <button
-                  key={r.id}
-                  onClick={() => setRange(r.id)}
-                  className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
-                    range === r.id
-                      ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-2xs font-black'
-                      : 'text-[#745E55] hover:text-[#331E17]'
-                  }`}
-                >
-                  {r.label}
-                </button>
-              ))}
+          <div className="flex items-center gap-2">
+            {/* Quick date range switcher */}
+            <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
+              <button
+                onClick={() => {
+                  setRange('TODAY');
+                  fetchOrders('TODAY');
+                }}
+                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                  range === 'TODAY'
+                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                    : 'text-[#745E55] hover:text-[#331E17]'
+                }`}
+              >
+                Today
+              </button>
+              <button
+                onClick={() => {
+                  setRange('WEEK');
+                  fetchOrders('WEEK');
+                }}
+                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                  range === 'WEEK'
+                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                    : 'text-[#745E55] hover:text-[#331E17]'
+                }`}
+              >
+                This Week
+              </button>
+              <button
+                onClick={() => {
+                  setRange('ALL');
+                  fetchOrders('ALL');
+                }}
+                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                  range === 'ALL'
+                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                    : 'text-[#745E55] hover:text-[#331E17]'
+                }`}
+              >
+                All Time
+              </button>
             </div>
 
-            {/* Filter by Order Type */}
-            <div className="flex items-center gap-1 bg-[#F7F2EA] p-1 rounded-2xl text-xs font-bold border border-[#E8E1D6]">
+            {/* Order Type Filter */}
+            <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
               <button
                 onClick={() => setOrderTypeFilter('ALL')}
                 className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
@@ -246,7 +300,7 @@ export default function AdminOrdersPage() {
                     : 'text-[#745E55]'
                 }`}
               >
-                All Types
+                All
               </button>
               <button
                 onClick={() => setOrderTypeFilter('CAR_SERVICE')}
@@ -275,7 +329,7 @@ export default function AdminOrdersPage() {
         </div>
 
         {/* Kanban Columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5 items-start overflow-x-auto pb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 items-start overflow-x-auto pb-6">
           {columns.map((col) => {
             const colOrders = filteredOrders.filter((o) => o.status === col.key);
             const Icon = col.icon;
@@ -283,7 +337,7 @@ export default function AdminOrdersPage() {
             return (
               <div
                 key={col.key}
-                className="bg-white rounded-3xl border border-[#E8E1D6] shadow-2xs flex flex-col max-h-[82vh] min-w-[280px]"
+                className="bg-white rounded-3xl border border-[#E8E1D6] shadow-2xs flex flex-col max-h-[82vh] min-w-[260px]"
               >
                 {/* Column Header */}
                 <div className={`p-3.5 border-b-2 ${col.color} rounded-t-3xl flex items-center justify-between`}>
@@ -303,7 +357,10 @@ export default function AdminOrdersPage() {
                       No orders in {col.title.toLowerCase()}
                     </div>
                   ) : (
-                    colOrders.map((ord) => (
+                    colOrders.map((ord) => {
+                      const isPaid = ord.paymentStatus === 'PAID';
+
+                      return (
                       <div
                         key={ord.id}
                         className="p-3.5 rounded-2xl border border-[#E8E1D6] bg-white hover:border-[#E09D3D] shadow-xs space-y-2.5 transition-all text-xs"
@@ -324,8 +381,14 @@ export default function AdminOrdersPage() {
 
                           <div className="text-right">
                             <span className="font-black text-[#AA1B2A] text-sm">₹{ord.grandTotal}</span>
-                            <span className={`text-[9px] font-bold block uppercase ${ord.paymentStatus === 'REFUNDED' ? 'text-red-700' : 'text-emerald-700'}`}>
-                              {ord.paymentStatus === 'REFUNDED' ? 'REFUNDED' : 'PAID ✓'}
+                            <span className={`text-[9px] font-bold block uppercase ${
+                              ord.paymentStatus === 'REFUNDED'
+                                ? 'text-red-700'
+                                : ord.paymentStatus === 'PAID'
+                                ? 'text-emerald-700'
+                                : 'text-amber-700 bg-amber-100 px-1 rounded'
+                            }`}>
+                              {ord.paymentStatus === 'REFUNDED' ? 'REFUNDED' : ord.paymentStatus === 'PAID' ? 'PAID ✓' : 'UNPAID ⏳'}
                             </span>
                           </div>
                         </div>
@@ -372,33 +435,47 @@ export default function AdminOrdersPage() {
 
                         {/* Action Buttons Toolbar */}
                         <div className="pt-1 flex items-center gap-1.5 flex-wrap">
-                          {/* Print Both (Bill + KOT) */}
-                          <button
-                            onClick={() => handlePrintBoth(ord)}
-                            className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-[#FEFBF5] px-2.5 py-1.5 rounded-xl font-black text-[10px] flex items-center gap-1 border border-[#E09D3D] shadow-2xs cursor-pointer"
-                            title="Print Both Bill &amp; KOT"
-                          >
-                            <Printer className="w-3 h-3 text-[#E09D3D]" />
-                            <span>Print Both</span>
-                          </button>
+                          {isPaid ? (
+                            <>
+                              {/* Print Both (Bill + KOT) */}
+                              <button
+                                onClick={() => handlePrintBoth(ord)}
+                                className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-[#FEFBF5] px-2.5 py-1.5 rounded-xl font-black text-[10px] flex items-center gap-1 border border-[#E09D3D] shadow-2xs cursor-pointer"
+                                title="Print Both Bill &amp; KOT"
+                              >
+                                <Printer className="w-3 h-3 text-[#E09D3D]" />
+                                <span>Print Both</span>
+                              </button>
 
-                          {/* Print Bill Only */}
-                          <button
-                            onClick={() => handlePrintBill(ord)}
-                            className="p-1.5 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-[#AA1B2A] transition-colors cursor-pointer border border-[#E8E1D6]"
-                            title="Print 80mm Customer Bill"
-                          >
-                            <Receipt className="w-3.5 h-3.5" />
-                          </button>
+                              {/* Print Bill Only */}
+                              <button
+                                onClick={() => handlePrintBill(ord)}
+                                className="p-1.5 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-[#AA1B2A] transition-colors cursor-pointer border border-[#E8E1D6]"
+                                title="Print 80mm Customer Bill"
+                              >
+                                <Receipt className="w-3.5 h-3.5" />
+                              </button>
 
-                          {/* Print KOT Only */}
-                          <button
-                            onClick={() => handlePrintKot(ord)}
-                            className="p-1.5 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-slate-700 transition-colors cursor-pointer border border-[#E8E1D6]"
-                            title="Print 80mm KOT Ticket"
-                          >
-                            <ChefHat className="w-3.5 h-3.5" />
-                          </button>
+                              {/* Print KOT Only */}
+                              <button
+                                onClick={() => handlePrintKot(ord)}
+                                className="p-1.5 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-slate-700 transition-colors cursor-pointer border border-[#E8E1D6]"
+                                title="Print 80mm KOT Ticket"
+                              >
+                                <ChefHat className="w-3.5 h-3.5" />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-1 w-full">
+                              <button
+                                onClick={() => handleConfirmCashOrder(ord)}
+                                className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-1.5 px-2 rounded-xl text-[10px] flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                              >
+                                <CheckCircle2 className="w-3 h-3 text-emerald-300" />
+                                <span>Confirm Cash Received</span>
+                              </button>
+                            </div>
+                          )}
 
                           {/* Refund Trigger */}
                           {ord.paymentStatus === 'PAID' && (
@@ -453,7 +530,8 @@ export default function AdminOrdersPage() {
                           )}
                         </div>
                       </div>
-                    ))
+                    );
+                  })
                   )}
                 </div>
               </div>

@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { broadcastEvent, recordLiveOrder, recordLiveInvoice } from '@/lib/events';
+import { recordLiveOrder, recordLiveInvoice } from '@/lib/events';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
+import { deductInventoryForOrder } from '@/lib/inventory';
 
 export async function POST(request: Request) {
+  let validatedItems: any[] = [];
+  let items: any[] = [];
   try {
     const body = await request.json();
     const {
@@ -13,12 +16,14 @@ export async function POST(request: Request) {
       carNumber,
       orderType = 'CAR_SERVICE',
       cookingInstructions,
-      items,
       paymentMethod = 'UPI',
       paymentStatus = 'PAID',
       transactionId,
       discountAmount = 0,
+      isStaffCashConfirmed = false,
+      staffId = 'POS_STAFF',
     } = body;
+    items = body.items || [];
 
     // Validation
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -29,7 +34,6 @@ export async function POST(request: Request) {
 
     // 1. Calculate Subtotal & Line Items Server-side
     let calculatedSubtotal = 0;
-    const validatedItems: any[] = [];
 
     const masterDishesMap = new Map();
     MASTER_AAPNO_KHANO_CATEGORIES.forEach((c) => {
@@ -95,6 +99,7 @@ export async function POST(request: Request) {
     const humanKotNumber = `KOT-${orderNum}`;
     const verifiedTxnId = transactionId || `POS_${Date.now()}_${cleanPhone.slice(-4)}`;
 
+    let restaurant: any = null;
     let orderRecord: any = {
       id: `ord_${Date.now()}`,
       humanOrderId,
@@ -144,7 +149,7 @@ export async function POST(request: Request) {
     // Persist in Database if available
     try {
       if (prisma) {
-        const restaurant = await prisma.restaurant.findFirst({
+        restaurant = await prisma.restaurant.findFirst({
           where: { slug: restaurantSlug },
           include: { settings: true },
         });
@@ -168,7 +173,7 @@ export async function POST(request: Request) {
               paymentMethod: paymentMethod || 'UPI',
               transactionId: verifiedTxnId,
               items: {
-                create: validatedItems.map((vi, idx) => ({
+                create: validatedItems.map((vi) => ({
                   productName: vi.productName,
                   selectedVariation: vi.selectedVariation,
                   isVeg: vi.isVeg,
@@ -233,6 +238,9 @@ export async function POST(request: Request) {
             include: { kotItems: true },
           });
           createdKots.push(kot);
+
+          // Inventory Deduction
+          await deductInventoryForOrder(dbOrder.id);
         }
       }
     } catch (dbError) {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import RazorpayModal from '@/components/RazorpayModal';
 import AdminLayout from '@/components/AdminLayout';
 import PrintDualThermal from '@/components/PrintDualThermal';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
@@ -55,6 +56,10 @@ export default function AdminPosPage() {
 
   // Customization Modal for Portion Variations
   const [customizingProduct, setCustomizingProduct] = useState<any | null>(null);
+  const [showCashModal, setShowCashModal] = useState(false);
+  const [cashTendered, setCashTendered] = useState<string>("");
+  const [showOnlineModal, setShowOnlineModal] = useState(false);
+
 
   useEffect(() => {
     async function loadData() {
@@ -284,28 +289,39 @@ export default function AdminPosPage() {
   const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
   const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
 
-  // Submit Verified POS Order
-  const handleFireKotAndPrint = async () => {
+  
+  // Trigger appropriate payment flow (Cash Modal vs Online Modal)
+  const handleFireKotAndPrint = () => {
     if (cartItems.length === 0) return;
-    setIsSubmitting(true);
+    if (paymentMethod === "CASH") {
+      setCashTendered(grandTotal.toString());
+      setShowCashModal(true);
+    } else {
+      setShowOnlineModal(true);
+    }
+  };
 
+  // Staff Confirmed Cash Payment & Bill Generation
+  const handleConfirmCashPayment = async () => {
+    setIsSubmitting(true);
     try {
-      const res = await fetch('/api/payments/verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          restaurantSlug: 'aapno-khano',
-          customerName: customerName.trim() || 'Direct Guest',
-          customerPhone: customerPhone || '9996213962',
+          restaurantId: "rest_aapno_khano",
+          customerName: customerName.trim() || "Direct Guest",
+          customerPhone: customerPhone || "9996213962",
           carNumber: carNumber.trim() || null,
           orderType,
           cookingInstructions,
-          paymentMethod,
+          paymentMethod: "CASH",
+          isStaffCashConfirmed: true,
+          receivedAmount: parseFloat(cashTendered) || grandTotal,
           discountAmount,
-          transactionId: `POS_MANUAL_${Date.now()}`,
           items: cartItems.map((it) => ({
             productId: it.productId,
-            productName: it.name,
+            name: it.name,
             selectedVariation: it.selectedVariation,
             quantity: it.quantity,
             unitPrice: it.unitPrice,
@@ -317,87 +333,31 @@ export default function AdminPosPage() {
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
-        // Trigger simultaneous 80mm GST Bill & KOT thermal printing
-        const kotData = {
-          kot: {
-            humanKotNumber: data.kots?.[0]?.humanKotNumber || `KOT-${Date.now()}`,
-            orderNumber: data.humanOrderId,
-            createdAt: new Date(),
-            stationName: 'ALL STATIONS / EXPEDITER',
-            carNumber: carNumber || undefined,
-            customerName: customerName,
-            orderType,
-            specialInstructions: cookingInstructions,
-          },
-          items: cartItems.map((it) => ({
-            productName: it.name,
-            selectedVariation: it.selectedVariation,
-            quantity: it.quantity,
-            isVeg: it.isVeg,
-            itemNotes: it.specialNotes,
-          })),
-        };
-
-        const currentBill = data.printReceiptData;
-        const safeBillItems = (currentBill?.items && currentBill.items.length > 0)
-          ? currentBill.items
-          : cartItems.map((c) => ({
-              name: c.name,
-              selectedVariation: c.selectedVariation,
-              quantity: c.quantity,
-              unitPrice: c.unitPrice,
-              totalPrice: c.unitPrice * c.quantity,
-              isVeg: c.isVeg,
-            }));
-
-        const finalizedBill = {
-          ...currentBill,
-          restaurant: currentBill?.restaurant || {
-            name: "आपणो खाणो (Aapno Khaano)",
-            address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
-            phone: "+91 99962 13962",
-            gstin: "08AABCU9603R1ZM",
-            fssaiNumber: "12224026000189",
-            currencySymbol: "₹",
-            defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
-          },
-          order: currentBill?.order || {
-            humanOrderId: data.humanOrderId || ("AK-2026-" + Date.now().toString().slice(-4)),
-            customerName: customerName || "Direct Guest",
-            customerPhone: customerPhone || "9996213962",
-            carNumber: carNumber || undefined,
-            orderType,
-            subtotal: subtotalAfterDiscount,
-            cgstAmount,
-            sgstAmount,
-            grandTotal,
-            paymentMethod,
-            createdAt: new Date(),
-          },
-          items: safeBillItems,
-        };
-
-        setLastBillData(finalizedBill);
-
+      if (res.ok && data.success && data.printReceiptData) {
+        setLastBillData(data.printReceiptData);
         setDualPrintData({
-          billData: finalizedBill,
-          kotData,
+          billData: data.printReceiptData,
+          kotData: data.kot ? {
+            kot: data.kot,
+            items: data.kot.kotItems || cartItems.map(c => ({ productName: c.name, quantity: c.quantity, isVeg: c.isVeg, selectedVariation: c.selectedVariation })),
+          } : null,
         });
-
+        setShowCashModal(false);
         setCartItems([]);
-        setCookingInstructions('');
-        setCarNumber('');
+        setCookingInstructions("");
+        setCarNumber("");
         setDiscountAmount(0);
       } else {
-        alert(data.error || 'Failed to place POS order.');
+        alert(data.error || "Failed to process cash order.");
       }
     } catch (err) {
-      console.error('POS fire error:', err);
+      console.error("POS Cash payment error:", err);
+      alert("Error confirming cash payment. Please check server.");
     } finally {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <AdminLayout>
@@ -866,6 +826,137 @@ export default function AdminPosPage() {
             </button>
           </div>
         </div>
+      )}
+
+      
+      {/* CASH PAYMENT CONFIRMATION MODAL */}
+      {showCashModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl border-2 border-[#E09D3D] max-w-sm w-full p-5 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="text-center pb-2 border-b border-slate-100">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center mx-auto mb-2 font-black text-lg">
+                💵
+              </div>
+              <h3 className="font-black text-base text-[#331E17]">Confirm Cash Payment</h3>
+              <p className="text-xs text-[#745E55]">Receive cash before printing tax bill &amp; KOT</p>
+            </div>
+
+            <div className="bg-[#FEFBF5] p-3 rounded-2xl border border-[#E8E1D6] space-y-2 text-xs">
+              <div className="flex justify-between items-center text-sm font-black text-[#331E17]">
+                <span>Bill Amount Payable:</span>
+                <span className="text-base text-[#AA1B2A]">₹{grandTotal.toFixed(2)}</span>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  Cash Received from Customer (₹):
+                </label>
+                <input
+                  type="number"
+                  value={cashTendered}
+                  onChange={(e) => setCashTendered(e.target.value)}
+                  className="w-full px-3 py-2 bg-white border border-[#E8E1D6] rounded-xl text-base font-black text-[#331E17] text-right font-mono focus:border-emerald-600 outline-none"
+                  placeholder="Enter cash amount"
+                  autoFocus
+                />
+              </div>
+
+              {/* Quick Cash Buttons */}
+              <div className="flex gap-1.5 pt-1">
+                {[grandTotal, 100, 200, 500, 2000].map((amt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setCashTendered(amt.toString())}
+                    className="flex-1 py-1 bg-white hover:bg-slate-100 border border-[#E8E1D6] rounded-lg text-[10px] font-bold text-[#331E17] cursor-pointer"
+                  >
+                    {idx === 0 ? "Exact" : "₹" + amt}
+                  </button>
+                ))}
+              </div>
+
+              {/* Change to Return */}
+              {parseFloat(cashTendered) >= grandTotal && (
+                <div className="p-2 bg-emerald-50 rounded-xl border border-emerald-200 flex justify-between font-black text-emerald-800">
+                  <span>Change to Return:</span>
+                  <span>₹{(parseFloat(cashTendered) - grandTotal).toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setShowCashModal(false)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#331E17] font-bold rounded-2xl text-xs cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmCashPayment}
+                disabled={isSubmitting || (parseFloat(cashTendered) || 0) < grandTotal}
+                className="flex-2 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black rounded-2xl text-xs shadow-md cursor-pointer disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>{isSubmitting ? "Generating Bill..." : "✓ Confirm & Print Bill"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ONLINE / UPI / RAZORPAY PAYMENT MODAL */}
+      {showOnlineModal && (
+        <RazorpayModal
+          isOpen={showOnlineModal}
+          onClose={() => setShowOnlineModal(false)}
+          amount={grandTotal}
+          restaurant={{
+            name: "आपणो खाणो (Aapno Khaano)",
+            slug: "aapno-khano",
+            settings: {
+              upiId: "9996213962m@pnb",
+              upiMerchantName: "AAPNO KHANO",
+            },
+          }}
+          orderDetails={{
+            customerName: customerName.trim() || "Direct Guest",
+            customerPhone: customerPhone || "9996213962",
+            carNumber: carNumber.trim() || undefined,
+            orderType,
+            cookingInstructions,
+            subtotal: rawSubtotal,
+            taxAmount,
+            grandTotal,
+            discountAmount,
+          }}
+          cart={cartItems.map((c) => ({
+            productId: c.productId,
+            name: c.name,
+            selectedVariation: c.selectedVariation,
+            quantity: c.quantity,
+            unitPrice: c.unitPrice,
+            isVeg: c.isVeg,
+          }))}
+          onPaymentSuccess={(result) => {
+            setShowOnlineModal(false);
+            if (result.printReceiptData) {
+              setLastBillData(result.printReceiptData);
+              setDualPrintData({
+                billData: result.printReceiptData,
+                kotData: result.kot ? {
+                  kot: result.kot,
+                  items: result.kot.items || result.kot.kotItems || cartItems,
+                } : null,
+              });
+            }
+            setCartItems([]);
+            setCookingInstructions("");
+            setCarNumber("");
+            setDiscountAmount(0);
+          }}
+        />
       )}
 
       {/* Dual Thermal Print Trigger */}

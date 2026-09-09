@@ -1,78 +1,123 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getLiveOrders } from "@/lib/events";
 
 export async function POST(request: Request) {
   try {
     const {
-      action = 'PRINT_BOTH',
+      action = "PRINT_BOTH",
       orderId,
       invoiceId,
       kotId,
-      staffName = 'Cashier / Admin',
+      staffName = "Cashier / Admin",
       notes,
     } = await request.json();
 
-    let restaurantId: string | null = null;
+    let restaurantId = "rest_aapno_khano";
     let orderRef: string | null = null;
+    let targetOrder: any = null;
 
-    if (orderId) {
-      const order = await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          printCount: { increment: 1 },
-          lastPrintedAt: new Date(),
-        },
-      });
-      restaurantId = order.restaurantId;
-      orderRef = order.humanOrderId;
+    if (prisma) {
+      try {
+        if (orderId) {
+          targetOrder = await prisma.order.findFirst({
+            where: {
+              OR: [
+                { id: orderId },
+                { humanOrderId: orderId },
+              ],
+            },
+          });
+        } else if (invoiceId) {
+          const inv = await prisma.invoice.findFirst({
+            where: {
+              OR: [
+                { id: invoiceId },
+                { humanInvoiceNumber: invoiceId },
+              ],
+            },
+            include: { order: true },
+          });
+          targetOrder = inv?.order;
+        }
+      } catch (dbErr) {
+        console.warn("DB order lookup warning in print route:", dbErr);
+      }
     }
 
-    if (invoiceId) {
-      const inv = await prisma.invoice.update({
-        where: { id: invoiceId },
-        data: {
-          printCount: { increment: 1 },
-          lastPrintedAt: new Date(),
-        },
-      });
-      if (!restaurantId) restaurantId = inv.restaurantId;
-      if (!orderRef) orderRef = inv.humanInvoiceNumber;
+    // Check Live Memory if not found in DB
+    if (!targetOrder && orderId) {
+      const liveOrders = getLiveOrders() || [];
+      targetOrder = liveOrders.find(
+        (o: any) => o.id === orderId || o.humanOrderId === orderId
+      );
     }
 
-    if (kotId) {
-      const kot = await prisma.kot.update({
-        where: { id: kotId },
-        data: {
-          printCount: { increment: 1 },
-          lastPrintedAt: new Date(),
-        },
-      });
-      if (!restaurantId) restaurantId = kot.restaurantId;
-      if (!orderRef) orderRef = kot.humanKotNumber;
+    // STRICT SECURITY CHECK: Reject print if order is unpaid
+    if (targetOrder) {
+      const isPaid =
+        targetOrder.paymentStatus === "PAID" ||
+        targetOrder.paymentStatus === "paid" ||
+        targetOrder.status === "CONFIRMED" ||
+        targetOrder.status === "confirmed";
+
+      if (!isPaid) {
+        console.error(`[Print Security] Rejected print attempt for unpaid order ${targetOrder.humanOrderId || targetOrder.id}`);
+        return NextResponse.json(
+          { error: "Security Violation: Cannot print Bill or KOT for unpaid order. Payment must be verified first." },
+          { status: 403 }
+        );
+      }
+
+      if (prisma && targetOrder.id) {
+        try {
+          await prisma.order.update({
+            where: { id: targetOrder.id },
+            data: {
+              printCount: { increment: 1 },
+              lastPrintedAt: new Date(),
+            },
+          });
+        } catch (updateErr) {
+          // Non-blocking
+        }
+      }
+      restaurantId = targetOrder.restaurantId || restaurantId;
+      orderRef = targetOrder.humanOrderId || targetOrder.id;
+    } else {
+      return NextResponse.json(
+        { error: "Order not found or invalid" },
+        { status: 404 }
+      );
     }
 
-    // Create Audit Log
-    await prisma.auditLog.create({
-      data: {
-        restaurantId,
-        userName: staffName,
-        action: action,
-        entity: orderId ? 'Order' : invoiceId ? 'Invoice' : 'Kot',
-        entityId: orderId || invoiceId || kotId,
-        oldValue: 'Printed',
-        newValue: `Reprinted / Fired via ${action}`,
-        notes: notes || `Print action ${action} performed for ${orderRef || 'Ticket'}`,
-      },
-    });
+    // Log reprint in AuditLog
+    if (prisma) {
+      try {
+        await prisma.auditLog.create({
+          data: {
+            restaurantId,
+            userName: staffName,
+            action,
+            entity: orderId ? "Order" : invoiceId ? "Invoice" : "Kot",
+            entityId: orderRef || orderId || invoiceId || "PRINT_JOB",
+            details: `Printed via ${action}. Notes: ${notes || "Verified Paid Print"}`,
+          },
+        });
+      } catch (auditErr) {
+        // Non-blocking audit log
+      }
+    }
 
     return NextResponse.json({
       success: true,
-      printJobId: `PJ_${Date.now()}`,
-      status: 'DISPATCHED_TO_PRINTER',
-      timestamp: new Date().toISOString(),
+      printed: true,
+      action,
+      orderRef,
+      timestamp: new Date(),
     });
   } catch (error: any) {
-    console.error('Print logger error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to log print action' }, { status: 500 });
+    console.error("Print API error:", error);
+    return NextResponse.json({ error: error?.message || "Failed to process print logging" }, { status: 500 });
   }
 }

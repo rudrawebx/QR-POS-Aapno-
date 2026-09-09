@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     dbKots.forEach((k) => kotsMap.set(k.id, k));
 
     liveOrders.forEach((order) => {
-      if (order.status !== "COMPLETED" && order.status !== "CANCELLED") {
+      if ((order.paymentStatus === "PAID" || order.status === "CONFIRMED" || order.status === "PREPARING" || order.status === "READY" || order.status === "SERVED") && order.status !== "COMPLETED" && order.status !== "CANCELLED" && order.status !== "awaiting_payment" && order.paymentStatus !== "pending") {
         const kotId = "kot_" + (order.id || order.humanOrderId);
         if (!kotsMap.has(kotId)) {
           kotsMap.set(kotId, {

@@ -24,7 +24,8 @@ export default function PrintDualThermal({
   
   useEffect(() => {
     // Trigger auto-print with small render delay to allow 2X logo & DOM to paint
-    if (autoPrint) {
+    const isPaidOrder = billData?.order?.paymentStatus === 'PAID' || !billData;
+    if (autoPrint && isPaidOrder) {
       const timer = setTimeout(() => {
         try {
           window.print();

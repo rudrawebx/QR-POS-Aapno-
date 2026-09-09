@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getCurrentSession } from "@/lib/auth";
-import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastLiveEvent } from "@/lib/events";
+import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastEvent } from "@/lib/events";
+import { deductInventoryForOrder } from "@/lib/inventory";
+import { MASTER_AAPNO_KHANO_CATEGORIES } from "@/lib/menuData";
 
 export async function GET(request: Request) {
   try {
@@ -47,13 +49,14 @@ export async function GET(request: Request) {
             kots: { include: { items: true } },
             invoices: true,
             payments: true,
+            takenByStaff: { select: { id: true, name: true, role: true } },
           },
           orderBy: { createdAt: "desc" },
           take: 100,
         });
       }
     } catch (dbErr) {
-      console.warn("Orders DB query failed, falling back to memory:", dbErr);
+      console.warn("Orders DB query fallback:", dbErr);
     }
 
     const liveMemOrders = getLiveOrders();
@@ -61,8 +64,10 @@ export async function GET(request: Request) {
 
     (liveMemOrders || []).forEach((o) => {
       const oDate = new Date(o.createdAt);
-      if (oDate >= startDate) {
-        combinedOrdersMap.set(o.id || o.humanOrderId, o);
+      if (oDate >= startDate && (o.restaurantId === restaurantId || !o.restaurantId)) {
+        if (!status || status === "ALL" || o.status === status) {
+          combinedOrdersMap.set(o.id || o.humanOrderId, o);
+        }
       }
     });
 
@@ -83,151 +88,391 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const session = await getCurrentSession();
     const data = await request.json();
     const {
-      restaurantId = "rest_aapno_khano",
+      restaurantId = session?.restaurantId || "rest_aapno_khano",
       customerName = "Direct Guest",
       customerPhone = "9996213962",
       carNumber,
       orderType = "CAR_SERVICE",
       cookingInstructions,
       items = [],
-      paymentMethod = "UPI",
+      paymentMethod = "CASH",
+      isStaffCashConfirmed = false,
+      receivedAmount = 0,
+      discountAmount = 0,
     } = data;
 
-    const subtotal = items.reduce((acc: number, it: any) => acc + (it.unitPrice || 0) * (it.quantity || 1), 0);
-    const cgstAmount = +(subtotal * 0.025).toFixed(2);
-    const sgstAmount = +(subtotal * 0.025).toFixed(2);
-    const grandTotal = +(subtotal + cgstAmount + sgstAmount).toFixed(2);
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json({ error: "Order must contain at least one valid item" }, { status: 400 });
+    }
+
+    const cleanPhone = (customerPhone || "9996213962").replace(/\D/g, "");
+
+    // 1. Calculate Server-Side Item Totals & GST
+    const masterDishesMap = new Map();
+    MASTER_AAPNO_KHANO_CATEGORIES.forEach((c) => {
+      (c.products || []).forEach((p) => {
+        masterDishesMap.set(p.id, p);
+        masterDishesMap.set(p.name, p);
+      });
+    });
+
+    let calculatedSubtotal = 0;
+    const validatedItems: any[] = [];
+
+    for (const it of items) {
+      let product: any = null;
+      try {
+        if (prisma && it.productId) {
+          product = await prisma.product.findUnique({ where: { id: it.productId } });
+        }
+      } catch (e) {
+        product = null;
+      }
+
+      if (!product) {
+        product = masterDishesMap.get(it.productId) || masterDishesMap.get(it.productName || it.name) || {
+          id: it.productId || `p_${Date.now()}`,
+          name: it.productName || it.name || "Special Royal Dish",
+          basePrice: it.unitPrice || 199,
+          isVeg: it.isVeg ?? true,
+          kitchenStationId: it.kitchenStationId || null,
+        };
+      }
+
+      let itemPrice = product.basePrice;
+      if (it.selectedVariation === "Small" || it.selectedVariation === "Half") {
+        itemPrice = product.priceSmallHalf || product.basePrice * 0.6;
+      } else if (it.selectedVariation === "Large" || it.selectedVariation === "Full") {
+        itemPrice = product.priceLargeFull || product.basePrice;
+      } else if (product.discountPrice) {
+        itemPrice = product.discountPrice;
+      }
+
+      const qty = Math.max(1, parseInt(it.quantity) || 1);
+      const lineTotal = itemPrice * qty;
+      calculatedSubtotal += lineTotal;
+
+      validatedItems.push({
+        productId: product.id,
+        productName: product.name,
+        selectedVariation: it.selectedVariation || null,
+        isVeg: Boolean(product.isVeg),
+        quantity: qty,
+        unitPrice: itemPrice,
+        totalPrice: lineTotal,
+        itemNotes: it.specialNotes || it.itemNotes || null,
+      });
+    }
+
+    const discountVal = parseFloat(discountAmount) || 0;
+    const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - discountVal);
+    const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+    const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+    const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
+    const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
+    const roundedTotal = Math.round(grandTotal);
+
     const orderNum = Math.floor(1000 + (Date.now() % 9000));
-    const humanOrderId = "AK-2026-" + orderNum;
-    const humanInvoiceNumber = "AK-INV-2026-" + String(orderNum).padStart(6, "0");
-    const kotNumber = "KOT-" + Math.floor(100 + Math.random() * 900);
+    const humanOrderId = `AK-2026-${orderNum}`;
 
-    let order: any = {
-      id: "ord_" + Date.now(),
-      humanOrderId,
-      restaurantId,
-      customerName,
-      customerPhone,
-      carNumber: carNumber ? String(carNumber).toUpperCase().trim() : null,
-      orderType,
-      status: "CONFIRMED",
-      subtotal,
-      taxAmount: cgstAmount + sgstAmount,
-      grandTotal,
-      cookingInstructions,
-      paymentStatus: "PAID",
-      paymentMethod,
-      createdAt: new Date(),
-      items: items.map((it: any) => ({
-        id: "oi_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5),
-        productName: it.productName || it.name,
-        selectedVariation: it.selectedVariation,
-        quantity: it.quantity,
-        unitPrice: it.unitPrice,
-        totalPrice: (it.unitPrice || 0) * (it.quantity || 1),
-        isVeg: it.isVeg ?? true,
-      })),
-    };
+    // 2. CHECK AUTHORIZATION FOR CASH CONFIRMATION
+    const isStaff = session?.user && ["SUPER_ADMIN", "OWNER", "MANAGER", "CASHIER", "WAITER"].includes(session.user.role);
+    const isConfirmedCash = paymentMethod === "CASH" && (isStaffCashConfirmed || isStaff);
 
-    try {
+    // CASE A: UNPAID / PENDING ORDER -> Strictly NO Invoice, NO KOT, NO Stock Deduction
+    if (!isConfirmedCash) {
+      let pendingOrder: any = null;
       if (prisma) {
-        // 1. Create Order & Items in DB
-        order = await prisma.order.create({
+        try {
+          pendingOrder = await prisma.order.create({
+            data: {
+              humanOrderId,
+              restaurantId,
+              customerName: customerName.trim(),
+              customerPhone: cleanPhone,
+              carNumber: carNumber ? carNumber.trim().toUpperCase() : null,
+              orderType,
+              status: "awaiting_payment",
+              subtotal: calculatedSubtotal,
+              discountAmount: discountVal,
+              taxAmount,
+              grandTotal,
+              cookingInstructions: cookingInstructions ? cookingInstructions.trim() : null,
+              paymentStatus: "pending",
+              paymentMethod,
+              items: {
+                create: validatedItems.map((vi) => ({
+                  productName: vi.productName,
+                  selectedVariation: vi.selectedVariation,
+                  isVeg: vi.isVeg,
+                  quantity: vi.quantity,
+                  unitPrice: vi.unitPrice,
+                  totalPrice: vi.totalPrice,
+                  itemNotes: vi.itemNotes,
+                  status: "PREPARING",
+                  product: { connect: { id: vi.productId } },
+                })),
+              },
+            },
+            include: { items: true },
+          });
+        } catch (dbErr) {
+          console.warn("DB pending order fallback:", dbErr);
+        }
+      }
+
+      if (!pendingOrder) {
+        pendingOrder = {
+          id: `ord_pending_${Date.now()}`,
+          humanOrderId,
+          restaurantId,
+          customerName,
+          customerPhone: cleanPhone,
+          carNumber,
+          orderType,
+          status: "awaiting_payment",
+          subtotal: calculatedSubtotal,
+          taxAmount,
+          grandTotal,
+          paymentStatus: "pending",
+          paymentMethod,
+          items: validatedItems,
+        };
+      }
+
+      // Record to live memory
+      recordLiveOrder(pendingOrder);
+
+      return NextResponse.json({
+        success: true,
+        order: pendingOrder,
+        requiresPayment: true,
+        status: "awaiting_payment",
+        paymentStatus: "pending",
+        message: "Order created in awaiting_payment state. Invoice and KOT will be generated strictly upon verified payment.",
+      });
+    }
+
+    // CASE B: AUTHORIZED CONFIRMED CASH TRANSACTION (POS CASHIER)
+    const humanInvoiceNumber = `AK-INV-2026-${String(orderNum).padStart(6, "0")}`;
+    const humanKotNumber = `KOT-${orderNum}`;
+    const transactionId = `CASH_${Date.now()}_${session?.user?.id?.slice(-4) || "POS"}`;
+
+    let orderRecord: any = null;
+    let invoiceRecord: any = null;
+    let kotRecord: any = null;
+
+    if (prisma) {
+      try {
+        orderRecord = await prisma.order.create({
           data: {
             humanOrderId,
             restaurantId,
-            customerName,
-            customerPhone,
-            carNumber: carNumber ? String(carNumber).toUpperCase().trim() : null,
+            customerName: customerName.trim(),
+            customerPhone: cleanPhone,
+            carNumber: carNumber ? carNumber.trim().toUpperCase() : null,
             orderType,
             status: "CONFIRMED",
-            subtotal,
-            taxAmount: cgstAmount + sgstAmount,
+            subtotal: calculatedSubtotal,
+            discountAmount: discountVal,
+            taxAmount,
             grandTotal,
-            cookingInstructions,
+            cookingInstructions: cookingInstructions ? cookingInstructions.trim() : null,
             paymentStatus: "PAID",
-            paymentMethod,
+            paymentMethod: "CASH",
+            transactionId,
+            takenByStaffId: session?.user?.id || null,
             items: {
-              create: items.map((it: any) => ({
-                productName: it.productName || it.name,
-                selectedVariation: it.selectedVariation,
-                quantity: it.quantity,
-                unitPrice: it.unitPrice,
-                totalPrice: (it.unitPrice || 0) * (it.quantity || 1),
-                isVeg: it.isVeg ?? true,
+              create: validatedItems.map((vi) => ({
+                productName: vi.productName,
+                selectedVariation: vi.selectedVariation,
+                isVeg: vi.isVeg,
+                quantity: vi.quantity,
+                unitPrice: vi.unitPrice,
+                totalPrice: vi.totalPrice,
+                itemNotes: vi.itemNotes,
+                status: "PREPARING",
+                product: { connect: { id: vi.productId } },
               })),
             },
           },
           include: { items: true },
         });
 
-        // 2. Create KOT in DB
-        try {
-          await prisma.kot.create({
-            data: {
-              kotNumber,
-              restaurantId,
-              orderId: order.id,
-              status: "PREPARING",
-              notes: cookingInstructions || null,
-              items: {
-                create: items.map((it: any) => ({
-                  productName: it.productName || it.name,
-                  selectedVariation: it.selectedVariation,
-                  quantity: it.quantity,
-                  notes: it.notes || null,
-                })),
-              },
-            },
-          });
-        } catch (kotErr) {
-          console.warn("Kot DB insert fallback:", kotErr);
-        }
+        // 1 Permanent Invoice
+        invoiceRecord = await prisma.invoice.create({
+          data: {
+            humanInvoiceNumber,
+            restaurantId,
+            orderId: orderRecord.id,
+            carNumber: orderRecord.carNumber,
+            customerName: orderRecord.customerName,
+            customerPhone: orderRecord.customerPhone,
+            orderType,
+            subtotal: calculatedSubtotal,
+            discountAmount: discountVal,
+            cgstRate: 2.5,
+            cgstAmount,
+            sgstRate: 2.5,
+            sgstAmount,
+            grandTotal,
+            roundedTotal,
+            paymentMethod: "CASH",
+            paymentStatus: "PAID",
+            transactionId,
+          },
+        });
 
-        // 3. Create Invoice & Payment in DB
-        try {
-          const inv = await prisma.invoice.create({
-            data: {
-              humanInvoiceNumber,
-              restaurantId,
-              orderId: order.id,
-              customerName: customerName || "Direct Guest",
-              customerPhone: customerPhone || "9996213962",
-              carNumber: carNumber ? String(carNumber).toUpperCase().trim() : null,
-              orderType,
-              subtotal,
-              cgstRate: 2.5,
-              cgstAmount,
-              sgstRate: 2.5,
-              sgstAmount,
-              grandTotal,
-              roundedTotal: Math.round(grandTotal),
-              paymentMethod,
-              paymentStatus: "PAID",
-              transactionId: "UPI_" + (customerPhone ? customerPhone.slice(-6) : "13962") + "_" + orderNum,
+        // 1 KOT Record
+        kotRecord = await prisma.kot.create({
+          data: {
+            humanKotNumber,
+            restaurantId,
+            orderId: orderRecord.id,
+            carNumber: orderRecord.carNumber,
+            customerName: orderRecord.customerName,
+            orderType,
+            status: "PREPARING",
+            isPrinted: true,
+            printCount: 1,
+            kotItems: {
+              create: orderRecord.items.map((it: any) => ({
+                orderItemId: it.id,
+                productName: it.productName,
+                selectedVariation: it.selectedVariation,
+                isVeg: it.isVeg,
+                quantity: it.quantity,
+                status: "PREPARING",
+              })),
             },
-          });
-          recordLiveInvoice(inv);
-        } catch (invErr) {
-          console.warn("Invoice DB insert fallback:", invErr);
-        }
+          },
+          include: { kotItems: true },
+        });
+
+        // Payment Record
+        await prisma.payment.create({
+          data: {
+            restaurantId,
+            orderId: orderRecord.id,
+            invoiceId: invoiceRecord.id,
+            amount: grandTotal,
+            currency: "INR",
+            paymentGateway: "CASH",
+            transactionId,
+            paymentMethod: "CASH",
+            status: "SUCCESS",
+          },
+        });
+
+        // Deduct inventory
+        await deductInventoryForOrder(orderRecord.id, restaurantId);
+      } catch (dbErr) {
+        console.warn("DB create confirmed cash order fallback:", dbErr);
       }
-    } catch (e) {
-      console.warn("Database error during order creation, serving in-memory order:", e);
     }
 
-    recordLiveOrder(order);
+    if (!orderRecord) {
+      orderRecord = {
+        id: `ord_cash_${Date.now()}`,
+        humanOrderId,
+        restaurantId,
+        customerName: customerName.trim(),
+        customerPhone: cleanPhone,
+        carNumber,
+        orderType,
+        status: "CONFIRMED",
+        subtotal: calculatedSubtotal,
+        discountAmount: discountVal,
+        taxAmount,
+        grandTotal,
+        paymentStatus: "PAID",
+        paymentMethod: "CASH",
+        transactionId,
+        createdAt: new Date(),
+        items: validatedItems,
+      };
+      invoiceRecord = {
+        id: `inv_${Date.now()}`,
+        humanInvoiceNumber,
+        restaurantId,
+        orderId: orderRecord.id,
+        customerName: orderRecord.customerName,
+        customerPhone: orderRecord.customerPhone,
+        subtotal: calculatedSubtotal,
+        cgstAmount,
+        sgstAmount,
+        grandTotal,
+        paymentMethod: "CASH",
+        paymentStatus: "PAID",
+        createdAt: new Date(),
+      };
+      kotRecord = {
+        id: `kot_${Date.now()}`,
+        humanKotNumber,
+        orderNumber: humanOrderId,
+        createdAt: new Date(),
+        status: "PREPARING",
+        items: validatedItems,
+      };
+    }
+
+    recordLiveOrder(orderRecord);
+    recordLiveInvoice(invoiceRecord);
+    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: orderRecord, invoice: invoiceRecord });
+    broadcastEvent("kds_rest_aapno_khano", { type: "NEW_KOT", kot: kotRecord });
+
+    const printReceiptData = {
+      restaurant: {
+        name: "आपणो खाणो (Aapno Khaano)",
+        address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
+        city: "Fatehabad",
+        phone: "+91 99962 13962",
+        gstin: "08AABCU9603R1ZM",
+        fssaiNumber: "12224026000189",
+        currencySymbol: "₹",
+        defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
+      },
+      order: {
+        humanOrderId,
+        createdAt: orderRecord.createdAt,
+        customerName: orderRecord.customerName,
+        customerPhone: orderRecord.customerPhone,
+        carNumber: orderRecord.carNumber,
+        orderType: orderRecord.orderType,
+        cookingInstructions: orderRecord.cookingInstructions,
+        paymentMethod: "CASH",
+        paymentStatus: "PAID",
+        transactionId,
+        subtotal: subtotalAfterDiscount,
+        cgstAmount,
+        sgstAmount,
+        grandTotal,
+        discountAmount: discountVal,
+      },
+      items: (orderRecord.items || validatedItems).map((it: any) => ({
+        name: it.productName || it.name,
+        selectedVariation: it.selectedVariation,
+        quantity: it.quantity,
+        unitPrice: it.unitPrice,
+        totalPrice: it.totalPrice,
+        isVeg: it.isVeg,
+      })),
+    };
 
     return NextResponse.json({
       success: true,
-      order,
-      invoiceNumber: humanInvoiceNumber,
-      kotNumber,
+      order: orderRecord,
+      invoice: invoiceRecord,
+      kot: kotRecord,
+      humanOrderId,
+      humanInvoiceNumber,
+      printReceiptData,
     });
   } catch (error: any) {
-    console.error("Create order error:", error);
-    return NextResponse.json({ success: true, order: { id: "ord_" + Date.now(), humanOrderId: "AK-2026-1001" } });
+    console.error("Order creation error:", error);
+    return NextResponse.json({ error: error?.message || "Failed to create order" }, { status: 500 });
   }
 }
