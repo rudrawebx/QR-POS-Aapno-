@@ -142,16 +142,24 @@ export default function PrintDualThermal({
             break-inside: avoid !important;
             display: block !important;
           }
-          .thermal-cut-line {
-            width: 72mm !important;
-            max-width: 72mm !important;
+          /* PHYSICAL HARDWARE AUTO-CUT TRIGGER: Sends Page Break to printer driver to fire cutter knife between Bill and KOT */
+          .thermal-bill-page {
+            page-break-after: always !important;
+            break-after: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
             display: block !important;
-            margin: 4mm auto !important;
-            border-top: 2px dashed #000000 !important;
-            border-bottom: 2px dashed #000000 !important;
-            padding: 3mm 0mm !important;
-            text-align: center !important;
-            background: #ffffff !important;
+          }
+          .thermal-kot-page {
+            page-break-before: always !important;
+            break-before: page !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block !important;
+          }
+          /* Hide the visual on-screen tear banner during physical print so printer cuts cleanly without printing tear text */
+          .thermal-cut-line {
+            display: none !important;
           }
           .thermal-feed-spacer {
             height: 12mm !important;
@@ -241,7 +249,9 @@ export default function PrintDualThermal({
           {(activeMode === "PRINT_BOTH" || activeMode === "PRINT_BILL") && billData && (
             <div
               id="thermal-bill-doc"
-              className="thermal-doc bg-white text-black p-4 rounded-xl shadow-2xl w-full font-mono text-[11px] leading-tight border border-slate-300 mx-auto"
+              className={`thermal-doc bg-white text-black p-4 rounded-xl shadow-2xl w-full font-mono text-[11px] leading-tight border border-slate-300 mx-auto ${
+                activeMode === "PRINT_BOTH" ? "thermal-bill-page" : ""
+              }`}
             >
               {/* Header with 2X Logo */}
               <div className="text-center pb-2 border-b border-dashed border-black space-y-1">
@@ -374,7 +384,9 @@ export default function PrintDualThermal({
           {(activeMode === "PRINT_BOTH" || activeMode === "PRINT_KOT") && kotData && (
             <div
               id="thermal-kot-doc"
-              className="thermal-doc bg-white text-black p-4 rounded-xl shadow-2xl w-full font-mono text-[11px] leading-tight border border-slate-300 mx-auto"
+              className={`thermal-doc bg-white text-black p-4 rounded-xl shadow-2xl w-full font-mono text-[11px] leading-tight border border-slate-300 mx-auto ${
+                activeMode === "PRINT_BOTH" ? "thermal-kot-page" : ""
+              }`}
             >
               {/* Header */}
               <div className="text-center pb-2 border-b-2 border-black space-y-0.5">
