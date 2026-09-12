@@ -87,22 +87,23 @@ export default function PrintDualThermal({
 
   return (
     <>
-      {/* Universal 80mm ESC/POS CSS - 100% Guaranteed Non-Blank Print & Clean Alignment */}
+      {/* Universal 80mm ESC/POS CSS & Crisp PDF Export - 100% Guaranteed Non-Blank Print & Clean Alignment */}
       <style jsx global>{`
         @media print {
           @page {
-            size: 80mm auto;
-            margin: 0mm !important;
+            size: auto;
+            margin: 0mm 0mm 4mm 0mm !important;
           }
           html, body {
-            width: 80mm !important;
-            max-width: 80mm !important;
+            width: 100% !important;
             margin: 0mm !important;
             padding: 0mm !important;
             background: #ffffff !important;
             color: #000000 !important;
             overflow: visible !important;
             height: auto !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
           }
           /* Hide all surrounding DOM, modals, fixed overlays and backgrounds */
           .no-print, header, nav, aside, footer {
@@ -113,15 +114,15 @@ export default function PrintDualThermal({
             background: #ffffff !important;
             backdrop-filter: none !important;
             padding: 0mm !important;
-            margin: 0mm !important;
+            margin: 0mm auto !important;
             overflow: visible !important;
-            width: 80mm !important;
-            height: auto !important;
+            width: 100% !important;
+            max-width: 80mm !important;
             display: block !important;
           }
           #thermal-print-root {
             position: static !important;
-            width: 80mm !important;
+            width: 100% !important;
             max-width: 80mm !important;
             margin: 0mm auto !important;
             padding: 0mm !important;

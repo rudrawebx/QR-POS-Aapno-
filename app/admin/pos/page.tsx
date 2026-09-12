@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import RazorpayModal from '@/components/RazorpayModal';
 import AdminLayout from '@/components/AdminLayout';
 import PrintDualThermal from '@/components/PrintDualThermal';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
@@ -22,6 +21,7 @@ import {
   Clock,
   Sparkles,
   CheckCircle2,
+  Check,
   Printer,
   ChevronRight,
   ShieldCheck,
@@ -39,9 +39,11 @@ export default function AdminPosPage() {
   // Active Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [orderType, setOrderType] = useState<'CAR_SERVICE' | 'TAKEAWAY' | 'DINE_IN'>('CAR_SERVICE');
+  const [isQuickGuest, setIsQuickGuest] = useState(true);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [carNumber, setCarNumber] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
   const [cookingInstructions, setCookingInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD' | 'SPLIT'>('UPI');
   const [discountAmount, setDiscountAmount] = useState<number>(0);
@@ -58,7 +60,6 @@ export default function AdminPosPage() {
   const [customizingProduct, setCustomizingProduct] = useState<any | null>(null);
   const [showCashModal, setShowCashModal] = useState(false);
   const [cashTendered, setCashTendered] = useState<string>("");
-  const [showOnlineModal, setShowOnlineModal] = useState(false);
 
 
   useEffect(() => {
@@ -290,34 +291,27 @@ export default function AdminPosPage() {
   const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
 
   
-  // Trigger appropriate payment flow (Cash Modal vs Online Modal)
-  const handleFireKotAndPrint = () => {
+  // Direct POS Settlement (Cash, UPI QR, Card EDC, Split) & Bill Generation
+  const handleSettleAndPrint = async (chosenMethod: 'CASH' | 'UPI' | 'CARD' | 'SPLIT' = paymentMethod) => {
     if (cartItems.length === 0) return;
-    if (paymentMethod === "CASH") {
-      setCashTendered(grandTotal.toString());
-      setShowCashModal(true);
-    } else {
-      setShowOnlineModal(true);
-    }
-  };
-
-  // Staff Confirmed Cash Payment & Bill Generation
-  const handleConfirmCashPayment = async () => {
     setIsSubmitting(true);
     try {
+      const guestDisplayName = customerName.trim() || (isQuickGuest ? "Walk-in Guest" : "Direct Guest");
+      const guestPhone = (customerPhone.trim() || "9996213962").replace(/\D/g, "");
+
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantId: "rest_aapno_khano",
-          customerName: customerName.trim() || "Direct Guest",
-          customerPhone: customerPhone || "9996213962",
-          carNumber: carNumber.trim() || null,
+          customerName: guestDisplayName,
+          customerPhone: guestPhone,
+          carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || null) : orderType === 'DINE_IN' && tableNumber ? `Table ${tableNumber.trim()}` : null,
           orderType,
           cookingInstructions,
-          paymentMethod: "CASH",
+          paymentMethod: chosenMethod,
           isStaffCashConfirmed: true,
-          receivedAmount: parseFloat(cashTendered) || grandTotal,
+          receivedAmount: grandTotal,
           discountAmount,
           items: cartItems.map((it) => ({
             productId: it.productId,
@@ -346,16 +340,26 @@ export default function AdminPosPage() {
         setCartItems([]);
         setCookingInstructions("");
         setCarNumber("");
+        setTableNumber("");
         setDiscountAmount(0);
+        if (!isQuickGuest) {
+          setCustomerName("");
+          setCustomerPhone("");
+        }
       } else {
-        alert(data.error || "Failed to process cash order.");
+        alert(data.error || `Failed to process ${chosenMethod} order.`);
       }
     } catch (err) {
-      console.error("POS Cash payment error:", err);
-      alert("Error confirming cash payment. Please check server.");
+      console.error("POS order settlement error:", err);
+      alert("Error processing order. Please check server connection.");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Staff Confirmed Cash Payment with Custom Received Amount
+  const handleConfirmCashPayment = async () => {
+    return handleSettleAndPrint("CASH");
   };
 
 
@@ -544,79 +548,128 @@ export default function AdminPosPage() {
             </div>
           </div>
 
-          {/* QSR Order Type, Car Number & Customer Inputs */}
+          {/* QSR Order Type, Car/Table Number & Guest Inputs */}
           <div className="p-3 border-b border-slate-100 bg-[#FEFBF5] space-y-2 text-xs">
+            {/* 3 Main Order Types */}
             <div className="grid grid-cols-3 gap-1 bg-[#F7F2EA] p-1 rounded-2xl font-bold text-[11px]">
               <button
                 type="button"
                 onClick={() => setOrderType('CAR_SERVICE')}
-                className={`py-1 rounded-xl transition-all cursor-pointer ${
+                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
                   orderType === 'CAR_SERVICE'
-                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs'
-                    : 'text-[#745E55]'
+                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
+                    : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
-                🚗 Car
+                <span>🚗 Car Order</span>
               </button>
               <button
                 type="button"
                 onClick={() => setOrderType('TAKEAWAY')}
-                className={`py-1 rounded-xl transition-all cursor-pointer ${
+                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
                   orderType === 'TAKEAWAY'
-                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs'
-                    : 'text-[#745E55]'
+                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
+                    : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
-                🛍️ Takeaway
+                <span>🛍️ Take away</span>
               </button>
               <button
                 type="button"
                 onClick={() => setOrderType('DINE_IN')}
-                className={`py-1 rounded-xl transition-all cursor-pointer ${
+                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
                   orderType === 'DINE_IN'
-                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs'
-                    : 'text-[#745E55]'
+                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
+                    : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
-                🍽️ Dine-in
+                <span>🍽️ Dine in</span>
               </button>
             </div>
 
+            {/* Vehicle Number (if Car Order) */}
             {orderType === 'CAR_SERVICE' && (
               <div className="relative">
                 <Car className="w-3.5 h-3.5 text-[#AA1B2A] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Car Plate (e.g. RJ 14 CA 9999)"
+                  placeholder="Car Plate (e.g. HR 03 AF 5256 / RJ 14 CA 9999)"
                   value={carNumber}
                   onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-mono font-bold text-[#AA1B2A]"
+                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-mono font-bold text-[#AA1B2A] focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
                 />
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-2">
-              <input
-                type="text"
-                placeholder="Guest Name"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-2.5 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs"
-              />
-              <div className="flex items-center">
-                <span className="inline-flex items-center px-1.5 py-1.5 bg-slate-100 border border-r-0 border-[#E8E1D6] rounded-l-xl text-[10px] font-bold text-slate-600 font-mono">
-                  +91
-                </span>
+            {/* Table Number (if Dine In) */}
+            {orderType === 'DINE_IN' && (
+              <div className="relative">
+                <Utensils className="w-3.5 h-3.5 text-[#AA1B2A] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
-                  type="tel"
-                  maxLength={10}
-                  placeholder="Mobile"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
-                  className="w-full px-2 py-1.5 bg-white border border-[#E8E1D6] rounded-r-xl text-xs font-mono"
+                  type="text"
+                  placeholder="Table / Seat Number (e.g. Table 4)"
+                  value={tableNumber}
+                  onChange={(e) => setTableNumber(e.target.value)}
+                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-bold text-[#331E17] focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
                 />
               </div>
-            </div>
+            )}
+
+            {/* Guest Selection: Quick Guest vs Named Guest */}
+            {isQuickGuest ? (
+              <div className="flex items-center justify-between bg-amber-50/90 border border-amber-200/80 px-2.5 py-1.5 rounded-xl">
+                <div className="flex items-center gap-1.5 text-amber-900 font-black text-[11px]">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                  <span>⚡ Guest without Name (Direct Guest)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsQuickGuest(false)}
+                  className="text-[10px] text-[#AA1B2A] font-bold underline hover:text-[#80101C] cursor-pointer"
+                >
+                  + Add Name/Phone
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-1.5 bg-white p-2 rounded-xl border border-[#E8E1D6]">
+                <div className="flex items-center justify-between text-[10px] text-[#745E55] pb-1 border-b border-slate-100">
+                  <span className="font-bold">Customer Details:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsQuickGuest(true);
+                      setCustomerName('');
+                      setCustomerPhone('');
+                    }}
+                    className="text-[#AA1B2A] font-bold underline cursor-pointer"
+                  >
+                    ⚡ Use Guest without Name
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="Guest Name"
+                    value={customerName}
+                    onChange={(e) => setCustomerName(e.target.value)}
+                    className="w-full px-2.5 py-1 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs text-[#331E17]"
+                  />
+                  <div className="flex items-center">
+                    <span className="inline-flex items-center px-1.5 py-1 bg-slate-100 border border-r-0 border-[#E8E1D6] rounded-l-xl text-[10px] font-bold text-slate-600 font-mono">
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      maxLength={10}
+                      placeholder="Mobile"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
+                      className="w-full px-2 py-1 bg-[#FEFBF5] border border-[#E8E1D6] rounded-r-xl text-xs font-mono text-[#331E17]"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Cart Item List */}
@@ -670,44 +723,50 @@ export default function AdminPosPage() {
 
           {/* Cart Summary & Settlement */}
           <div className="p-3 border-t border-[#E8E1D6] bg-[#FEFBF5] space-y-2 text-xs">
-            {/* Payment Mode Selector */}
-            <div className="grid grid-cols-4 gap-1 bg-[#F7F2EA] p-1 rounded-xl text-[10px] font-bold text-center">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('UPI')}
-                className={`py-1 rounded-lg transition-all cursor-pointer ${
-                  paymentMethod === 'UPI' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55]'
-                }`}
-              >
-                UPI / PNB
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('CASH')}
-                className={`py-1 rounded-lg transition-all cursor-pointer ${
-                  paymentMethod === 'CASH' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55]'
-                }`}
-              >
-                Cash
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('CARD')}
-                className={`py-1 rounded-lg transition-all cursor-pointer ${
-                  paymentMethod === 'CARD' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55]'
-                }`}
-              >
-                Card
-              </button>
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('SPLIT')}
-                className={`py-1 rounded-lg transition-all cursor-pointer ${
-                  paymentMethod === 'SPLIT' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55]'
-                }`}
-              >
-                Split
-              </button>
+            {/* Manual Payment Mode Selector */}
+            <div>
+              <div className="flex items-center justify-between text-[10px] font-bold text-[#745E55] mb-1">
+                <span>Payment Mode (Collected Manually):</span>
+                <span className="font-mono text-[#AA1B2A] font-black">{paymentMethod}</span>
+              </div>
+              <div className="grid grid-cols-4 gap-1 bg-[#F7F2EA] p-1 rounded-xl text-[10px] font-bold text-center">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('UPI')}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer ${
+                    paymentMethod === 'UPI' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  📱 UPI / QR
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('CASH')}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer ${
+                    paymentMethod === 'CASH' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  💵 Cash
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('CARD')}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer ${
+                    paymentMethod === 'CARD' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  💳 Card
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('SPLIT')}
+                  className={`py-1.5 rounded-lg transition-all cursor-pointer ${
+                    paymentMethod === 'SPLIT' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  🔀 Split
+                </button>
+              </div>
             </div>
 
             {/* Calculations */}
@@ -721,8 +780,8 @@ export default function AdminPosPage() {
                 <span className="font-bold text-[#331E17]">₹{taxAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-xs font-black text-[#AA1B2A] pt-0.5">
-                <span>Grand Total:</span>
-                <span className="text-sm">₹{grandTotal.toFixed(2)}</span>
+                <span>Grand Total ({paymentMethod}):</span>
+                <span className="text-base font-black text-[#AA1B2A]">₹{grandTotal.toFixed(2)}</span>
               </div>
             </div>
 
@@ -740,12 +799,12 @@ export default function AdminPosPage() {
 
               <button
                 type="button"
-                onClick={handleFireKotAndPrint}
+                onClick={() => handleSettleAndPrint(paymentMethod)}
                 disabled={cartItems.length === 0 || isSubmitting}
                 className="py-2.5 bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-md border border-[#E09D3D]/50 cursor-pointer disabled:opacity-50 transition-transform active:scale-98"
               >
                 <Printer className="w-3.5 h-3.5 text-[#E09D3D]" />
-                <span>{isSubmitting ? 'Firing...' : 'Print Bill & KOT'}</span>
+                <span>{isSubmitting ? 'Firing...' : '🖨️ Settle & Print Bill'}</span>
               </button>
             </div>
           </div>
@@ -904,59 +963,6 @@ export default function AdminPosPage() {
             </div>
           </div>
         </div>
-      )}
-
-      {/* ONLINE / UPI / RAZORPAY PAYMENT MODAL */}
-      {showOnlineModal && (
-        <RazorpayModal
-          isOpen={showOnlineModal}
-          onClose={() => setShowOnlineModal(false)}
-          amount={grandTotal}
-          restaurant={{
-            name: "आपणो खाणो (Aapno Khaano)",
-            slug: "aapno-khano",
-            settings: {
-              upiId: "9996213962m@pnb",
-              upiMerchantName: "AAPNO KHANO",
-            },
-          }}
-          orderDetails={{
-            customerName: customerName.trim() || "Direct Guest",
-            customerPhone: customerPhone || "9996213962",
-            carNumber: carNumber.trim() || undefined,
-            orderType,
-            cookingInstructions,
-            subtotal: rawSubtotal,
-            taxAmount,
-            grandTotal,
-            discountAmount,
-          }}
-          cart={cartItems.map((c) => ({
-            productId: c.productId,
-            name: c.name,
-            selectedVariation: c.selectedVariation,
-            quantity: c.quantity,
-            unitPrice: c.unitPrice,
-            isVeg: c.isVeg,
-          }))}
-          onPaymentSuccess={(result) => {
-            setShowOnlineModal(false);
-            if (result.printReceiptData) {
-              setLastBillData(result.printReceiptData);
-              setDualPrintData({
-                billData: result.printReceiptData,
-                kotData: result.kot ? {
-                  kot: result.kot,
-                  items: result.kot.items || result.kot.kotItems || cartItems,
-                } : null,
-              });
-            }
-            setCartItems([]);
-            setCookingInstructions("");
-            setCarNumber("");
-            setDiscountAmount(0);
-          }}
-        />
       )}
 
       {/* Dual Thermal Print Trigger */}

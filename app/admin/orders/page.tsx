@@ -365,13 +365,16 @@ export default function AdminOrdersPage() {
                         key={ord.id}
                         className="p-3.5 rounded-2xl border border-[#E8E1D6] bg-white hover:border-[#E09D3D] shadow-xs space-y-2.5 transition-all text-xs"
                       >
-                        {/* Order Header: ID, Car No, Type */}
+                        {/* Order Header: ID, Car No, Type, Payment Source */}
                         <div className="flex items-start justify-between">
                           <div>
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-black text-[#331E17] font-mono">{ord.humanOrderId}</span>
                               <span className="bg-[#AA1B2A] text-white font-black text-[9px] px-1.5 py-0.5 rounded uppercase">
                                 {ord.orderType?.replace('_', ' ')}
+                              </span>
+                              <span className="bg-slate-100 text-slate-800 font-bold text-[9px] px-1.5 py-0.5 rounded border border-slate-200">
+                                {ord.paymentMethod === 'UPI_DIRECT' || ord.paymentMethod === 'UPI' ? '📱 UPI/QR' : ord.paymentMethod === 'CASH' ? '💵 Cash' : ord.paymentMethod === 'CARD' ? '💳 Card' : ord.paymentMethod || 'Pay'}
                               </span>
                             </div>
                             <p className="text-[11px] text-[#745E55] font-semibold mt-0.5">

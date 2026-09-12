@@ -50,9 +50,56 @@ export default function PrintThermalReceipt({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 overflow-y-auto">
-      {/* Top Floating Print & Close Controls (Hidden in Print) */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 no-print">
+    <>
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: auto;
+            margin: 0mm 0mm 4mm 0mm !important;
+          }
+          html, body {
+            width: 100% !important;
+            margin: 0mm !important;
+            padding: 0mm !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            overflow: visible !important;
+            height: auto !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .no-print, header, nav, aside, footer {
+            display: none !important;
+          }
+          #thermal-receipt-modal {
+            position: static !important;
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            padding: 0mm !important;
+            margin: 0mm auto !important;
+            overflow: visible !important;
+            width: 100% !important;
+            max-width: 80mm !important;
+            display: block !important;
+          }
+          .print-container {
+            width: 72mm !important;
+            max-width: 72mm !important;
+            margin: 0mm auto !important;
+            padding: 2mm 1mm 4mm 1mm !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            border: none !important;
+            box-shadow: none !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block !important;
+          }
+        }
+      `}</style>
+      <div id="thermal-receipt-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 overflow-y-auto">
+        {/* Top Floating Print & Close Controls (Hidden in Print) */}
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 no-print">
         <button
           onClick={handleShareWhatsapp}
           className="bg-[#25D366] hover:bg-[#20bd5a] text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer transition-transform active:scale-95"
@@ -184,5 +231,6 @@ export default function PrintThermalReceipt({
         </div>
       </div>
     </div>
-  );
+  </>
+);
 }

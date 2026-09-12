@@ -178,12 +178,14 @@ export async function POST(request: Request) {
     const orderNum = Math.floor(1000 + (Date.now() % 9000));
     const humanOrderId = `AK-2026-${orderNum}`;
 
-    // 2. CHECK AUTHORIZATION FOR CASH CONFIRMATION
+    // 2. CHECK AUTHORIZATION FOR MANUAL / POS SETTLEMENT
     const isStaff = session?.user && ["SUPER_ADMIN", "OWNER", "MANAGER", "CASHIER", "WAITER"].includes(session.user.role);
-    const isConfirmedCash = paymentMethod === "CASH" && (isStaffCashConfirmed || isStaff);
+    const validCounterMethods = ["CASH", "UPI", "CARD", "SPLIT", "UPI_DIRECT", "DIRECT_QR", "PAY_AT_COUNTER"];
+    const isConfirmedStaffOrder = (isStaffCashConfirmed && validCounterMethods.includes(paymentMethod)) || (isStaff && validCounterMethods.includes(paymentMethod));
+    const effectivePaymentMethod = validCounterMethods.includes(paymentMethod) ? paymentMethod : "CASH";
 
     // CASE A: UNPAID / PENDING ORDER -> Strictly NO Invoice, NO KOT, NO Stock Deduction
-    if (!isConfirmedCash) {
+    if (!isConfirmedStaffOrder) {
       let pendingOrder: any = null;
       if (prisma) {
         try {
@@ -202,7 +204,7 @@ export async function POST(request: Request) {
               grandTotal,
               cookingInstructions: cookingInstructions ? cookingInstructions.trim() : null,
               paymentStatus: "pending",
-              paymentMethod,
+              paymentMethod: effectivePaymentMethod,
               items: {
                 create: validatedItems.map((vi) => ({
                   productName: vi.productName,
@@ -238,7 +240,7 @@ export async function POST(request: Request) {
           taxAmount,
           grandTotal,
           paymentStatus: "pending",
-          paymentMethod,
+          paymentMethod: effectivePaymentMethod,
           items: validatedItems,
         };
       }
@@ -256,10 +258,10 @@ export async function POST(request: Request) {
       });
     }
 
-    // CASE B: AUTHORIZED CONFIRMED CASH TRANSACTION (POS CASHIER)
+    // CASE B: AUTHORIZED CONFIRMED TRANSACTION (POS CASHIER / MANUAL SETTLEMENT)
     const humanInvoiceNumber = `AK-INV-2026-${String(orderNum).padStart(6, "0")}`;
     const humanKotNumber = `KOT-${orderNum}`;
-    const transactionId = `CASH_${Date.now()}_${session?.user?.id?.slice(-4) || "POS"}`;
+    const transactionId = `${effectivePaymentMethod}_${Date.now()}_${session?.user?.id?.slice(-4) || "POS"}`;
 
     let orderRecord: any = null;
     let invoiceRecord: any = null;
@@ -282,7 +284,7 @@ export async function POST(request: Request) {
             grandTotal,
             cookingInstructions: cookingInstructions ? cookingInstructions.trim() : null,
             paymentStatus: "PAID",
-            paymentMethod: "CASH",
+            paymentMethod: effectivePaymentMethod,
             transactionId,
             takenByStaffId: session?.user?.id || null,
             items: {
@@ -320,7 +322,7 @@ export async function POST(request: Request) {
             sgstAmount,
             grandTotal,
             roundedTotal,
-            paymentMethod: "CASH",
+            paymentMethod: effectivePaymentMethod,
             paymentStatus: "PAID",
             transactionId,
           },
@@ -353,6 +355,7 @@ export async function POST(request: Request) {
         });
 
         // Payment Record
+        const paymentGateway = effectivePaymentMethod === "CASH" ? "CASH" : effectivePaymentMethod === "UPI" ? "UPI_DIRECT" : effectivePaymentMethod === "CARD" ? "POS_CARD" : "MANUAL";
         await prisma.payment.create({
           data: {
             restaurantId,
@@ -360,9 +363,9 @@ export async function POST(request: Request) {
             invoiceId: invoiceRecord.id,
             amount: grandTotal,
             currency: "INR",
-            paymentGateway: "CASH",
+            paymentGateway,
             transactionId,
-            paymentMethod: "CASH",
+            paymentMethod: effectivePaymentMethod,
             status: "SUCCESS",
           },
         });
@@ -370,13 +373,13 @@ export async function POST(request: Request) {
         // Deduct inventory
         await deductInventoryForOrder(orderRecord.id, restaurantId);
       } catch (dbErr) {
-        console.warn("DB create confirmed cash order fallback:", dbErr);
+        console.warn("DB create confirmed order fallback:", dbErr);
       }
     }
 
     if (!orderRecord) {
       orderRecord = {
-        id: `ord_cash_${Date.now()}`,
+        id: `ord_${effectivePaymentMethod.toLowerCase()}_${Date.now()}`,
         humanOrderId,
         restaurantId,
         customerName: customerName.trim(),
@@ -389,7 +392,7 @@ export async function POST(request: Request) {
         taxAmount,
         grandTotal,
         paymentStatus: "PAID",
-        paymentMethod: "CASH",
+        paymentMethod: effectivePaymentMethod,
         transactionId,
         createdAt: new Date(),
         items: validatedItems,
@@ -405,7 +408,7 @@ export async function POST(request: Request) {
         cgstAmount,
         sgstAmount,
         grandTotal,
-        paymentMethod: "CASH",
+        paymentMethod: effectivePaymentMethod,
         paymentStatus: "PAID",
         createdAt: new Date(),
       };
@@ -443,7 +446,7 @@ export async function POST(request: Request) {
         carNumber: orderRecord.carNumber,
         orderType: orderRecord.orderType,
         cookingInstructions: orderRecord.cookingInstructions,
-        paymentMethod: "CASH",
+        paymentMethod: effectivePaymentMethod,
         paymentStatus: "PAID",
         transactionId,
         subtotal: subtotalAfterDiscount,

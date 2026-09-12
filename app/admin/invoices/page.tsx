@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/components/AdminLayout";
-import PrintThermalReceipt from "@/components/PrintThermalReceipt";
+import PrintDualThermal from "@/components/PrintDualThermal";
 import { PrintReceiptData } from "@/lib/types";
 import {
   FileText,
@@ -321,10 +321,12 @@ export default function AdminInvoicesPage() {
           </div>
         </div>
 
-        {/* REPRINT THERMAL MODAL */}
+        {/* REPRINT THERMAL & PDF INVOICE MODAL */}
         {activePrintReceipt && (
-          <PrintThermalReceipt
-            data={activePrintReceipt}
+          <PrintDualThermal
+            billData={activePrintReceipt}
+            kotData={null}
+            mode="PRINT_BILL"
             autoPrint={false}
             onClose={() => setActivePrintReceipt(null)}
           />

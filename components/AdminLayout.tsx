@@ -37,12 +37,125 @@ interface AdminLayoutProps {
   children: React.ReactNode;
 }
 
+function playChimeSound() {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+
+    // Chime Tone 1 (High bell)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(659.25, now); // E5
+    gain1.gain.setValueAtTime(0.3, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    // Chime Tone 2 (Mid bell)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(783.99, now + 0.15); // G5
+    gain2.gain.setValueAtTime(0.35, now + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.15);
+    osc2.stop(now + 0.6);
+
+    // Chime Tone 3 (Peak Royal bell)
+    const osc3 = ctx.createOscillator();
+    const gain3 = ctx.createGain();
+    osc3.type = "triangle";
+    osc3.frequency.setValueAtTime(1046.50, now + 0.3); // C6
+    gain3.gain.setValueAtTime(0.4, now + 0.3);
+    gain3.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
+    osc3.connect(gain3);
+    gain3.connect(ctx.destination);
+    osc3.start(now + 0.3);
+    osc3.stop(now + 0.9);
+  } catch (e) {
+    console.warn("Chime playback error:", e);
+  }
+}
+
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sessionUser, setSessionUser] = useState<any | null>(null);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [newOrderAlert, setNewOrderAlert] = useState<any | null>(null);
+  const seenOrderIdsRef = React.useRef<Set<string>>(new Set());
+  const isInitialLoadRef = React.useRef(true);
+
+  // Real-time Live QR Order Listener
+  useEffect(() => {
+    async function checkLatestOrders() {
+      try {
+        const res = await fetch('/api/orders?range=TODAY');
+        const data = await res.json();
+        if (data.orders && Array.isArray(data.orders)) {
+          if (isInitialLoadRef.current) {
+            data.orders.forEach((o: any) => {
+              if (o.id) seenOrderIdsRef.current.add(o.id);
+              if (o.humanOrderId) seenOrderIdsRef.current.add(o.humanOrderId);
+            });
+            isInitialLoadRef.current = false;
+          } else {
+            for (const ord of data.orders) {
+              const ordKey = ord.id || ord.humanOrderId;
+              if (ordKey && !seenOrderIdsRef.current.has(ordKey)) {
+                seenOrderIdsRef.current.add(ordKey);
+                playChimeSound();
+                setNewOrderAlert(ord);
+                break;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Live order check error:", err);
+      }
+    }
+
+    checkLatestOrders();
+    const interval = setInterval(checkLatestOrders, 3000);
+
+    let eventSource: EventSource | null = null;
+    try {
+      eventSource = new EventSource('/api/events?channel=pos_rest_aapno_khano');
+      eventSource.onmessage = (event) => {
+        try {
+          const parsed = JSON.parse(event.data);
+          if (parsed.type === 'NEW_ORDER' || parsed.type === 'NEW_CONFIRMED_ORDER') {
+            const ord = parsed.order;
+            const ordKey = ord?.id || ord?.humanOrderId;
+            if (ordKey && !seenOrderIdsRef.current.has(ordKey)) {
+              seenOrderIdsRef.current.add(ordKey);
+              playChimeSound();
+              setNewOrderAlert(ord);
+            }
+          }
+        } catch (e) {
+          // ignore keepalive parse error
+        }
+      };
+    } catch (e) {
+      console.warn("SSE init error:", e);
+    }
+
+    return () => {
+      clearInterval(interval);
+      if (eventSource) eventSource.close();
+    };
+  }, []);
 
   useEffect(() => {
     async function loadSession() {
@@ -313,6 +426,43 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </main>
         </div>
       </div>
+
+      {/* Real-Time Incoming QR Order Floating Banner */}
+      {newOrderAlert && (
+        <div className="fixed top-4 right-4 z-50 max-w-sm w-full bg-gradient-to-r from-[#AA1B2A] to-[#80101C] text-white p-4 rounded-3xl border-2 border-[#E09D3D] shadow-2xl animate-bounce">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl animate-pulse">🔔</span>
+              <div>
+                <p className="font-black text-xs text-amber-300 uppercase tracking-wider">New Incoming QR Order!</p>
+                <p className="font-black text-sm">{newOrderAlert.humanOrderId} • ₹{newOrderAlert.grandTotal?.toFixed(2)}</p>
+              </div>
+            </div>
+            <button onClick={() => setNewOrderAlert(null)} className="text-white/80 hover:text-white p-1 cursor-pointer">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="mt-2 text-xs text-amber-100 flex items-center justify-between">
+            <span>{newOrderAlert.carNumber ? `🚗 Car: ${newOrderAlert.carNumber}` : newOrderAlert.customerName || 'QR Guest'}</span>
+            <span className="font-mono font-bold bg-white/20 px-2 py-0.5 rounded-full">{newOrderAlert.orderType?.replace('_', ' ')}</span>
+          </div>
+          <div className="mt-3 flex gap-2">
+            <Link
+              href="/admin/orders"
+              onClick={() => setNewOrderAlert(null)}
+              className="flex-1 py-2 bg-[#E09D3D] hover:bg-[#c88b34] text-[#331E17] font-black rounded-xl text-center text-xs shadow-md"
+            >
+              View Live Orders ➔
+            </Link>
+            <button
+              onClick={() => setNewOrderAlert(null)}
+              className="px-3 py-2 bg-black/30 hover:bg-black/50 text-white font-bold rounded-xl text-xs cursor-pointer"
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
