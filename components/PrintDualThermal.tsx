@@ -87,7 +87,7 @@ export default function PrintDualThermal({
 
   return (
     <>
-      {/* Universal 80mm ESC/POS CSS - 100% Guaranteed Non-Blank Print */}
+      {/* Universal 80mm ESC/POS CSS - 100% Guaranteed Non-Blank Print & Clean Alignment */}
       <style jsx global>{`
         @media print {
           @page {
@@ -124,15 +124,15 @@ export default function PrintDualThermal({
             width: 80mm !important;
             max-width: 80mm !important;
             margin: 0mm auto !important;
-            padding: 1mm 0mm !important;
+            padding: 0mm !important;
             background: #ffffff !important;
             display: block !important;
           }
           .thermal-doc {
-            width: 78mm !important;
-            max-width: 78mm !important;
+            width: 72mm !important;
+            max-width: 72mm !important;
             margin: 0mm auto !important;
-            padding: 2mm 1mm !important;
+            padding: 2mm 1mm 4mm 1mm !important;
             background: #ffffff !important;
             color: #000000 !important;
             border: none !important;
@@ -142,17 +142,18 @@ export default function PrintDualThermal({
             display: block !important;
           }
           .thermal-cut-line {
+            width: 72mm !important;
+            max-width: 72mm !important;
             display: block !important;
-            page-break-after: always !important;
-            break-after: page !important;
-            margin: 5mm 0mm !important;
-            border-top: 1px dashed #000000 !important;
-            border-bottom: 1px dashed #000000 !important;
-            padding: 2mm 0mm !important;
+            margin: 4mm auto !important;
+            border-top: 2px dashed #000000 !important;
+            border-bottom: 2px dashed #000000 !important;
+            padding: 3mm 0mm !important;
             text-align: center !important;
+            background: #ffffff !important;
           }
           .thermal-feed-spacer {
-            height: 10mm !important;
+            height: 12mm !important;
             display: block !important;
           }
         }
@@ -353,16 +354,17 @@ export default function PrintDualThermal({
                 <p className="font-bold">*** धन्यवाद! फिर पधारें ***</p>
                 <p>{billData.restaurant.defaultReceiptFooter || "Padharo Mhare Desh! Thank you for visiting Aapno Khaano."}</p>
               </div>
+              <div className="thermal-feed-spacer h-3" />
             </div>
           )}
 
           {/* TVS TEAR / CUT SEPARATOR */}
           {activeMode === "PRINT_BOTH" && billData && kotData && (
-            <div className="thermal-cut-line my-4 text-center text-black font-mono text-xs font-black w-full mx-auto bg-amber-50/50 p-2 rounded border border-dashed border-black">
-              <p className="tracking-wider uppercase py-0.5">✂️ ============================= ✂️</p>
-              <p className="text-[11px] font-black tracking-widest uppercase">✂️ TEAR / CUT HERE (यहाँ से अलग करें) ✂️</p>
-              <p className="text-[9px] font-bold text-slate-700">⬆️ [ ग्राहक बिल ]  •  ⬇️ [ किचन KOT ]</p>
-              <p className="tracking-wider uppercase py-0.5">✂️ ============================= ✂️</p>
+            <div className="thermal-cut-line my-3 text-center text-black font-mono text-[11px] font-black w-full mx-auto bg-slate-50 p-2 border-y-2 border-dashed border-black">
+              <p className="tracking-widest uppercase text-[10px] py-0.5">✂️ - - - - - - - - - - - - - - - - - ✂️</p>
+              <p className="text-[11px] font-black tracking-wider uppercase">✂️ TEAR / CUT HERE (यहाँ से अलग करें) ✂️</p>
+              <p className="text-[9px] font-bold text-slate-800">⬆️ [ CUSTOMER BILL ] • ⬇️ [ KITCHEN KOT ]</p>
+              <p className="tracking-widest uppercase text-[10px] py-0.5">✂️ - - - - - - - - - - - - - - - - - ✂️</p>
               <div className="thermal-feed-spacer h-3" />
             </div>
           )}
@@ -444,6 +446,7 @@ export default function PrintDualThermal({
               <div className="text-center pt-2 text-[9px] font-bold">
                 <p>*** RUSH ORDER • PREPARE FRESH ***</p>
               </div>
+              <div className="thermal-feed-spacer h-8" />
             </div>
           )}
         </div>
