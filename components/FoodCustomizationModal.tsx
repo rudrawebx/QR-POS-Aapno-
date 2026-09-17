@@ -65,7 +65,12 @@ export default function FoodCustomizationModal({
         <div className="relative h-44 sm:h-48 w-full bg-slate-900 overflow-hidden">
           <img
             src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600'}
-            alt={product.name} className="w-full h-full object-cover opacity-90" 
+            alt={product.name}
+            className="w-full h-full object-cover opacity-90"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 

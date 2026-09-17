@@ -28,6 +28,7 @@ import {
   Image as ImageIcon,
   Flame,
   Check,
+  Upload,
 } from 'lucide-react';
 
 export default function SuperAdminPage() {
@@ -510,6 +511,10 @@ export default function SuperAdminPage() {
                         src={p.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600'}
                         alt={p.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
+                        }}
                       />
                       <span
                         className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase text-white shadow-xs ${
@@ -1026,32 +1031,74 @@ export default function SuperAdminPage() {
                   </div>
                 </div>
 
-                {/* Direct Image URL & Live Preview */}
-                <div className="space-y-1.5 bg-[#FFF0E8] p-3 rounded-2xl border border-[#E09D3D]/50">
-                  <label className="block font-black text-[#AA1B2A] text-xs flex items-center gap-1">
-                    <ImageIcon className="w-3.5 h-3.5" /> Food Image URL
-                  </label>
-                  <input
-                    type="url"
-                    required
-                    placeholder="https://images.unsplash.com/photo-..."
-                    value={dishFormData.imageUrl}
-                    onChange={(e) => setDishFormData({ ...dishFormData, imageUrl: e.target.value })}
-                    className="w-full px-3 py-2 bg-white border border-[#E8E1D6] rounded-xl font-mono text-[11px]"
-                  />
+                {/* Dish Photo (Optional, URL or Upload) */}
+                <div className="space-y-2 bg-[#FFF0E8] p-3.5 rounded-2xl border border-[#E09D3D]/50">
+                  <div className="flex items-center justify-between">
+                    <label className="font-black text-[#AA1B2A] text-xs flex items-center gap-1.5">
+                      <ImageIcon className="w-4 h-4 text-[#AA1B2A]" /> Dish Photo / Image (Optional)
+                    </label>
+                    {dishFormData.imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setDishFormData({ ...dishFormData, imageUrl: '' })}
+                        className="text-[11px] text-red-600 hover:text-red-800 font-bold underline cursor-pointer"
+                      >
+                        Remove Photo
+                      </button>
+                    )}
+                  </div>
+
                   {dishFormData.imageUrl && (
-                    <div className="flex items-center gap-2 mt-2 pt-2 border-t border-[#E8E1D6]">
-                      <div className="w-12 h-12 rounded-xl overflow-hidden border border-[#E8E1D6] bg-white flex-shrink-0">
+                    <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-[#E8E1D6]">
+                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-[#E8E1D6] bg-slate-100 flex-shrink-0">
                         <img
                           src={dishFormData.imageUrl}
                           alt="Preview"
                           className="w-full h-full object-cover"
-                          onError={(e) => ((e.target as any).src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600')}
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
+                          }}
                         />
                       </div>
-                      <span className="text-[10px] text-[#745E55] font-bold">Image Live Preview</span>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[11px] font-bold text-[#331E17] truncate">Image Selected</p>
+                        <p className="text-[10px] text-slate-500 font-mono truncate">{dishFormData.imageUrl.startsWith('data:') ? 'Custom Uploaded Image' : dishFormData.imageUrl}</p>
+                      </div>
                     </div>
                   )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Image URL or /images/menu/... (optional)"
+                      value={dishFormData.imageUrl}
+                      onChange={(e) => setDishFormData({ ...dishFormData, imageUrl: e.target.value })}
+                      className="w-full px-3 py-2 bg-white border border-[#E8E1D6] rounded-xl font-mono text-[11px]"
+                    />
+                    <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-dashed border-[#AA1B2A]/40 hover:border-[#AA1B2A] rounded-xl cursor-pointer text-xs font-bold text-[#AA1B2A] transition-colors shadow-2xs">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload File</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string') {
+                                setDishFormData({ ...dishFormData, imageUrl: reader.result });
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-500">Photo is optional. If left blank, a high-quality royal dish image will be shown automatically.</p>
                 </div>
 
                 {/* Pricing & Variations */}

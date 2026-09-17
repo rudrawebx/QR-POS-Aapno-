@@ -477,7 +477,12 @@ export default function AdminPosPage() {
                     <div className="relative h-24 w-full rounded-2xl overflow-hidden bg-slate-100 mb-2 border border-[#E8E1D6]">
                       <img
                         src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80'}
-                        alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                        alt={product.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80';
+                        }}
                       />
                       <span
                         className={`absolute top-1.5 left-1.5 w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center bg-white ${

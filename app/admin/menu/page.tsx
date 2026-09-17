@@ -794,7 +794,12 @@ export default function AdminMenuPage() {
                           <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 border border-slate-200 shadow-2xs relative">
                             <img
                               src={p.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600'}
-                              alt={p.name} className="w-full h-full object-cover" 
+                              alt={p.name}
+                              className="w-full h-full object-cover"
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
+                              }}
                             />
                             {p.hasVariations && (
                               <span className="absolute bottom-0 right-0 bg-black/75 text-[#D4AF37] text-[8px] font-black px-1 rounded-tl">
@@ -1187,16 +1192,64 @@ export default function AdminMenuPage() {
                   </label>
                 </div>
 
-                {/* Image URL */}
+                {/* Image URL & File Upload */}
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Photo Image URL</label>
-                  <input
-                    type="url"
-                    placeholder="https://images.unsplash.com/..."
-                    value={formData.imageUrl}
-                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"
-                  />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-slate-700">Dish Photo Image (Optional)</label>
+                    {formData.imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                        className="text-[10px] font-bold text-red-600 hover:text-red-800 cursor-pointer"
+                      >
+                        Remove Image
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex gap-2 items-center">
+                    {formData.imageUrl && (
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                        <img
+                          src={formData.imageUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=200';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <input
+                      type="text"
+                      placeholder="/images/menu/p-1-sweet-corn-chaat.png or https://..."
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                    />
+                    <label className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 cursor-pointer flex items-center gap-1.5 whitespace-nowrap">
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>Upload File</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string') {
+                                setFormData({ ...formData, imageUrl: reader.result });
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                  <p className="text-[10px] text-slate-400 mt-1">Leave blank to use default royal food placeholder.</p>
                 </div>
 
                 {/* Submit Buttons */}
