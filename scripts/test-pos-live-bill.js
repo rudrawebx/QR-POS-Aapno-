@@ -102,9 +102,9 @@ async function runTests() {
     });
 
     assert(
-      posCashRes.status === 200 && posCashRes.body.order.customerName === 'Walk-in Guest' && posCashRes.body.kot !== null,
+      posCashRes.status === 200 && posCashRes.body?.order?.customerName === 'Walk-in Guest' && posCashRes.body?.kot !== null,
       'TEST 2: POS Guest without Name + Takeaway',
-      `Guest: ${posCashRes.body.order.customerName}, KOT: ${posCashRes.body.kot?.humanKotNumber}`
+      `Guest: ${posCashRes.body?.order?.customerName}, KOT: ${posCashRes.body?.kot?.humanKotNumber}`
     );
 
     // -------------------------------------------------------------
@@ -124,9 +124,9 @@ async function runTests() {
     });
 
     assert(
-      posCardRes.status === 200 && posCardRes.body.order.paymentMethod === 'CARD' && posCardRes.body.order.status === 'CONFIRMED',
+      posCardRes.status === 200 && posCardRes.body?.order?.paymentMethod === 'CARD' && posCardRes.body?.order?.status === 'CONFIRMED',
       'TEST 3: POS Dine-In Card Settlement',
-      `Invoice: ${posCardRes.body.humanInvoiceNumber}, Status: ${posCardRes.body.order.status}`
+      `Invoice: ${posCardRes.body?.humanInvoiceNumber}, Status: ${posCardRes.body?.order?.status}`
     );
 
     // -------------------------------------------------------------
