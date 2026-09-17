@@ -21,9 +21,9 @@ function request(path, options = {}, body = null) {
         res.on('end', () => {
           try {
             const parsed = JSON.parse(data);
-            resolve({ status: res.statusCode, body: parsed });
+            resolve({ status: res.statusCode, body: parsed || {} });
           } catch (e) {
-            resolve({ status: res.statusCode, raw: data });
+            resolve({ status: res.statusCode, body: {}, raw: data });
           }
         });
       }
@@ -74,16 +74,16 @@ async function runTests() {
     });
 
     assert(
-      posUpiRes.status === 200 && posUpiRes.body.success === true && posUpiRes.body.order.paymentStatus === 'PAID',
+      posUpiRes.status === 200 && posUpiRes.body?.success === true && posUpiRes.body?.order?.paymentStatus === 'PAID',
       'TEST 1: POS Direct UPI Settlement',
-      `Order: ${posUpiRes.body.humanOrderId}, Method: ${posUpiRes.body.order?.paymentMethod}, Invoice: ${posUpiRes.body.humanInvoiceNumber}`
+      `Order: ${posUpiRes.body?.humanOrderId}, Method: ${posUpiRes.body?.order?.paymentMethod}, Invoice: ${posUpiRes.body?.humanInvoiceNumber}`
     );
 
     assert(
-      posUpiRes.body.printReceiptData?.restaurant?.name.includes('Aapno Khaano') &&
-      posUpiRes.body.printReceiptData?.order?.carNumber === 'HR03AF5256',
+      posUpiRes.body?.printReceiptData?.restaurant?.name?.includes('Aapno Khaano') &&
+      posUpiRes.body?.printReceiptData?.order?.carNumber === 'HR03AF5256',
       'TEST 1.1: Thermal Receipt Data Integrity',
-      `Car: ${posUpiRes.body.printReceiptData?.order?.carNumber}, Total: ₹${posUpiRes.body.printReceiptData?.order?.grandTotal}`
+      `Car: ${posUpiRes.body?.printReceiptData?.order?.carNumber}, Total: ₹${posUpiRes.body?.printReceiptData?.order?.grandTotal}`
     );
 
     // -------------------------------------------------------------
@@ -147,12 +147,12 @@ async function runTests() {
 
     assert(
       publicQrRes.status === 200 &&
-      publicQrRes.body.status === 'awaiting_payment' &&
-      publicQrRes.body.paymentStatus === 'pending' &&
-      !publicQrRes.body.invoice &&
-      !publicQrRes.body.kot,
+      publicQrRes.body?.status === 'awaiting_payment' &&
+      publicQrRes.body?.paymentStatus === 'pending' &&
+      !publicQrRes.body?.invoice &&
+      !publicQrRes.body?.kot,
       'TEST 4: Public QR Order Security Check',
-      `Status: ${publicQrRes.body.status} (Strictly No Invoice/KOT generated)`
+      `Status: ${publicQrRes.body?.status} (Strictly No Invoice/KOT generated)`
     );
 
     // -------------------------------------------------------------
@@ -174,21 +174,23 @@ async function runTests() {
     });
 
     assert(
-      qrVerifyRes.status === 200 && qrVerifyRes.body.success === true && qrVerifyRes.body.order.paymentStatus === 'PAID',
+      qrVerifyRes.status === 200 && qrVerifyRes.body?.success === true && qrVerifyRes.body?.order?.paymentStatus === 'PAID',
       'TEST 5: QR Direct UPI Instant Verification & Bill Generation',
-      `Order: ${qrVerifyRes.body.humanOrderId}, Invoice: ${qrVerifyRes.body.humanInvoiceNumber}, KOT: ${qrVerifyRes.body.humanKotNumber}`
+      `Order: ${qrVerifyRes.body?.humanOrderId}, Invoice: ${qrVerifyRes.body?.humanInvoiceNumber}, KOT: ${qrVerifyRes.body?.humanKotNumber}`
     );
 
     // -------------------------------------------------------------
     // TEST 6: Real-time Live Orders Registry Verification
     // -------------------------------------------------------------
     const liveOrdersRes = await request('/api/orders?range=TODAY');
-    const hasLatestOrder = liveOrdersRes.body?.orders?.some(o => o.humanOrderId === qrVerifyRes.body.humanOrderId);
+    const hasLatestOrder = qrVerifyRes.body?.humanOrderId
+      ? liveOrdersRes.body?.orders?.some((o) => o.humanOrderId === qrVerifyRes.body.humanOrderId)
+      : false;
 
     assert(
       liveOrdersRes.status === 200 && hasLatestOrder,
       'TEST 6: Real-time Live Orders Registry',
-      `Found verified QR order ${qrVerifyRes.body.humanOrderId} in Live Feed (Total live today: ${liveOrdersRes.body?.orders?.length})`
+      `Found verified QR order ${qrVerifyRes.body?.humanOrderId} in Live Feed (Total live today: ${liveOrdersRes.body?.orders?.length || 0})`
     );
 
     console.log('\n===============================================================');
