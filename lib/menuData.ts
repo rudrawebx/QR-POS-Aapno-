@@ -1520,6 +1520,9 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-113-ice-cubes.png",
         "description": "Freshly prepared Ice Cubes made to order with authentic spices."
+      }
+    ]
+  }
 ];
 
 const globalOverrides = new Map<string, any>();
