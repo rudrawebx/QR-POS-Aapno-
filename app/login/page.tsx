@@ -85,32 +85,6 @@ function LoginForm() {
     }
   };
 
-  const handleQuickDemoLogin = async (role: string) => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/auth/demo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role }),
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        if (typeof window !== 'undefined' && data.user) {
-          localStorage.setItem('auth_session', JSON.stringify(data.user));
-        }
-        navigateToDashboard(role);
-      } else {
-        setError(data.error || 'Demo login failed');
-      }
-    } catch (err) {
-      console.error(err);
-      setError('Connection error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -262,68 +236,6 @@ function LoginForm() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </form>
-
-      {/* Quick Demo 1-Click Role Accounts */}
-      <div className="pt-4 border-t border-[#E8E1D6] space-y-2">
-        <p className="text-[10px] font-bold text-[#745E55] uppercase tracking-wider text-center">
-          Quick Role Logins (Single-Click Access)
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <button
-            onClick={() => handleQuickDemoLogin('SUPER_ADMIN')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-purple-900 block text-[11px]">1. Super Admin</span>
-            <span className="text-[9px] text-[#745E55] block truncate">vinod@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-purple-700 font-bold">PIN: 0000</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemoLogin('OWNER')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-[#AA1B2A] block text-[11px]">2. Restaurant Owner</span>
-            <span className="text-[9px] text-[#745E55] block truncate">fatehabad@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-[#AA1B2A] font-bold">PIN: 1111</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemoLogin('MANAGER')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-amber-800 block text-[11px]">3. Manager</span>
-            <span className="text-[9px] text-[#745E55] block truncate">ftd.mngr@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-amber-700 font-bold">PIN: 2222</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemoLogin('CASHIER')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-emerald-800 block text-[11px]">4. Cashier &amp; POS</span>
-            <span className="text-[9px] text-[#745E55] block truncate">ftd.cashier@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-emerald-700 font-bold">PIN: 3333</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemoLogin('KITCHEN')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-red-700 block text-[11px]">5. Kitchen Chef (KDS)</span>
-            <span className="text-[9px] text-[#745E55] block truncate">ftd.kitchen@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-red-600 font-bold">PIN: 4444</span>
-          </button>
-
-          <button
-            onClick={() => handleQuickDemoLogin('WAITER')}
-            className="p-2 rounded-xl bg-[#F7F2EA] hover:bg-[#E8E1D6] text-left text-xs font-medium cursor-pointer transition-colors border border-[#E8E1D6]"
-          >
-            <span className="font-bold text-blue-800 block text-[11px]">6. Captain / Waiter</span>
-            <span className="text-[9px] text-[#745E55] block truncate">ftd.waiter@aapnokhano.com</span>
-            <span className="text-[9px] font-mono text-blue-700 font-bold">PIN: 5555</span>
-          </button>
-        </div>
-      </div>
 
       {/* Forgot Password Modal */}
       {isForgotModalOpen && (

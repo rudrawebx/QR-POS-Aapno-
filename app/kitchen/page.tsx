@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import PrintKot from '@/components/PrintKot';
-import DemoRoleSwitcher from '@/components/DemoRoleSwitcher';
 import { PrintKotData } from '@/lib/types';
 import {
   ChefHat,

@@ -74,7 +74,45 @@ export default function CustomerQsrMenuPage() {
   const [checkoutOrderDetails, setCheckoutOrderDetails] = useState<any | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
+  // Table Validation State
+  const [isTableValidating, setIsTableValidating] = useState(Boolean(tableParam));
+  const [isTableInvalid, setIsTableInvalid] = useState(false);
+  const [tableValidationError, setTableValidationError] = useState('');
+  const [validatedTableData, setValidatedTableData] = useState<any | null>(null);
+
   const isStoreOpen = restaurant.settings?.isRestaurantOpen ?? restaurant.isOpen ?? true;
+
+  // Validate Table QR if tableParam is present
+  useEffect(() => {
+    async function validateTable() {
+      if (!tableParam) {
+        setIsTableValidating(false);
+        return;
+      }
+
+      try {
+        setIsTableValidating(true);
+        const res = await fetch(`/api/tables/validate?slug=${encodeURIComponent(slug)}&table=${encodeURIComponent(tableParam)}`);
+        const data = await res.json();
+
+        if (res.ok && data.valid && data.table) {
+          setIsTableInvalid(false);
+          setValidatedTableData(data.table);
+        } else {
+          setIsTableInvalid(true);
+          setTableValidationError(data.error || 'This table QR code is invalid or no longer active.');
+        }
+      } catch (err) {
+        console.error('Table validation error:', err);
+        setIsTableInvalid(true);
+        setTableValidationError('Unable to verify table QR code.');
+      } finally {
+        setIsTableValidating(false);
+      }
+    }
+
+    validateTable();
+  }, [slug, tableParam]);
 
   useEffect(() => {
     async function loadData() {
@@ -178,6 +216,65 @@ export default function CustomerQsrMenuPage() {
     `Hello Aapno Khaano team, I am looking at the menu${lockedTableNumber ? ` at Table ${lockedTableNumber}` : ''} and need some assistance.`
   )}`;
 
+  // 1. Loading Table Validation State
+  if (isTableValidating) {
+    return (
+      <div className="min-h-screen bg-[#FEFBF5] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-16 h-16 rounded-full border-4 border-[#E09D3D]/30 border-t-[#AA1B2A] animate-spin mb-4" />
+        <h2 className="text-base font-black text-[#331E17]">Verifying Table QR Code...</h2>
+        <p className="text-xs text-[#745E55] mt-1">Connecting to Aapno Khaano dining session</p>
+      </div>
+    );
+  }
+
+  // 2. Invalid or Inactive Table QR State
+  if (isTableInvalid) {
+    return (
+      <div className="min-h-screen bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans">
+        <header className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white p-4 text-center shadow-lg">
+          <h1 className="text-base font-black">आपणो खाणो (Aapno Khaano)</h1>
+          <p className="text-xs text-[#E09D3D]">Royal Rajasthani Handi &amp; QSR</p>
+        </header>
+
+        <main className="max-w-md mx-auto px-4 py-16 flex-1 flex flex-col items-center justify-center text-center">
+          <div className="w-20 h-20 rounded-3xl bg-red-100 border-2 border-red-300 flex items-center justify-center mb-5 text-red-600 shadow-lg">
+            <AlertCircle className="w-10 h-10" />
+          </div>
+
+          <span className="bg-red-100 text-red-800 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider mb-3 border border-red-200">
+            Table Not Found
+          </span>
+
+          <h2 className="text-xl font-black text-[#331E17] mb-2">Invalid or Inactive Table QR</h2>
+          <p className="text-xs text-[#745E55] max-w-sm mb-6 leading-relaxed">
+            {tableValidationError ||
+              'The scanned table QR code does not match any active dining table at this restaurant. Orders cannot be submitted against an unverified table.'}
+          </p>
+
+          <div className="w-full space-y-3">
+            <a
+              href={`/r/${slug}`}
+              className="w-full block bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white font-black py-3.5 px-6 rounded-2xl text-xs shadow-md hover:from-[#901622] hover:to-[#C0392F] transition-all"
+            >
+              Browse General Menu (Car Service / Takeaway)
+            </a>
+
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full block bg-white border border-[#E8E1D6] text-[#331E17] font-bold py-3 px-6 rounded-2xl text-xs hover:bg-[#F7F2EA] transition-all"
+            >
+              Ask Restaurant Staff for Help
+            </a>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  const effectiveTableNumber = validatedTableData?.tableNumber || lockedTableNumber;
+
   return (
     <div className="min-h-screen bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans pb-28 selection:bg-[#E09D3D] selection:text-[#AA1B2A]">
       {/* Sticky Header with Veg/Non-Veg Filters and Category Nav */}
@@ -193,10 +290,10 @@ export default function CustomerQsrMenuPage() {
       />
 
       {/* Table Lock Banner if present */}
-      {lockedTableNumber && (
+      {effectiveTableNumber && (
         <div className="bg-emerald-50 border-b border-emerald-200 px-4 py-2 text-center text-xs font-bold text-emerald-900 flex items-center justify-center gap-2">
           <Lock className="w-3.5 h-3.5 text-emerald-700" />
-          <span>Ordering for Dine-In: <b>Table {lockedTableNumber}</b></span>
+          <span>Ordering for Dine-In: <b>Table {effectiveTableNumber}</b></span>
         </div>
       )}
 
@@ -386,7 +483,7 @@ export default function CustomerQsrMenuPage() {
       {/* Sticky Bottom Cart Drawer */}
       <StickyCartDrawer
         cart={cart}
-        lockedTableNumber={lockedTableNumber}
+        lockedTableNumber={effectiveTableNumber}
         onUpdateQuantity={handleUpdateQuantity}
         onRemoveItem={handleRemoveItem}
         onProceedToPayment={handleProceedToPayment}

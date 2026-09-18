@@ -53,6 +53,9 @@ export default function StickyCartDrawer({
   const [instructions, setInstructions] = useState('');
   const [formError, setFormError] = useState('');
 
+  const [manualTableNumber, setManualTableNumber] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (lockedTableNumber) {
       setOrderType('DINE_IN');
@@ -69,34 +72,66 @@ export default function StickyCartDrawer({
   if (cart.length === 0) return null;
 
   const handleCheckoutClick = () => {
+    if (isSubmitting) return;
     setFormError('');
 
-    if (!customerName.trim()) {
-      setFormError('Please enter customer full name.');
+    const trimmedName = customerName.trim();
+    if (!trimmedName || trimmedName.length < 2) {
+      setFormError('Please enter a valid customer name (at least 2 characters).');
       return;
     }
 
     const cleanPhone = customerPhone.replace(/\D/g, '');
-    if (cleanPhone.length < 10) {
-      setFormError('Please enter a valid 10-digit mobile number.');
+    const indianPhoneRegex = /^[6-9]\d{9}$/;
+    if (!indianPhoneRegex.test(cleanPhone)) {
+      setFormError('Please enter a valid 10-digit Indian mobile number (e.g. 9876543210).');
       return;
     }
 
-    if (orderType === 'CAR_SERVICE' && !carNumber.trim()) {
-      setFormError('Please enter car / vehicle registration number for Car Service delivery.');
-      return;
+    if (orderType === 'CAR_SERVICE') {
+      const cleanCar = carNumber.trim();
+      if (!cleanCar || cleanCar.length < 3) {
+        setFormError('Please enter a valid car / vehicle registration number (e.g. RJ 14 CA 9999).');
+        return;
+      }
     }
+
+    if (orderType === 'DINE_IN' && !lockedTableNumber) {
+      const cleanTable = manualTableNumber.trim();
+      if (!cleanTable) {
+        setFormError('Please enter or select your dining table number.');
+        return;
+      }
+    }
+
+    setIsSubmitting(true);
+
+    const resolvedLocation = lockedTableNumber
+      ? `Table ${lockedTableNumber}`
+      : orderType === 'DINE_IN'
+      ? `Table ${manualTableNumber.trim()}`
+      : orderType === 'CAR_SERVICE'
+      ? carNumber.trim().toUpperCase()
+      : 'TAKEAWAY';
 
     onProceedToPayment({
-      customerName: customerName.trim(),
+      customerName: trimmedName,
       customerPhone: cleanPhone,
-      carNumber: lockedTableNumber ? `Table ${lockedTableNumber}` : carNumber.trim().toUpperCase(),
+      carNumber: resolvedLocation,
       orderType,
       cookingInstructions: instructions.trim(),
       subtotal,
       taxAmount,
       grandTotal,
     });
+
+    setTimeout(() => setIsSubmitting(false), 2000);
+  };
+
+  const getHeadingText = () => {
+    if (orderType === 'CAR_SERVICE') return 'Customer & Vehicle Details';
+    if (orderType === 'TAKEAWAY') return 'Customer Details';
+    return 'Dine-In Details';
   };
 
   return (
@@ -106,6 +141,7 @@ export default function StickyCartDrawer({
         <div className="max-w-md mx-auto pointer-events-auto">
           <button
             onClick={() => setIsOpen(true)}
+            aria-label="View shopping cart and proceed to payment"
             className="w-full bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white p-3.5 rounded-3xl shadow-2xl border-2 border-[#E09D3D] flex items-center justify-between transition-all active:scale-98 cursor-pointer"
           >
             <div className="flex items-center gap-3">
@@ -149,7 +185,8 @@ export default function StickyCartDrawer({
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors"
+                aria-label="Close cart drawer"
+                className="w-8 h-8 rounded-full bg-white/10 text-white flex items-center justify-center hover:bg-white/20 transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -205,6 +242,7 @@ export default function StickyCartDrawer({
                             if (item.quantity === 1) onRemoveItem(item.cartId);
                             else onUpdateQuantity(item.cartId, -1);
                           }}
+                          aria-label={item.quantity === 1 ? "Remove item from cart" : "Decrease item quantity"}
                           className="w-6 h-6 rounded-lg bg-white text-slate-700 flex items-center justify-center shadow-2xs hover:bg-slate-100 cursor-pointer"
                         >
                           {item.quantity === 1 ? <Trash2 className="w-3 h-3 text-red-500" /> : <Minus className="w-3 h-3" />}
@@ -212,6 +250,7 @@ export default function StickyCartDrawer({
                         <span className="w-5 text-center font-black text-[#331E17]">{item.quantity}</span>
                         <button
                           onClick={() => onUpdateQuantity(item.cartId, 1)}
+                          aria-label="Increase item quantity"
                           className="w-6 h-6 rounded-lg bg-white text-slate-700 flex items-center justify-center shadow-2xs hover:bg-slate-100 cursor-pointer"
                         >
                           <Plus className="w-3 h-3" />
@@ -241,6 +280,7 @@ export default function StickyCartDrawer({
                     <button
                       type="button"
                       onClick={() => setOrderType('CAR_SERVICE')}
+                      aria-label="Select Car Service delivery"
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer ${
                         orderType === 'CAR_SERVICE'
                           ? 'border-[#AA1B2A] bg-[#AA1B2A]/10 font-bold text-[#AA1B2A]'
@@ -254,6 +294,7 @@ export default function StickyCartDrawer({
                     <button
                       type="button"
                       onClick={() => setOrderType('TAKEAWAY')}
+                      aria-label="Select Takeaway pickup"
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer ${
                         orderType === 'TAKEAWAY'
                           ? 'border-[#AA1B2A] bg-[#AA1B2A]/10 font-bold text-[#AA1B2A]'
@@ -267,6 +308,7 @@ export default function StickyCartDrawer({
                     <button
                       type="button"
                       onClick={() => setOrderType('DINE_IN')}
+                      aria-label="Select Quick Dine-In"
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer ${
                         orderType === 'DINE_IN'
                           ? 'border-[#AA1B2A] bg-[#AA1B2A]/10 font-bold text-[#AA1B2A]'
@@ -283,7 +325,7 @@ export default function StickyCartDrawer({
               {/* Customer Info Form */}
               <div className="bg-white rounded-3xl p-4 border border-[#E8E1D6] space-y-3 shadow-2xs">
                 <p className="font-black text-[#331E17] text-xs flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> Customer &amp; Vehicle Details
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" /> {getHeadingText()}
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -294,6 +336,7 @@ export default function StickyCartDrawer({
                     <input
                       type="text"
                       required
+                      maxLength={50}
                       placeholder="e.g. Vikramaditya Singh"
                       value={customerName}
                       onChange={(e) => setCustomerName(e.target.value)}
@@ -314,7 +357,7 @@ export default function StickyCartDrawer({
                         type="tel"
                         maxLength={10}
                         required
-                        placeholder="99962 13962"
+                        placeholder="98765 43210"
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
                         className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-r-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A] font-mono"
@@ -323,6 +366,7 @@ export default function StickyCartDrawer({
                   </div>
                 </div>
 
+                {/* Car Service Vehicle Number */}
                 {orderType === 'CAR_SERVICE' && (
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
@@ -331,13 +375,35 @@ export default function StickyCartDrawer({
                     <input
                       type="text"
                       required
+                      maxLength={15}
                       placeholder="e.g. RJ 14 CA 9999"
                       value={carNumber}
-                      onChange={(e) => setCarNumber(e.target.value)}
+                      onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
                       className="w-full px-3 py-2 bg-amber-50/50 border border-amber-300 rounded-xl text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
                     />
                     <span className="text-[10px] text-slate-500 mt-0.5 block">
                       Our runner will deliver your hot order directly to your car window!
+                    </span>
+                  </div>
+                )}
+
+                {/* General QR Dine-In Table Selection */}
+                {orderType === 'DINE_IN' && !lockedTableNumber && (
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                      Dining Table Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={10}
+                      placeholder="e.g. 04, Table 04, T-02"
+                      value={manualTableNumber}
+                      onChange={(e) => setManualTableNumber(e.target.value)}
+                      className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
+                    />
+                    <span className="text-[10px] text-slate-500 mt-0.5 block">
+                      Please enter the table number where you are seated.
                     </span>
                   </div>
                 )}
@@ -348,6 +414,7 @@ export default function StickyCartDrawer({
                   </label>
                   <input
                     type="text"
+                    maxLength={200}
                     placeholder="e.g. Extra green chutney, less spicy, parking bay 4"
                     value={instructions}
                     onChange={(e) => setInstructions(e.target.value)}
@@ -377,9 +444,11 @@ export default function StickyCartDrawer({
             <div className="p-4 bg-white border-t border-slate-200">
               <button
                 onClick={handleCheckoutClick}
-                className="w-full bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black py-3.5 px-4 rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer border border-[#E09D3D] transition-all active:scale-98"
+                disabled={isSubmitting}
+                aria-label={`Proceed to verified payment of ₹${grandTotal}`}
+                className="w-full bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black py-3.5 px-4 rounded-2xl text-sm shadow-xl flex items-center justify-center gap-2 cursor-pointer border border-[#E09D3D] transition-all active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <span>Proceed to Verified Payment</span>
+                <span>{isSubmitting ? 'Securing Order...' : 'Proceed to Verified Payment'}</span>
                 <span className="font-black text-[#FEFBF5]">(₹{grandTotal})</span>
                 <ArrowRight className="w-4 h-4 text-[#E09D3D]" />
               </button>
@@ -390,3 +459,4 @@ export default function StickyCartDrawer({
     </>
   );
 }
+

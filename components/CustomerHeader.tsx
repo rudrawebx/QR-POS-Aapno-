@@ -75,7 +75,7 @@ export default function CustomerHeader({
             <Search className="w-4 h-4 text-[#E09D3D] absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search chats, handi curries, tandoor, breads..."
+              placeholder="Search dishes, curries, tandoor, breads..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
               className="w-full pl-10 pr-4 py-2 bg-[#80101C] border border-[#E09D3D]/40 rounded-2xl text-xs text-white placeholder-amber-200/60 focus:outline-none focus:ring-2 focus:ring-[#E09D3D] shadow-inner"

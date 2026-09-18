@@ -9,7 +9,13 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const session = await getCurrentSession();
-    const restaurantId = searchParams.get("restaurantId") || session?.restaurantId || "rest_aapno_khano";
+
+    // Multi-Tenant Isolation:
+    // Derive restaurantId strictly from authenticated session unless Super Admin explicitly requests another tenant
+    let restaurantId = session?.restaurantId || "rest_aapno_khano";
+    if (session?.role === "SUPER_ADMIN" && searchParams.get("restaurantId")) {
+      restaurantId = searchParams.get("restaurantId")!;
+    }
     const range = searchParams.get("range") || "TODAY";
     const status = searchParams.get("status");
 
@@ -179,9 +185,9 @@ export async function POST(request: Request) {
     const humanOrderId = `AK-2026-${orderNum}`;
 
     // 2. CHECK AUTHORIZATION FOR MANUAL / POS SETTLEMENT
-    const isStaff = session?.user && ["SUPER_ADMIN", "OWNER", "MANAGER", "CASHIER", "WAITER"].includes(session.user.role);
+    const isStaff = Boolean(session?.userId && ["SUPER_ADMIN", "OWNER", "MANAGER", "CASHIER", "WAITER"].includes(session.role));
     const validCounterMethods = ["CASH", "UPI", "CARD", "SPLIT", "UPI_DIRECT", "DIRECT_QR", "PAY_AT_COUNTER"];
-    const isConfirmedStaffOrder = (isStaffCashConfirmed && validCounterMethods.includes(paymentMethod)) || (isStaff && validCounterMethods.includes(paymentMethod));
+    const isConfirmedStaffOrder = (isStaffCashConfirmed && isStaff && validCounterMethods.includes(paymentMethod)) || (isStaff && validCounterMethods.includes(paymentMethod));
     const effectivePaymentMethod = validCounterMethods.includes(paymentMethod) ? paymentMethod : "CASH";
 
     // CASE A: UNPAID / PENDING ORDER -> Strictly NO Invoice, NO KOT, NO Stock Deduction
@@ -261,7 +267,7 @@ export async function POST(request: Request) {
     // CASE B: AUTHORIZED CONFIRMED TRANSACTION (POS CASHIER / MANUAL SETTLEMENT)
     const humanInvoiceNumber = `AK-INV-2026-${String(orderNum).padStart(6, "0")}`;
     const humanKotNumber = `KOT-${orderNum}`;
-    const transactionId = `${effectivePaymentMethod}_${Date.now()}_${session?.user?.id?.slice(-4) || "POS"}`;
+    const transactionId = `${effectivePaymentMethod}_${Date.now()}_${session?.userId?.slice(-4) || "POS"}`;
 
     let orderRecord: any = null;
     let invoiceRecord: any = null;
@@ -286,7 +292,7 @@ export async function POST(request: Request) {
             paymentStatus: "PAID",
             paymentMethod: effectivePaymentMethod,
             transactionId,
-            takenByStaffId: session?.user?.id || null,
+            takenByStaffId: session?.userId || null,
             items: {
               create: validatedItems.map((vi) => ({
                 productName: vi.productName,

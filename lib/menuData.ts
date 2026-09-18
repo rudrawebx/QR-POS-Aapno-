@@ -1199,7 +1199,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-90-coke-250-ml.jpeg",
-        "description": "Freshly prepared Coke 250 ml made to order with authentic spices."
+        "description": "Chilled packaged soft drink (250 ml)."
       },
       {
         "id": "p-91",
@@ -1211,7 +1211,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-91-coke-500-ml.jpg",
-        "description": "Freshly prepared Coke 500 ml made to order with authentic spices."
+        "description": "Chilled packaged soft drink (500 ml)."
       },
       {
         "id": "p-92",
@@ -1223,7 +1223,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-92-coke-750-ml.jpg",
-        "description": "Freshly prepared Coke 750 ml made to order with authentic spices."
+        "description": "Chilled packaged soft drink (750 ml)."
       },
       {
         "id": "p-93",
@@ -1235,19 +1235,19 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": true,
         "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Coke 1 litre made to order with authentic spices."
+        "description": "Chilled packaged soft drink (1 Litre)."
       },
       {
         "id": "p-94",
         "name": "Coke 2 litres",
-        "basePrice": 85.0,
+        "basePrice": 100.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-94-coke-2-litres.jpeg",
-        "description": "Freshly prepared Coke 2 litres made to order with authentic spices."
+        "description": "Chilled packaged soft drink (2 Litres)."
       },
       {
         "id": "p-95",
@@ -1259,7 +1259,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-95-sprite-250-ml.webp",
-        "description": "Freshly prepared Sprite 250 ml made to order with authentic spices."
+        "description": "Chilled packaged lemon-lime soft drink (250 ml)."
       },
       {
         "id": "p-96",
@@ -1271,7 +1271,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Sprite 500 ml made to order with authentic spices."
+        "description": "Chilled packaged lemon-lime soft drink (500 ml)."
       },
       {
         "id": "p-97",
@@ -1283,7 +1283,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-97-sprite-750-ml.jpg",
-        "description": "Freshly prepared Sprite 750 ml made to order with authentic spices."
+        "description": "Chilled packaged lemon-lime soft drink (750 ml)."
       },
       {
         "id": "p-98",
@@ -1295,19 +1295,19 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-98-sprite-1-litre.jpg",
-        "description": "Freshly prepared Sprite 1 litre made to order with authentic spices."
+        "description": "Chilled packaged lemon-lime soft drink (1 Litre)."
       },
       {
         "id": "p-99",
         "name": "Sprite 2 litres",
-        "basePrice": 85.0,
+        "basePrice": 100.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Sprite 2 litres made to order with authentic spices."
+        "description": "Chilled packaged lemon-lime soft drink (2 Litres)."
       },
       {
         "id": "p-100",
@@ -1319,7 +1319,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-100-limca-250-ml.png",
-        "description": "Freshly prepared Limca 250 ml made to order with authentic spices."
+        "description": "Chilled cloudy lemon fizzy soft drink (250 ml)."
       },
       {
         "id": "p-101",
@@ -1331,7 +1331,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Limca 500 ml made to order with authentic spices."
+        "description": "Chilled cloudy lemon fizzy soft drink (500 ml)."
       },
       {
         "id": "p-102",
@@ -1343,7 +1343,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Limca 750 ml made to order with authentic spices."
+        "description": "Chilled cloudy lemon fizzy soft drink (750 ml)."
       },
       {
         "id": "p-103",
@@ -1355,19 +1355,19 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-103-limca-1-litre.jpeg",
-        "description": "Freshly prepared Limca 1 litre made to order with authentic spices."
+        "description": "Chilled cloudy lemon fizzy soft drink (1 Litre)."
       },
       {
         "id": "p-104",
         "name": "Limca 2 litres",
-        "basePrice": 85.0,
+        "basePrice": 100.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-104-limca-2-litres.jpeg",
-        "description": "Freshly prepared Limca 2 litres made to order with authentic spices."
+        "description": "Chilled cloudy lemon fizzy soft drink (2 Litres)."
       },
       {
         "id": "p-105",
@@ -1379,7 +1379,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-105-coke-can.jpg",
-        "description": "Freshly prepared Coke Can made to order with authentic spices."
+        "description": "Chilled 300 ml Coke Aluminum Can."
       },
       {
         "id": "p-106",
@@ -1391,7 +1391,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-106-diet-coke-can.jpg",
-        "description": "Freshly prepared Diet Coke Can made to order with authentic spices."
+        "description": "Chilled 300 ml Zero Sugar Diet Coke Can."
       }
     ]
   },
@@ -1414,7 +1414,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": true,
         "imageUrl": "/images/menu/p-107-hell-can.webp",
-        "description": "Freshly prepared Hell Can made to order with authentic spices."
+        "description": "Chilled 250 ml Hell Energy drink can."
       },
       {
         "id": "p-108",
@@ -1426,7 +1426,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-108-predator-can.jpg",
-        "description": "Freshly prepared Predator Can made to order with authentic spices."
+        "description": "Chilled 250 ml Predator Energy drink can."
       }
     ]
   },
@@ -1449,7 +1449,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80",
-        "description": "Freshly prepared Bisleri Water made to order with authentic spices."
+        "description": "Pure packaged mineral water (1 Litre bottle)."
       },
       {
         "id": "p-110",
@@ -1461,7 +1461,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-110-vedica-water.webp",
-        "description": "Freshly prepared Vedica Water made to order with authentic spices."
+        "description": "Himalayan spring natural mineral water (1 Litre glass bottle)."
       }
     ]
   },
@@ -1484,7 +1484,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-111-kinley-soda.jpeg",
-        "description": "Freshly prepared Kinley Soda made to order with authentic spices."
+        "description": "Chilled sparkling carbonated soda (750 ml)."
       },
       {
         "id": "p-112",
@@ -1496,7 +1496,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-112-bisleri-soda.jpeg",
-        "description": "Freshly prepared Bisleri Soda made to order with authentic spices."
+        "description": "Chilled sparkling carbonated club soda (750 ml)."
       }
     ]
   },
@@ -1519,7 +1519,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-113-ice-cubes.jpg",
-        "description": "Freshly prepared Ice Cubes made to order with authentic spices."
+        "description": "Food-grade crystal clear chilled ice bucket."
       }
     ]
   }
