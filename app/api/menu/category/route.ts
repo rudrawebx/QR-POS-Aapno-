@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentSession } from '@/lib/auth';
+import { invalidateMenuCache } from '@/lib/cache';
+
 
 export async function GET() {
   try {
@@ -55,6 +57,7 @@ export async function POST(request: Request) {
       },
     });
 
+    invalidateMenuCache(restaurantId);
     return NextResponse.json({ success: true, category });
   } catch (error) {
     console.error('Create category error:', error);
@@ -85,6 +88,7 @@ export async function PATCH(request: Request) {
       data: updateData,
     });
 
+    invalidateMenuCache();
     return NextResponse.json({ success: true, category: updated });
   } catch (error) {
     console.error('Update category error:', error);
@@ -105,6 +109,7 @@ export async function DELETE(request: Request) {
       data: { isArchived: true, isActive: false },
     });
 
+    invalidateMenuCache();
     return NextResponse.json({ success: true, message: 'Category archived' });
   } catch (error) {
     console.error('Delete category error:', error);

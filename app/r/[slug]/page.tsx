@@ -117,16 +117,21 @@ export default function CustomerQsrMenuPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const resRest = await fetch(`/api/restaurants/${slug}`);
-        const restData = await resRest.json();
+        const [resRest, resMenu] = await Promise.all([
+          fetch(`/api/restaurants/${slug}`),
+          fetch(`/api/menu/${slug}`),
+        ]);
+
+        const [restData, menuData] = await Promise.all([
+          resRest.json(),
+          resMenu.json(),
+        ]);
 
         if (restData.restaurant) {
           setRestaurant(restData.restaurant);
-          const resMenu = await fetch(`/api/menu/${restData.restaurant.id || 'aapno-khano'}`);
-          const menuData = await resMenu.json();
-          if (menuData.categories && menuData.categories.length > 0) {
-            setCategories(menuData.categories);
-          }
+        }
+        if (menuData.categories && menuData.categories.length > 0) {
+          setCategories(menuData.categories);
         }
       } catch (err) {
         console.error('Error fetching QSR menu:', err);
@@ -134,6 +139,7 @@ export default function CustomerQsrMenuPage() {
     }
     loadData();
   }, [slug]);
+
 
   // Cart operations
   const handleAddToCart = (item: CartItem) => {
@@ -438,6 +444,8 @@ export default function CustomerQsrMenuPage() {
                         <img
                           src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80'}
                           alt={product.name}
+                          loading="lazy"
+                          decoding="async"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             e.currentTarget.onerror = null;

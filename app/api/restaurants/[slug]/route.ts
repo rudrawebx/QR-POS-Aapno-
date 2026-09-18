@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { memoryCache, CacheKeys } from '@/lib/cache';
+
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=120, stale-while-revalidate=600',
+};
 
 export async function GET(
   request: Request,
@@ -7,6 +12,13 @@ export async function GET(
 ) {
   try {
     const { slug } = await params;
+    const cacheKey = CacheKeys.restaurant(slug);
+
+    // ⚡ INSTANT IN-MEMORY CACHE HIT (<1ms)
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) {
+      return NextResponse.json({ restaurant: cached, cached: true }, { headers: CACHE_HEADERS });
+    }
 
     let restaurant = await prisma.restaurant.findFirst({
       where: {
@@ -21,6 +33,7 @@ export async function GET(
         branches: true,
       },
     });
+
 
     // Auto-create Aapno Khaano restaurant record if running on a fresh Vercel serverless instance
     if (!restaurant) {
@@ -72,13 +85,16 @@ export async function GET(
       });
     }
 
+    const result = {
+      ...restaurant,
+      isOpen: true,
+      closedReason: '',
+    };
+    memoryCache.set(cacheKey, result, 600);
+
     return NextResponse.json({
-      restaurant: {
-        ...restaurant,
-        isOpen: true,
-        closedReason: '',
-      },
-    });
+      restaurant: result,
+    }, { headers: CACHE_HEADERS });
   } catch (error) {
     console.error('Restaurant fetch error:', error);
     // Safe fallback object for Vercel

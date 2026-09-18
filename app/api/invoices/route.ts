@@ -12,6 +12,8 @@ export async function GET(request: Request) {
     const customStart = searchParams.get('startDate');
     const customEnd = searchParams.get('endDate');
     const searchQuery = searchParams.get('q')?.toLowerCase();
+    const limitParam = searchParams.get('limit');
+    const takeLimit = limitParam ? Math.min(Math.max(1, parseInt(limitParam, 10) || 200), 500) : 200;
 
     // Date range calculation
     const now = new Date();
@@ -64,7 +66,7 @@ export async function GET(request: Request) {
             payments: true,
           },
           orderBy: { createdAt: 'desc' },
-          take: 200,
+          take: takeLimit,
         });
       }
     } catch (dbErr) {

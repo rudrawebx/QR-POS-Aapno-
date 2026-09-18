@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
+import { memoryCache, CacheKeys } from '@/lib/cache';
+
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
+};
 
 export async function GET(request: Request) {
   try {
@@ -14,7 +19,14 @@ export async function GET(request: Request) {
     const cleanTable = tableParam.replace(/^table-?/i, '').trim();
     const tableToken = tableParam.trim();
 
+    const cacheKey = CacheKeys.tableValidation(slug, tableToken);
+    const cachedTable = memoryCache.get<any>(cacheKey);
+    if (cachedTable) {
+      return NextResponse.json({ valid: true, table: cachedTable, cached: true }, { headers: CACHE_HEADERS });
+    }
+
     let tableRecord: any = null;
+
 
     try {
       if (prisma) {
@@ -62,17 +74,20 @@ export async function GET(request: Request) {
       }, { status: 404 });
     }
 
+    const validated = {
+      id: tableRecord.id,
+      tableNumber: tableRecord.tableNumber,
+      name: tableRecord.name,
+      capacity: tableRecord.capacity || 4,
+      status: tableRecord.status || 'AVAILABLE',
+      qrCodeToken: tableRecord.qrCodeToken,
+    };
+    memoryCache.set(cacheKey, validated, 600);
+
     return NextResponse.json({
       valid: true,
-      table: {
-        id: tableRecord.id,
-        tableNumber: tableRecord.tableNumber,
-        name: tableRecord.name,
-        capacity: tableRecord.capacity || 4,
-        status: tableRecord.status || 'AVAILABLE',
-        qrCodeToken: tableRecord.qrCodeToken,
-      },
-    });
+      table: validated,
+    }, { headers: CACHE_HEADERS });
   } catch (error: any) {
     console.error('[Table Validation] Error:', error);
     return NextResponse.json({ valid: false, error: 'Table validation error' }, { status: 500 });

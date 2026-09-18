@@ -2,6 +2,8 @@ import { updateProductOverride } from "@/lib/menuData";
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentSession } from '@/lib/auth';
+import { invalidateMenuCache } from '@/lib/cache';
+
 
 // 1. CREATE DISH
 export async function POST(request: Request) {
@@ -154,6 +156,7 @@ export async function POST(request: Request) {
 
     if (product && product.id) { updateProductOverride(product.id, product); }
     if (id) { updateProductOverride(id, { ...updateData, ...(product || {}) }); }
+    invalidateMenuCache(restaurantId);
     return NextResponse.json({ success: true, product });
   } catch (error) {
     console.error('Create product error:', error);
@@ -289,6 +292,7 @@ export async function PATCH(request: Request) {
       console.warn('DB upsert product warning:', dbErr);
     }
 
+    invalidateMenuCache();
     return NextResponse.json({ success: true, product });
   } catch (error) {
     console.error('Update product error:', error);
@@ -321,6 +325,7 @@ export async function DELETE(request: Request) {
       console.warn('DB delete product warning:', dbErr);
     }
 
+    invalidateMenuCache();
     return NextResponse.json({ success: true, message: 'Product archived successfully' });
   } catch (error) {
     console.error('Delete product error:', error);

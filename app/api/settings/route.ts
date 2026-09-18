@@ -1,10 +1,24 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentSession } from '@/lib/auth';
+import { memoryCache, CacheKeys, invalidateRestaurantCache } from '@/lib/cache';
+
+const CACHE_HEADERS = {
+  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+};
 
 export async function GET(request: Request) {
   try {
     const session = await getCurrentSession();
+    const restId = session?.restaurantId || 'rest_aapno_khano';
+    const cacheKey = CacheKeys.settings(restId);
+
+    // ⚡ INSTANT IN-MEMORY CACHE HIT (<1ms)
+    const cached = memoryCache.get<any>(cacheKey);
+    if (cached) {
+      return NextResponse.json({ success: true, restaurant: cached, cached: true }, { headers: CACHE_HEADERS });
+    }
+
     let restaurant = null;
 
     if (session?.restaurantId) {
@@ -25,8 +39,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, restaurant });
+    memoryCache.set(cacheKey, restaurant, 300);
+
+    return NextResponse.json({ success: true, restaurant }, { headers: CACHE_HEADERS });
   } catch (error) {
+
     console.error('Settings fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }
@@ -128,6 +145,10 @@ export async function POST(request: Request) {
         supportWhatsappNumber: supportWhatsappNumber || '+919996213962',
       },
     });
+
+    // Invalidate cached restaurant settings immediately
+    invalidateRestaurantCache('aapno-khano');
+    if (restaurantId) invalidateRestaurantCache(restaurantId);
 
     return NextResponse.json({
       success: true,

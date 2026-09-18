@@ -68,7 +68,7 @@ export default function AdminPosPage() {
         const [menuRes, settingsRes, ordersRes] = await Promise.all([
           fetch('/api/menu/aapno-khano'),
           fetch('/api/settings'),
-          fetch('/api/invoices'),
+          fetch('/api/invoices?limit=1'),
         ]);
 
         const menuData = await menuRes.json();
@@ -479,6 +479,8 @@ export default function AdminPosPage() {
                       <img
                         src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80'}
                         alt={product.name}
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         onError={(e) => {
                           e.currentTarget.onerror = null;
