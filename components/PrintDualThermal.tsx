@@ -94,11 +94,19 @@ export default function PrintDualThermal({
             size: auto;
             margin: 0mm 0mm 4mm 0mm !important;
           }
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
           html, body {
             width: 100% !important;
-            margin: 0mm !important;
+            max-width: 80mm !important;
+            margin: 0mm auto !important;
             padding: 0mm !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             color: #000000 !important;
             overflow: visible !important;
             height: auto !important;
@@ -112,7 +120,9 @@ export default function PrintDualThermal({
           #thermal-print-overlay {
             position: static !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             backdrop-filter: none !important;
+            box-shadow: none !important;
             padding: 0mm !important;
             margin: 0mm auto !important;
             overflow: visible !important;
@@ -127,6 +137,7 @@ export default function PrintDualThermal({
             margin: 0mm auto !important;
             padding: 0mm !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             display: block !important;
           }
           .thermal-doc {
@@ -135,6 +146,7 @@ export default function PrintDualThermal({
             margin: 0mm auto !important;
             padding: 2mm 1mm 4mm 1mm !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             color: #000000 !important;
             border: none !important;
             box-shadow: none !important;
@@ -162,7 +174,7 @@ export default function PrintDualThermal({
             display: none !important;
           }
           .thermal-feed-spacer {
-            height: 12mm !important;
+            height: 10mm !important;
             display: block !important;
           }
         }
@@ -253,9 +265,9 @@ export default function PrintDualThermal({
                 activeMode === "PRINT_BOTH" ? "thermal-bill-page" : ""
               }`}
             >
-              {/* Header with 2X Logo */}
-              <div className="text-center pb-2 border-b border-dashed border-black space-y-1">
-                <div className="w-20 h-20 mx-auto filter grayscale contrast-200 mb-2">
+              {/* Header */}
+              <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
+                <div className="w-14 h-14 mx-auto mb-1 flex items-center justify-center">
                   <img
                     src="/images/aapno-khano-logo.png"
                     alt="Aapno Khaano"
@@ -267,9 +279,9 @@ export default function PrintDualThermal({
                 </p>
                 <p className="text-[10px]">{billData.restaurant.address}, {billData.restaurant.city}</p>
                 <p className="text-[10px]">Tel: {billData.restaurant.phone}</p>
-                {billData.restaurant.gstin && <p className="text-[10px]">GSTIN: {billData.restaurant.gstin}</p>}
+                {billData.restaurant.gstin && <p className="text-[10px] font-bold">GSTIN: {billData.restaurant.gstin}</p>}
                 {billData.restaurant.fssaiNumber && <p className="text-[10px]">FSSAI: {billData.restaurant.fssaiNumber}</p>}
-                <p className="text-[10px] font-black uppercase tracking-widest pt-1">*** GST TAX INVOICE ***</p>
+                <p className="text-[10px] font-black uppercase tracking-widest pt-1 border-t border-dotted border-black">*** GST TAX INVOICE ***</p>
               </div>
 
               {/* Order Meta */}
@@ -280,7 +292,7 @@ export default function PrintDualThermal({
                 </div>
 
                 {billData.order.carNumber && (
-                  <div className="bg-slate-100 p-1.5 border border-black font-black text-center text-xs tracking-wider uppercase">
+                  <div className="bg-white p-1 border-2 border-black font-black text-center text-xs tracking-wider uppercase">
                     🚗 CAR NO: {billData.order.carNumber}
                   </div>
                 )}
@@ -391,7 +403,7 @@ export default function PrintDualThermal({
               {/* Header */}
               <div className="text-center pb-2 border-b-2 border-black space-y-0.5">
                 <p className="text-base font-black tracking-wider uppercase">*** KITCHEN ORDER TICKET ***</p>
-                <div className="bg-black text-white px-2 py-0.5 rounded font-black text-xs inline-block">
+                <div className="border-2 border-black bg-white text-black px-3 py-0.5 rounded-sm font-black text-xs inline-block">
                   {kotData.kot.humanKotNumber}
                 </div>
                 <p className="text-[10px] font-bold">Order Ref: {kotData.kot.orderNumber}</p>
@@ -400,11 +412,11 @@ export default function PrintDualThermal({
               {/* Vehicle & Station */}
               <div className="py-2 border-b-2 border-black text-xs space-y-1">
                 {kotData.kot.carNumber ? (
-                  <div className="bg-black text-white p-1 text-center font-black text-sm tracking-widest uppercase rounded">
+                  <div className="border-2 border-black bg-white text-black p-1 text-center font-black text-sm tracking-widest uppercase rounded-sm">
                     🚗 CAR NO: {kotData.kot.carNumber}
                   </div>
                 ) : (
-                  <div className="border border-black p-1 text-center font-bold uppercase">
+                  <div className="border-2 border-black bg-white text-black p-1 text-center font-bold uppercase rounded-sm">
                     TYPE: {kotData.kot.orderType?.replace("_", " ")}
                   </div>
                 )}
