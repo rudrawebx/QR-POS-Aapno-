@@ -1,5 +1,5 @@
 // Master 113 Dish Menu Catalog for Aapno Khaano (आपणो खाणो)
-// Sourced from official restaurant menu spreadsheet with authentic Half/Full pricing
+// Sourced from official restaurant menu spreadsheet with authentic Half/Full pricing & Google Drive Photos
 
 export const MASTER_AAPNO_KHANO_CATEGORIES = [
   {
@@ -151,7 +151,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-11-tandoori-pineapple.png",
+        "imageUrl": "https://images.unsplash.com/photo-1550258987-190a2d41a8ba?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Tandoori Pineapple made to order with authentic spices."
       }
     ]
@@ -174,7 +174,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-12-tandoori-papad-2pc.png",
+        "imageUrl": "/images/menu/p-12-tandoori-papad--2pc-.png",
         "description": "Freshly prepared Tandoori Papad (2pc) made to order with authentic spices."
       },
       {
@@ -186,7 +186,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-13-fried-papad-2pc.png",
+        "imageUrl": "/images/menu/p-13-fried-papad--2pc-.png",
         "description": "Freshly prepared Fried Papad (2pc) made to order with authentic spices."
       },
       {
@@ -579,7 +579,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-43-matar-paneer.png",
+        "imageUrl": "/images/menu/p-43-matar-paneer.jpg",
         "description": "Freshly prepared Matar Paneer made to order with authentic spices."
       },
       {
@@ -627,7 +627,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-47-paneer-butter-masala.png",
+        "imageUrl": "/images/menu/p-47-paneer-butter-masala.jpg",
         "description": "Freshly prepared Paneer Butter Masala made to order with authentic spices."
       },
       {
@@ -639,7 +639,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-48-paneer-do-pyaja.png",
+        "imageUrl": "/images/menu/p-48-paneer-do-pyaja.jpg",
         "description": "Freshly prepared Paneer Do Pyaja made to order with authentic spices."
       },
       {
@@ -651,7 +651,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-49-veg-biryani-handi.png",
+        "imageUrl": "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Veg Biryani Handi made to order with authentic spices."
       }
     ]
@@ -698,7 +698,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-52-simple-pyaj-roti.png",
+        "imageUrl": "/images/menu/p-50-simple-roti.png",
         "description": "Freshly prepared Simple Pyaj Roti made to order with authentic spices."
       },
       {
@@ -746,7 +746,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": true,
-        "imageUrl": "/images/menu/p-56-butter-nan.png",
+        "imageUrl": "/images/menu/p-56-butter-nan.jpg",
         "description": "Freshly prepared Butter Nan made to order with authentic spices."
       },
       {
@@ -758,7 +758,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-57-garlic-nan.png",
+        "imageUrl": "/images/menu/p-57-garlic-nan.jpg",
         "description": "Freshly prepared Garlic Nan made to order with authentic spices."
       },
       {
@@ -770,7 +770,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-58-dahi.png",
+        "imageUrl": "https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Dahi made to order with authentic spices."
       },
       {
@@ -782,7 +782,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-59-namkin-lassi.png",
+        "imageUrl": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Namkin Lassi made to order with authentic spices."
       },
       {
@@ -794,7 +794,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-60-mithi-lassi.png",
+        "imageUrl": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Mithi Lassi made to order with authentic spices."
       },
       {
@@ -806,7 +806,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-61-raita.png",
+        "imageUrl": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Raita made to order with authentic spices."
       },
       {
@@ -818,7 +818,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-62-aapno-special-raita.png",
+        "imageUrl": "https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Aapno Special Raita made to order with authentic spices."
       },
       {
@@ -830,7 +830,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": true,
-        "imageUrl": "/images/menu/p-63-churma-desi-ghee.png",
+        "imageUrl": "/images/menu/p-63-churma--desi-ghee-.png",
         "description": "Freshly prepared Churma (Desi Ghee) made to order with authentic spices."
       }
     ]
@@ -865,7 +865,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-65-egg-bhurji-desi-ghee.png",
+        "imageUrl": "/images/menu/p-65-egg-bhurji--desi-ghee-.png",
         "description": "Freshly prepared Egg Bhurji (Desi Ghee) made to order with authentic spices."
       },
       {
@@ -877,7 +877,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-66-boiled-egg-bhurji-desi-ghee.png",
+        "imageUrl": "/images/menu/p-66-boiled-egg-bhurji--desi-ghee-.png",
         "description": "Freshly prepared Boiled Egg Bhurji (Desi Ghee) made to order with authentic spices."
       },
       {
@@ -889,7 +889,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": true,
-        "imageUrl": "/images/menu/p-67-omelette-desi-ghee.png",
+        "imageUrl": "/images/menu/p-67-omelette--desi-ghee-.png",
         "description": "Freshly prepared Omelette (Desi Ghee) made to order with authentic spices."
       },
       {
@@ -901,7 +901,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-68-omelette-with-multigrain-bread-desi-ghee.png",
+        "imageUrl": "/images/menu/p-68-omelette-with-multigrain-bread--desi-ghee-.png",
         "description": "Freshly prepared Omelette with Multigrain Bread (Desi Ghee) made to order with authentic spices."
       },
       {
@@ -913,7 +913,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-69-egg-curry.png",
+        "imageUrl": "/images/menu/p-69-egg-curry.jpg",
         "description": "Freshly prepared Egg Curry made to order with authentic spices."
       },
       {
@@ -1151,7 +1151,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": true,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-87-aapno-special-chicken-handi-boneless.png",
+        "imageUrl": "/images/menu/p-87-aapno-special-chicken-handi--boneless-.png",
         "description": "Authentic chef prepared specialty available in Half (\u20b9429) and Full (\u20b9759) portions."
       },
       {
@@ -1198,7 +1198,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-90-coke-250-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke 250 ml made to order with authentic spices."
       },
       {
@@ -1210,7 +1210,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-91-coke-500-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke 500 ml made to order with authentic spices."
       },
       {
@@ -1222,7 +1222,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-92-coke-750-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke 750 ml made to order with authentic spices."
       },
       {
@@ -1234,7 +1234,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": true,
-        "imageUrl": "/images/menu/p-93-coke-1-litre.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke 1 litre made to order with authentic spices."
       },
       {
@@ -1246,7 +1246,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-94-coke-2-litres.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke 2 litres made to order with authentic spices."
       },
       {
@@ -1258,7 +1258,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-95-sprite-250-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Sprite 250 ml made to order with authentic spices."
       },
       {
@@ -1270,7 +1270,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-96-sprite-500-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Sprite 500 ml made to order with authentic spices."
       },
       {
@@ -1282,7 +1282,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-97-sprite-750-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Sprite 750 ml made to order with authentic spices."
       },
       {
@@ -1294,7 +1294,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-98-sprite-1-litre.png",
+        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Sprite 1 litre made to order with authentic spices."
       },
       {
@@ -1306,7 +1306,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-99-sprite-2-litres.png",
+        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Sprite 2 litres made to order with authentic spices."
       },
       {
@@ -1318,7 +1318,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-100-limca-250-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Limca 250 ml made to order with authentic spices."
       },
       {
@@ -1330,7 +1330,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-101-limca-500-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Limca 500 ml made to order with authentic spices."
       },
       {
@@ -1342,7 +1342,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-102-limca-750-ml.png",
+        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Limca 750 ml made to order with authentic spices."
       },
       {
@@ -1354,7 +1354,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-103-limca-1-litre.png",
+        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Limca 1 litre made to order with authentic spices."
       },
       {
@@ -1366,7 +1366,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-104-limca-2-litres.png",
+        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Limca 2 litres made to order with authentic spices."
       },
       {
@@ -1378,7 +1378,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-105-coke-can.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Coke Can made to order with authentic spices."
       },
       {
@@ -1390,7 +1390,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-106-diet-coke-can.png",
+        "imageUrl": "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Diet Coke Can made to order with authentic spices."
       }
     ]
@@ -1413,7 +1413,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": true,
-        "imageUrl": "/images/menu/p-107-hell-can.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Hell Can made to order with authentic spices."
       },
       {
@@ -1425,7 +1425,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-108-predator-can.png",
+        "imageUrl": "https://images.unsplash.com/photo-1622543925917-763c34d1a86e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Predator Can made to order with authentic spices."
       }
     ]
@@ -1448,7 +1448,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-109-bisleri-water.png",
+        "imageUrl": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Bisleri Water made to order with authentic spices."
       },
       {
@@ -1460,7 +1460,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-110-vedica-water.png",
+        "imageUrl": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Vedica Water made to order with authentic spices."
       }
     ]
@@ -1483,7 +1483,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-111-kinley-soda.png",
+        "imageUrl": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Kinley Soda made to order with authentic spices."
       },
       {
@@ -1495,7 +1495,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-112-bisleri-soda.png",
+        "imageUrl": "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Bisleri Soda made to order with authentic spices."
       }
     ]
@@ -1518,33 +1518,61 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-113-ice-cubes.png",
+        "imageUrl": "https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800&auto=format&fit=crop&q=80",
         "description": "Freshly prepared Ice Cubes made to order with authentic spices."
       }
     ]
   }
 ];
 
-const globalOverrides = new Map<string, any>();
+// Global in-memory overrides store across hot reloads
+const globalForMenu = globalThis as unknown as {
+  menuProductOverrides: Map<string, any> | undefined;
+};
 
-export function updateProductOverride(productIdOrName: string, updates: any) {
-  globalOverrides.set(productIdOrName, {
-    ...(globalOverrides.get(productIdOrName) || {}),
-    ...updates,
-  });
+export const menuProductOverrides = globalForMenu.menuProductOverrides ?? new Map<string, any>();
+if (process.env.NODE_ENV !== 'production') {
+  globalForMenu.menuProductOverrides = menuProductOverrides;
 }
 
-export function getMergedCategories(baseCategories: any[] = MASTER_AAPNO_KHANO_CATEGORIES) {
-  return (baseCategories || MASTER_AAPNO_KHANO_CATEGORIES).map((cat) => ({
+export function updateProductOverride(productId: string, updatedFields: Record<string, any>) {
+  const existing = menuProductOverrides.get(productId) || {};
+  menuProductOverrides.set(productId, { ...existing, ...updatedFields });
+}
+
+export function getProductOverride(productId: string) {
+  return menuProductOverrides.get(productId);
+}
+
+export function getAllProducts() {
+  const products: any[] = [];
+  MASTER_AAPNO_KHANO_CATEGORIES.forEach((cat) => {
+    (cat.products || []).forEach((prod) => {
+      const override = menuProductOverrides.get(prod.id);
+      products.push(override ? { ...prod, ...override } : prod);
+    });
+  });
+  return products;
+}
+
+export function getProductById(productId: string) {
+  for (const cat of MASTER_AAPNO_KHANO_CATEGORIES) {
+    for (const prod of cat.products || []) {
+      if (prod.id === productId) {
+        const override = menuProductOverrides.get(productId);
+        return override ? { ...prod, ...override } : prod;
+      }
+    }
+  }
+  return null;
+}
+
+export function getMergedCategories() {
+  return MASTER_AAPNO_KHANO_CATEGORIES.map((cat) => ({
     ...cat,
-    products: (cat.products || []).map((prod: any) => {
-      const override = globalOverrides.get(prod.id) || globalOverrides.get(prod.name);
-      const res = override ? { ...prod, ...override } : { ...prod };
-      if (res.isAvailable === undefined) res.isAvailable = true;
-      return res;
+    products: (cat.products || []).map((prod) => {
+      const override = menuProductOverrides.get(prod.id);
+      return override ? { ...prod, ...override } : prod;
     }),
   }));
 }
-
-export default MASTER_AAPNO_KHANO_CATEGORIES;
-

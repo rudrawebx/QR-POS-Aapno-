@@ -148,6 +148,7 @@ export default function RazorpayModal({
           razorpay_order_id: paymentData.razorpay_order_id,
           razorpay_payment_id: paymentData.razorpay_payment_id,
           razorpay_signature: paymentData.razorpay_signature,
+          source: "QR_MENU",
           customerName: orderDetails.customerName,
           customerPhone: orderDetails.customerPhone,
           carNumber: orderDetails.carNumber,

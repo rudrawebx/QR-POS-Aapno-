@@ -399,9 +399,9 @@ export async function POST(request: Request) {
     }
 
     // 7. Update Live In-Memory Real-time State & Broadcast Events
-    recordLiveOrder(orderRecord);
+    recordLiveOrder({ ...orderRecord, source: 'QR_MENU' });
     recordLiveInvoice(invoiceRecord);
-    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: orderRecord, invoice: invoiceRecord });
+    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: { ...orderRecord, source: 'QR_MENU' }, invoice: invoiceRecord, source: 'QR_MENU' });
     broadcastEvent("kds_rest_aapno_khano", { type: "NEW_KOT", kot: kotRecord });
 
     const printReceiptData = {

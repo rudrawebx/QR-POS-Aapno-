@@ -422,9 +422,11 @@ export async function POST(request: Request) {
       };
     }
 
-    recordLiveOrder(orderRecord);
+    const effectiveOrderSource = data.source || (isStaffCashConfirmed || isStaff ? "POS_TERMINAL" : "QR_MENU");
+    const orderWithSource = { ...orderRecord, source: effectiveOrderSource, isStaffCashConfirmed: Boolean(isStaffCashConfirmed) };
+    recordLiveOrder(orderWithSource);
     recordLiveInvoice(invoiceRecord);
-    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: orderRecord, invoice: invoiceRecord });
+    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: orderWithSource, invoice: invoiceRecord, source: effectiveOrderSource });
     broadcastEvent("kds_rest_aapno_khano", { type: "NEW_KOT", kot: kotRecord });
 
     const printReceiptData = {

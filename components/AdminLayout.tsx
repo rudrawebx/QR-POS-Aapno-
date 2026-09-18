@@ -95,7 +95,20 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const seenOrderIdsRef = React.useRef<Set<string>>(new Set());
   const isInitialLoadRef = React.useRef(true);
 
-  // Real-time Live QR Order Listener
+  // Helper to ensure chime/popup ONLY triggers on Customer QR orders, NOT POS cashier punches
+  const isQrCustomerOrder = (ord: any, sourceHint?: string) => {
+    if (!ord) return false;
+    const src = ord.source || sourceHint || '';
+    if (src === 'POS_TERMINAL' || src === 'POS' || ord.isStaffCashConfirmed || ord.takenByStaffId) {
+      return false;
+    }
+    if (src === 'QR_MENU' || src === 'QR_DIRECT' || src === 'QR_TABLE') {
+      return true;
+    }
+    return Boolean(ord.orderType === 'QR_TABLE' || (!ord.takenByStaffId && !ord.isStaffCashConfirmed));
+  };
+
+  // Real-time Live QR Order Listener (Sound chime & popup ONLY for Customer QR Menu orders)
   useEffect(() => {
     async function checkLatestOrders() {
       try {
@@ -113,9 +126,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               const ordKey = ord.id || ord.humanOrderId;
               if (ordKey && !seenOrderIdsRef.current.has(ordKey)) {
                 seenOrderIdsRef.current.add(ordKey);
-                playChimeSound();
-                setNewOrderAlert(ord);
-                break;
+                // Trigger notification sound and banner ONLY if order is from QR
+                if (isQrCustomerOrder(ord)) {
+                  playChimeSound();
+                  setNewOrderAlert(ord);
+                  break;
+                }
               }
             }
           }
@@ -139,8 +155,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             const ordKey = ord?.id || ord?.humanOrderId;
             if (ordKey && !seenOrderIdsRef.current.has(ordKey)) {
               seenOrderIdsRef.current.add(ordKey);
-              playChimeSound();
-              setNewOrderAlert(ord);
+              // Trigger notification ONLY for QR customer orders
+              if (isQrCustomerOrder(ord, parsed.source)) {
+                playChimeSound();
+                setNewOrderAlert(ord);
+              }
             }
           }
         } catch (e) {

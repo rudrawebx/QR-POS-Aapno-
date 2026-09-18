@@ -344,26 +344,55 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
+    const session = await getCurrentSession();
+    const restaurantId = session?.restaurantId || "rest_aapno_khano";
     const { id, name, unit, currentStock, minStockAlert, unitCost, supplierId } = await request.json();
 
-    const updateData: any = {};
-    if (name !== undefined) updateData.name = name;
-    if (unit !== undefined) updateData.unit = unit;
-    if (currentStock !== undefined) updateData.currentStock = parseFloat(currentStock);
-    if (minStockAlert !== undefined) updateData.minStockAlert = parseFloat(minStockAlert);
-    if (unitCost !== undefined) updateData.unitCost = parseFloat(unitCost);
-    if (supplierId !== undefined) updateData.supplierId = supplierId || null;
+    if (!id) return NextResponse.json({ error: "Missing ingredient ID" }, { status: 400 });
 
-    let ingredient: any = { id, ...updateData };
+    const numStock = currentStock !== undefined ? parseFloat(String(currentStock)) : 0;
+    const numMinAlert = minStockAlert !== undefined ? parseFloat(String(minStockAlert)) : 5;
+    const numCost = unitCost !== undefined ? parseFloat(String(unitCost)) : 0;
+    const cleanUnit = unit || "KG";
+    const cleanName = name || "Raw Material";
+
+    let ingredient: any = null;
     try {
       if (prisma) {
-        ingredient = await prisma.ingredient.update({
+        ingredient = await prisma.ingredient.upsert({
           where: { id },
-          data: updateData,
+          update: {
+            name: cleanName,
+            unit: cleanUnit,
+            currentStock: numStock,
+            minStockAlert: numMinAlert,
+            unitCost: numCost,
+            supplierId: supplierId || null,
+          },
+          create: {
+            id,
+            restaurantId,
+            name: cleanName,
+            unit: cleanUnit,
+            currentStock: numStock,
+            minStockAlert: numMinAlert,
+            unitCost: numCost,
+            supplierId: supplierId || null,
+          },
         });
       }
     } catch (dbErr) {
-      console.warn("DB update ingredient fallback:", dbErr);
+      console.warn("DB upsert ingredient error:", dbErr);
+      ingredient = {
+        id,
+        restaurantId,
+        name: cleanName,
+        unit: cleanUnit,
+        currentStock: numStock,
+        minStockAlert: numMinAlert,
+        unitCost: numCost,
+        supplierId: supplierId || null,
+      };
     }
 
     return NextResponse.json({ success: true, ingredient });
@@ -371,6 +400,10 @@ export async function PATCH(request: Request) {
     console.error("Update ingredient error:", error);
     return NextResponse.json({ error: "Failed to update ingredient" }, { status: 500 });
   }
+}
+
+export async function PUT(request: Request) {
+  return PATCH(request);
 }
 
 export async function DELETE(request: Request) {

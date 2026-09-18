@@ -304,6 +304,7 @@ export default function AdminPosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           restaurantId: "rest_aapno_khano",
+          source: "POS_TERMINAL",
           customerName: guestDisplayName,
           customerPhone: guestPhone,
           carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || null) : orderType === 'DINE_IN' && tableNumber ? `Table ${tableNumber.trim()}` : null,
