@@ -1531,9 +1531,7 @@ const globalForMenu = globalThis as unknown as {
 };
 
 export const menuProductOverrides = globalForMenu.menuProductOverrides ?? new Map<string, any>();
-if (process.env.NODE_ENV !== 'production') {
-  globalForMenu.menuProductOverrides = menuProductOverrides;
-}
+globalForMenu.menuProductOverrides = menuProductOverrides;
 
 export function updateProductOverride(productId: string, updatedFields: Record<string, any>) {
   const existing = menuProductOverrides.get(productId) || {};
@@ -1567,12 +1565,67 @@ export function getProductById(productId: string) {
   return null;
 }
 
-export function getMergedCategories() {
-  return MASTER_AAPNO_KHANO_CATEGORIES.map((cat) => ({
-    ...cat,
-    products: (cat.products || []).map((prod) => {
-      const override = menuProductOverrides.get(prod.id);
-      return override ? { ...prod, ...override } : prod;
-    }),
-  }));
+export function getMergedCategories(inputCategories?: any[]) {
+  // Build lookup of DB products and categories if provided
+  const dbProductMap = new Map<string, any>();
+  const dbCategoryMap = new Map<string, any>();
+
+  if (Array.isArray(inputCategories)) {
+    inputCategories.forEach((cat) => {
+      dbCategoryMap.set(cat.id, cat);
+      (cat.products || []).forEach((p: any) => {
+        dbProductMap.set(p.id, p);
+        if (p.name) dbProductMap.set(p.name.toLowerCase().trim(), p);
+      });
+    });
+  }
+
+  // 1. Map master categories with DB updates and in-memory overrides
+  const resultCategories = MASTER_AAPNO_KHANO_CATEGORIES.map((cat) => {
+    const dbCat = dbCategoryMap.get(cat.id);
+    return {
+      ...cat,
+      name: dbCat?.name || cat.name,
+      description: dbCat?.description !== undefined ? dbCat.description : cat.description,
+      isVegCategory: dbCat?.isVegCategory !== undefined ? dbCat.isVegCategory : cat.isVegCategory,
+      products: (cat.products || []).map((prod) => {
+        const dbProd = dbProductMap.get(prod.id) || dbProductMap.get(prod.name?.toLowerCase().trim());
+        const override = menuProductOverrides.get(prod.id);
+        return {
+          ...prod,
+          ...(dbProd || {}),
+          ...(override || {}),
+        };
+      }),
+    };
+  });
+
+  // 2. Include any custom categories or custom products created by the user in DB
+  if (Array.isArray(inputCategories)) {
+    inputCategories.forEach((cat) => {
+      const masterCat = resultCategories.find((c) => c.id === cat.id);
+      if (!masterCat) {
+        // Completely new category
+        resultCategories.push({
+          ...cat,
+          products: (cat.products || []).map((p: any) => {
+            const override = menuProductOverrides.get(p.id);
+            return override ? { ...p, ...override } : p;
+          }),
+        });
+      } else {
+        // Check if DB category has new custom products not present in masterCat
+        (cat.products || []).forEach((dbP: any) => {
+          const exists = masterCat.products.some((p: any) => p.id === dbP.id || p.name?.toLowerCase().trim() === dbP.name?.toLowerCase().trim());
+          if (!exists) {
+            const override = menuProductOverrides.get(dbP.id);
+            masterCat.products.push(override ? { ...dbP, ...override } : dbP);
+          }
+        });
+      }
+    });
+  }
+
+  return resultCategories;
 }
+

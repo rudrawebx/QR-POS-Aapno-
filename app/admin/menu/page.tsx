@@ -50,6 +50,7 @@ export default function AdminMenuPage() {
 
   // Form State for Adding / Editing Dish
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     shortName: '',
@@ -1248,29 +1249,48 @@ export default function AdminMenuPage() {
                       onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                       className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                     />
-                    <label className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 cursor-pointer flex items-center gap-1.5 whitespace-nowrap">
+                    <label className={`px-3 py-2 border rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all ${
+                      isUploadingImage
+                        ? 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse'
+                        : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    }`}>
                       <Upload className="w-3.5 h-3.5" />
-                      <span>Upload File</span>
+                      <span>{isUploadingImage ? 'Uploading...' : 'Upload File'}</span>
                       <input
                         type="file"
                         accept="image/*"
+                        disabled={isUploadingImage}
                         className="hidden"
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
                           if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (typeof reader.result === 'string') {
-                                setFormData({ ...formData, imageUrl: reader.result });
+                            try {
+                              setIsUploadingImage(true);
+                              const uploadData = new FormData();
+                              uploadData.append('file', file);
+                              const res = await fetch('/api/upload', {
+                                method: 'POST',
+                                body: uploadData,
+                              });
+                              const data = await res.json();
+                              if (res.ok && data.url) {
+                                setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+                                showToast('✓ Dish photo uploaded successfully!');
+                              } else {
+                                alert(data.error || 'Failed to upload photo');
                               }
-                            };
-                            reader.readAsDataURL(file);
+                            } catch (err) {
+                              console.error('Upload error:', err);
+                              alert('Unable to upload image. Please try entering a URL instead.');
+                            } finally {
+                              setIsUploadingImage(false);
+                            }
                           }
                         }}
                       />
                     </label>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">Leave blank to use default royal food placeholder.</p>
+                  <p className="text-[10px] text-slate-400 mt-1">Select an image file from your device, or enter any image URL / path.</p>
                 </div>
 
                 {/* Submit Buttons */}

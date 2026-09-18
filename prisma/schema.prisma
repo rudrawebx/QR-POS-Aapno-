@@ -296,8 +296,8 @@ model Category {
   restaurantId  String
   name          String
   slug          String
-  description   String?
-  imageUrl      String?
+  description   String?  @db.Text
+  imageUrl      String?  @db.Text
   icon          String?  @default("Utensils")
   isVegCategory Boolean  @default(true)
   displayOrder  Int      @default(0)
@@ -342,8 +342,8 @@ model Product {
   localName               String?  // Hindi / Regional Name (e.g. पनीर टिक्का)
   slug                    String
   sku                     String?
-  description             String?
-  imageUrl                String?
+  description             String?  @db.Text
+  imageUrl                String?  @db.Text
   basePrice               Float
   discountPrice           Float?
   hasVariations           Boolean  @default(false)

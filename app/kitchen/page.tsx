@@ -157,7 +157,7 @@ export default function KitchenDisplayPage() {
           </button>
 
           <Link
-            href="/admin"
+            href="/admin/pos"
             className="hidden md:flex px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 border border-slate-700 transition-colors"
           >
             Admin POS →

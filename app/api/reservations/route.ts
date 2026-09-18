@@ -6,10 +6,11 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const session = await getCurrentSession();
-    const restaurantId = searchParams.get('restaurantId') || session?.restaurantId;
+    let restaurantId = searchParams.get('restaurantId') || session?.restaurantId;
 
     if (!restaurantId) {
-      return NextResponse.json({ error: 'Restaurant ID required' }, { status: 400 });
+      const defRest = await prisma.restaurant.findFirst({ where: { slug: 'aapno-khano' } });
+      restaurantId = defRest?.id || 'rest_aapno_khano';
     }
 
     const reservations = await prisma.reservation.findMany({
@@ -28,7 +29,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const data = await request.json();
-    const {
+    const session = await getCurrentSession();
+    let {
       restaurantId,
       branchId,
       tableId,
@@ -40,6 +42,14 @@ export async function POST(request: Request) {
       reservationTime,
       specialRequests,
     } = data;
+
+    if (!restaurantId) {
+      restaurantId = session?.restaurantId;
+      if (!restaurantId) {
+        const defRest = await prisma.restaurant.findFirst({ where: { slug: 'aapno-khano' } });
+        restaurantId = defRest?.id || 'rest_aapno_khano';
+      }
+    }
 
     const reservation = await prisma.reservation.create({
       data: {
