@@ -141,36 +141,38 @@ export default function AdminStaffPage() {
   return (
     <AdminLayout>
       <div className="space-y-5 max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
-              <UserCog className="w-5 h-5" />
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
+                <UserCog className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="font-black text-sm text-[#331E17]">Staff &amp; Role-Based Access Control</h1>
+                <p className="text-xs text-[#745E55]">
+                  {staff.length} staff accounts • Instant 4-digit PIN login &amp; operational roles
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-black text-sm text-[#331E17]">Staff &amp; Role-Based Access Control</h1>
-              <p className="text-xs text-[#745E55]">
-                {staff.length} staff accounts • Instant 4-digit PIN login &amp; operational roles
-              </p>
-            </div>
-          </div>
 
-          <button
-            onClick={() => {
-              setEditingStaff(null);
-              setNewName('');
-              setNewEmail('');
-              setNewPhone('');
-              setNewRole('WAITER');
-              setNewPin('1234');
-              setNewPassword('staff123');
-              setIsAddModalOpen(true);
-            }}
-            className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-[#FEFBF5] border border-[#E09D3D] px-4 py-2 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-xs transition-transform active:scale-95 cursor-pointer"
-          >
-            <Plus className="w-4 h-4 text-[#E09D3D]" />
-            <span>Add Staff Member</span>
-          </button>
+            <button
+              onClick={() => {
+                setEditingStaff(null);
+                setNewName('');
+                setNewEmail('');
+                setNewPhone('');
+                setNewRole('WAITER');
+                setNewPin('1234');
+                setNewPassword('staff123');
+                setIsAddModalOpen(true);
+              }}
+              className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-[#FEFBF5] border border-[#E09D3D] px-4 py-2 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-xs transition-transform active:scale-95 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-[#E09D3D]" />
+              <span>Add Staff Member</span>
+            </button>
+          </div>
         </div>
 
         {/* Staff Table */}

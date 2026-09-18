@@ -200,25 +200,27 @@ export default function AdminSettingsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6 max-w-4xl mx-auto pb-12">
-        {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
-              <Settings className="w-5 h-5" />
+        {/* Sticky Header */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
+                <Settings className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="font-black text-sm text-[#331E17]">Restaurant Settings &amp; Payment Configuration</h1>
+                <p className="text-xs text-[#745E55]">
+                  Multi-tenant Razorpay gateway, UPI standee VPA, 80mm dual printing &amp; operational hours
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-black text-sm text-[#331E17]">Restaurant Settings &amp; Payment Configuration</h1>
-              <p className="text-xs text-[#745E55]">
-                Multi-tenant Razorpay gateway, UPI standee VPA, 80mm dual printing &amp; operational hours
-              </p>
-            </div>
-          </div>
 
-          {savedSuccess && (
-            <span className="text-emerald-900 bg-emerald-100 border border-emerald-300 px-3.5 py-1.5 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-xs animate-in zoom-in-95">
-              <Check className="w-4 h-4 text-emerald-700" /> Settings Saved!
-            </span>
-          )}
+            {savedSuccess && (
+              <span className="text-emerald-900 bg-emerald-100 border border-emerald-300 px-3.5 py-1.5 rounded-2xl text-xs font-black flex items-center gap-1.5 shadow-xs animate-in zoom-in-95">
+                <Check className="w-4 h-4 text-emerald-700" /> Settings Saved!
+              </span>
+            )}
+          </div>
         </div>
 
         <form onSubmit={handleSave} className="space-y-5">

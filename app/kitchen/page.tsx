@@ -92,9 +92,9 @@ export default function KitchenDisplayPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
-      {/* Top KDS Header */}
-      <header className="h-16 px-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between no-print">
+    <div className="h-screen w-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-orange-500 selection:text-white">
+      {/* Top KDS Header - Sticky */}
+      <header className="h-16 px-4 bg-slate-900 border-b border-slate-800 flex items-center justify-between flex-shrink-0 z-20 no-print">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#7A0C16] text-[#D4AF37] border border-[#D4AF37]/40 flex items-center justify-center font-bold shadow-md">
             <ChefHat className="w-6 h-6" />

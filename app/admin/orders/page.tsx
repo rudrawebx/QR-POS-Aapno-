@@ -232,98 +232,100 @@ export default function AdminOrdersPage() {
   return (
     <AdminLayout>
       <div className="space-y-4 max-w-full">
-        {/* Top Control Bar */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
-              <ShoppingCart className="w-5 h-5" />
-            </div>
-            <div>
-              <h1 className="text-lg font-black text-[#331E17]">Live Order Operations</h1>
-              <p className="text-xs text-[#745E55]">
-                Real-time Kitchen &amp; Car Service KOT pipeline with strict payment verification
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Quick date range switcher */}
-            <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
-              <button
-                onClick={() => {
-                  setRange('TODAY');
-                  fetchOrders('TODAY');
-                }}
-                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-                  range === 'TODAY'
-                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
-                    : 'text-[#745E55] hover:text-[#331E17]'
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => {
-                  setRange('WEEK');
-                  fetchOrders('WEEK');
-                }}
-                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-                  range === 'WEEK'
-                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
-                    : 'text-[#745E55] hover:text-[#331E17]'
-                }`}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => {
-                  setRange('ALL');
-                  fetchOrders('ALL');
-                }}
-                className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
-                  range === 'ALL'
-                    ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
-                    : 'text-[#745E55] hover:text-[#331E17]'
-                }`}
-              >
-                All Time
-              </button>
+        {/* Sticky Top Control Bar */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-1">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#AA1B2A]/10 border border-[#AA1B2A]/20 flex items-center justify-center text-[#AA1B2A]">
+                <ShoppingCart className="w-5 h-5" />
+              </div>
+              <div>
+                <h1 className="text-lg font-black text-[#331E17]">Live Order Operations</h1>
+                <p className="text-xs text-[#745E55]">
+                  Real-time Kitchen &amp; Car Service KOT pipeline with strict payment verification
+                </p>
+              </div>
             </div>
 
-            {/* Order Type Filter */}
-            <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
-              <button
-                onClick={() => setOrderTypeFilter('ALL')}
-                className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
-                  orderTypeFilter === 'ALL'
-                    ? 'bg-[#331E17] text-white shadow-2xs font-black'
-                    : 'text-[#745E55]'
-                }`}
-              >
-                All
-              </button>
-              <button
-                onClick={() => setOrderTypeFilter('CAR_SERVICE')}
-                className={`px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
-                  orderTypeFilter === 'CAR_SERVICE'
-                    ? 'bg-[#331E17] text-white shadow-2xs font-black'
-                    : 'text-[#745E55]'
-                }`}
-              >
-                <Car className="w-3 h-3" />
-                <span>Car</span>
-              </button>
-              <button
-                onClick={() => setOrderTypeFilter('TAKEAWAY')}
-                className={`px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
-                  orderTypeFilter === 'TAKEAWAY'
-                    ? 'bg-[#331E17] text-white shadow-2xs font-black'
-                    : 'text-[#745E55]'
-                }`}
-              >
-                <ShoppingBag className="w-3 h-3" />
-                <span>Takeaway</span>
-              </button>
+            <div className="flex items-center gap-2">
+              {/* Quick date range switcher */}
+              <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
+                <button
+                  onClick={() => {
+                    setRange('TODAY');
+                    fetchOrders('TODAY');
+                  }}
+                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                    range === 'TODAY'
+                      ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                      : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => {
+                    setRange('WEEK');
+                    fetchOrders('WEEK');
+                  }}
+                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                    range === 'WEEK'
+                      ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                      : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  This Week
+                </button>
+                <button
+                  onClick={() => {
+                    setRange('ALL');
+                    fetchOrders('ALL');
+                  }}
+                  className={`px-3 py-1 rounded-xl transition-all cursor-pointer ${
+                    range === 'ALL'
+                      ? 'bg-[#AA1B2A] text-white font-bold shadow-2xs'
+                      : 'text-[#745E55] hover:text-[#331E17]'
+                  }`}
+                >
+                  All Time
+                </button>
+              </div>
+
+              {/* Order Type Filter */}
+              <div className="flex items-center bg-[#F7F2EA] p-1 rounded-2xl border border-[#E8E1D6] text-xs">
+                <button
+                  onClick={() => setOrderTypeFilter('ALL')}
+                  className={`px-2.5 py-1 rounded-xl transition-all cursor-pointer ${
+                    orderTypeFilter === 'ALL'
+                      ? 'bg-[#331E17] text-white shadow-2xs font-black'
+                      : 'text-[#745E55]'
+                  }`}
+                >
+                  All
+                </button>
+                <button
+                  onClick={() => setOrderTypeFilter('CAR_SERVICE')}
+                  className={`px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
+                    orderTypeFilter === 'CAR_SERVICE'
+                      ? 'bg-[#331E17] text-white shadow-2xs font-black'
+                      : 'text-[#745E55]'
+                  }`}
+                >
+                  <Car className="w-3 h-3" />
+                  <span>Car</span>
+                </button>
+                <button
+                  onClick={() => setOrderTypeFilter('TAKEAWAY')}
+                  className={`px-2.5 py-1 rounded-xl flex items-center gap-1 transition-all cursor-pointer ${
+                    orderTypeFilter === 'TAKEAWAY'
+                      ? 'bg-[#331E17] text-white shadow-2xs font-black'
+                      : 'text-[#745E55]'
+                  }`}
+                >
+                  <ShoppingBag className="w-3 h-3" />
+                  <span>Takeaway</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

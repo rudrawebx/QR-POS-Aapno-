@@ -175,8 +175,9 @@ export default function AdminInvoicesPage() {
           </div>
         </div>
 
-        {/* FILTER & SEARCH BAR */}
-        <div className="bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs space-y-3">
+        {/* STICKY FILTER & SEARCH BAR */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-1">
+          <div className="bg-white p-4 rounded-3xl border border-[#E8E1D6] shadow-xs space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             {/* Multi-Period Tabs */}
             <div className="flex flex-wrap items-center gap-1 bg-[#F7F2EA] p-1 rounded-2xl text-xs font-bold border border-[#E8E1D6]">
@@ -241,6 +242,7 @@ export default function AdminInvoicesPage() {
             </button>
           </div>
         </div>
+      </div>
 
         {/* INVOICES LIST TABLE */}
         <div className="bg-white rounded-3xl border border-[#E8E1D6] shadow-xs overflow-hidden">

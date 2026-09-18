@@ -447,182 +447,184 @@ export default function AdminInventoryPage() {
           </div>
         )}
 
-        {/* Primary Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E8E1D6] pb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={() => setActiveTab("STOCK")}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === "STOCK"
-                  ? "bg-[#AA1B2A] text-white shadow-xs"
-                  : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
-              }`}
-            >
-              📦 Raw Materials Stock ({ingredients.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("BOM")}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === "BOM"
-                  ? "bg-[#AA1B2A] text-white shadow-xs"
-                  : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
-              }`}
-            >
-              🍲 Recipe BOMs ({recipes.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("TRANSACTIONS")}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === "TRANSACTIONS"
-                  ? "bg-[#AA1B2A] text-white shadow-xs"
-                  : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
-              }`}
-            >
-              📜 Stock Audit Log ({stockTransactions.length})
-            </button>
-            <button
-              onClick={() => setActiveTab("SUPPLIERS")}
-              className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-                activeTab === "SUPPLIERS"
-                  ? "bg-[#AA1B2A] text-white shadow-xs"
-                  : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
-              }`}
-            >
-              🚚 Suppliers ({suppliers.length})
-            </button>
+        {/* Sticky Primary Navigation Tabs & Filter Bar */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-3 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E8E1D6] pb-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() => setActiveTab("STOCK")}
+                className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  activeTab === "STOCK"
+                    ? "bg-[#AA1B2A] text-white shadow-xs"
+                    : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
+                }`}
+              >
+                📦 Raw Materials Stock ({ingredients.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("BOM")}
+                className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  activeTab === "BOM"
+                    ? "bg-[#AA1B2A] text-white shadow-xs"
+                    : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
+                }`}
+              >
+                🍲 Recipe BOMs ({recipes.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("TRANSACTIONS")}
+                className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  activeTab === "TRANSACTIONS"
+                    ? "bg-[#AA1B2A] text-white shadow-xs"
+                    : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
+                }`}
+              >
+                📜 Stock Audit Log ({stockTransactions.length})
+              </button>
+              <button
+                onClick={() => setActiveTab("SUPPLIERS")}
+                className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+                  activeTab === "SUPPLIERS"
+                    ? "bg-[#AA1B2A] text-white shadow-xs"
+                    : "bg-white text-[#745E55] hover:bg-[#F7F2EA]"
+                }`}
+              >
+                🚚 Suppliers ({suppliers.length})
+              </button>
+            </div>
+
+            {activeTab === "STOCK" && (
+              <div className="flex items-center gap-2">
+                {/* Search Bar */}
+                <div className="relative w-56 sm:w-64">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search raw material..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
+                  />
+                </div>
+
+                {/* View Switcher: List, Column, Icon, Gallery */}
+                <div className="flex items-center bg-white p-1 rounded-2xl border border-slate-200 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("LIST")}
+                    className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                      viewMode === "LIST" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="List Table View"
+                  >
+                    <ListIcon className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline text-[11px]">List</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("COLUMN")}
+                    className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                      viewMode === "COLUMN" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Categorized Column View"
+                  >
+                    <ColumnsIcon className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline text-[11px]">Column</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("ICON")}
+                    className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                      viewMode === "ICON" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Compact Icon Grid"
+                  >
+                    <GridIcon className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline text-[11px]">Icon</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("GALLERY")}
+                    className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
+                      viewMode === "GALLERY" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                    }`}
+                    title="Gallery Cards View"
+                  >
+                    <LayoutGrid className="w-3.5 h-3.5" />
+                    <span className="hidden md:inline text-[11px]">Gallery</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
+          {/* Secondary Filter Controls (Category & Stock Health Filters) */}
           {activeTab === "STOCK" && (
-            <div className="flex items-center gap-2">
-              {/* Search Bar */}
-              <div className="relative w-56 sm:w-64">
-                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search raw material..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
-                />
+            <div className="space-y-2.5">
+              {/* Department / Category Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+                <span className="text-[11px] font-bold text-[#745E55] flex items-center gap-1 mr-1 flex-shrink-0">
+                  <Tag className="w-3 h-3 text-[#AA1B2A]" /> Department:
+                </span>
+                {DEPARTMENTS.map((dept) => (
+                  <button
+                    key={dept}
+                    onClick={() => setFilterDept(dept)}
+                    className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex-shrink-0 cursor-pointer ${
+                      filterDept === dept
+                        ? "bg-[#331E17] text-[#E09D3D] shadow-xs"
+                        : "bg-white hover:bg-slate-100 text-[#745E55] border border-slate-200"
+                    }`}
+                  >
+                    {dept}
+                  </button>
+                ))}
               </div>
 
-              {/* View Switcher: List, Column, Icon, Gallery */}
-              <div className="flex items-center bg-white p-1 rounded-2xl border border-slate-200 shadow-2xs">
+              {/* Health Filter Chips */}
+              <div className="flex items-center gap-1.5 text-xs">
+                <span className="text-[11px] font-bold text-[#745E55] flex items-center gap-1 mr-1">
+                  <SlidersHorizontal className="w-3 h-3 text-[#AA1B2A]" /> Health:
+                </span>
                 <button
-                  type="button"
-                  onClick={() => setViewMode("LIST")}
-                  className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "LIST" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                  onClick={() => setFilterHealth("ALL")}
+                  className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
+                    filterHealth === "ALL" ? "bg-[#AA1B2A] text-white" : "bg-white text-slate-600 border border-slate-200"
                   }`}
-                  title="List Table View"
                 >
-                  <ListIcon className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline text-[11px]">List</span>
+                  All ({ingredients.length})
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() => setViewMode("COLUMN")}
-                  className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "COLUMN" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                  onClick={() => setFilterHealth("LOW_STOCK")}
+                  className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
+                    filterHealth === "LOW_STOCK" ? "bg-amber-500 text-white" : "bg-white text-amber-700 border border-amber-300"
                   }`}
-                  title="Categorized Column View"
                 >
-                  <ColumnsIcon className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline text-[11px]">Column</span>
+                  ⚠️ Low Stock ({lowStockItems.length})
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() => setViewMode("ICON")}
-                  className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "ICON" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                  onClick={() => setFilterHealth("IN_STOCK")}
+                  className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
+                    filterHealth === "IN_STOCK" ? "bg-emerald-600 text-white" : "bg-white text-emerald-700 border border-emerald-300"
                   }`}
-                  title="Compact Icon Grid"
                 >
-                  <GridIcon className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline text-[11px]">Icon</span>
+                  ✅ In Stock ({inStockItems.length})
                 </button>
-
                 <button
-                  type="button"
-                  onClick={() => setViewMode("GALLERY")}
-                  className={`p-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                    viewMode === "GALLERY" ? "bg-[#AA1B2A] text-white shadow-2xs" : "text-slate-500 hover:text-slate-800"
+                  onClick={() => setFilterHealth("OUT_OF_STOCK")}
+                  className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
+                    filterHealth === "OUT_OF_STOCK" ? "bg-red-600 text-white" : "bg-white text-red-700 border border-red-300"
                   }`}
-                  title="Gallery Cards View"
                 >
-                  <LayoutGrid className="w-3.5 h-3.5" />
-                  <span className="hidden md:inline text-[11px]">Gallery</span>
+                  ❌ Out of Stock ({outOfStockItems.length})
                 </button>
               </div>
             </div>
           )}
         </div>
-
-        {/* Secondary Filter Controls (Category & Stock Health Filters) */}
-        {activeTab === "STOCK" && (
-          <div className="space-y-2.5">
-            {/* Department / Category Filter Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-              <span className="text-[11px] font-bold text-[#745E55] flex items-center gap-1 mr-1 flex-shrink-0">
-                <Tag className="w-3 h-3 text-[#AA1B2A]" /> Department:
-              </span>
-              {DEPARTMENTS.map((dept) => (
-                <button
-                  key={dept}
-                  onClick={() => setFilterDept(dept)}
-                  className={`px-3 py-1 rounded-xl text-xs font-bold transition-all flex-shrink-0 cursor-pointer ${
-                    filterDept === dept
-                      ? "bg-[#331E17] text-[#E09D3D] shadow-xs"
-                      : "bg-white hover:bg-slate-100 text-[#745E55] border border-slate-200"
-                  }`}
-                >
-                  {dept}
-                </button>
-              ))}
-            </div>
-
-            {/* Health Filter Chips */}
-            <div className="flex items-center gap-1.5 text-xs">
-              <span className="text-[11px] font-bold text-[#745E55] flex items-center gap-1 mr-1">
-                <SlidersHorizontal className="w-3 h-3 text-[#AA1B2A]" /> Health:
-              </span>
-              <button
-                onClick={() => setFilterHealth("ALL")}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
-                  filterHealth === "ALL" ? "bg-[#AA1B2A] text-white" : "bg-white text-slate-600 border border-slate-200"
-                }`}
-              >
-                All ({ingredients.length})
-              </button>
-              <button
-                onClick={() => setFilterHealth("LOW_STOCK")}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
-                  filterHealth === "LOW_STOCK" ? "bg-amber-500 text-white" : "bg-white text-amber-700 border border-amber-300"
-                }`}
-              >
-                ⚠️ Low Stock ({lowStockItems.length})
-              </button>
-              <button
-                onClick={() => setFilterHealth("IN_STOCK")}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
-                  filterHealth === "IN_STOCK" ? "bg-emerald-600 text-white" : "bg-white text-emerald-700 border border-emerald-300"
-                }`}
-              >
-                ✅ In Stock ({inStockItems.length})
-              </button>
-              <button
-                onClick={() => setFilterHealth("OUT_OF_STOCK")}
-                className={`px-2.5 py-0.5 rounded-lg text-[11px] font-bold cursor-pointer ${
-                  filterHealth === "OUT_OF_STOCK" ? "bg-red-600 text-white" : "bg-white text-red-700 border border-red-300"
-                }`}
-              >
-                🛑 Out of Stock ({outOfStockItems.length})
-              </button>
-            </div>
-          </div>
-        )}
 
         {/* TAB 1: STOCK BALANCES */}
         {activeTab === "STOCK" && (

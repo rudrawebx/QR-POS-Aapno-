@@ -490,184 +490,205 @@ export default function AdminMenuPage() {
           </div>
         )}
 
-        {/* Top Action Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#7A0C16]/10 flex items-center justify-center border border-[#7A0C16]/20">
-              <UtensilsCrossed className="w-5 h-5 text-[#7A0C16]" />
+        {/* Sticky Top Action Header, Search & Category Filters */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-2 space-y-3">
+          {/* Top Action Header */}
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#7A0C16]/10 flex items-center justify-center border border-[#7A0C16]/20">
+                <UtensilsCrossed className="w-5 h-5 text-[#7A0C16]" />
+              </div>
+              <div>
+                <h1 className="font-black text-base text-slate-900 flex items-center gap-2">
+                  <span>Menu &amp; Catalog Management</span>
+                  <span className="bg-[#7A0C16] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    Live Database
+                  </span>
+                </h1>
+                <p className="text-xs text-slate-500">
+                  {allProducts.length} total dishes across {categories.length} categories • Instant synchronization
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="font-black text-base text-slate-900 flex items-center gap-2">
-                <span>Menu &amp; Catalog Management</span>
-                <span className="bg-[#7A0C16] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  Live Database
-                </span>
-              </h1>
-              <p className="text-xs text-slate-500">
-                {allProducts.length} total dishes across {categories.length} categories • Instant synchronization
-              </p>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={handleExportCsv}
+                className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Export CSV</span>
+              </button>
+
+              <button
+                onClick={() => setIsImportModalOpen(true)}
+                className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Import CSV</span>
+              </button>
+
+              <button
+                onClick={() => setIsCategoryModalOpen(true)}
+                className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-300 shadow-2xs transition-colors cursor-pointer"
+              >
+                <FolderPlus className="w-3.5 h-3.5 text-slate-600" />
+                <span>+ Add Category</span>
+              </button>
+
+              <button
+                onClick={handleOpenAddModal}
+                className="bg-[#7A0C16] hover:bg-[#600810] text-white px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 border border-[#D4AF37] cursor-pointer"
+              >
+                <Plus className="w-4 h-4 text-[#D4AF37]" />
+                <span>Add New Dish</span>
+              </button>
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              onClick={handleExportCsv}
-              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export CSV</span>
-            </button>
-
-            <button
-              onClick={() => setIsImportModalOpen(true)}
-              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-200 shadow-2xs transition-colors cursor-pointer"
-            >
-              <Upload className="w-3.5 h-3.5" />
-              <span>Import CSV</span>
-            </button>
-
-            <button
-              onClick={() => setIsCategoryModalOpen(true)}
-              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold flex items-center gap-1.5 border border-slate-300 shadow-2xs transition-colors cursor-pointer"
-            >
-              <FolderPlus className="w-3.5 h-3.5 text-slate-600" />
-              <span>+ Add Category</span>
-            </button>
-
-            <button
-              onClick={handleOpenAddModal}
-              className="bg-[#7A0C16] hover:bg-[#600810] text-white px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-sm transition-transform active:scale-95 border border-[#D4AF37] cursor-pointer"
-            >
-              <Plus className="w-4 h-4 text-[#D4AF37]" />
-              <span>Add New Dish</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Search, Filter & Dietary Controls */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            {/* Search input */}
-            <div className="relative flex-1 min-w-[240px]">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search dishes by Name, SKU, ID, or description..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7A0C16]"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
-            </div>
-
-            {/* Quick Filters */}
-            <div className="flex flex-wrap items-center gap-1.5">
-              {/* Diet */}
-              <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
-                <button
-                  onClick={() => setFilterDiet('ALL')}
-                  className={`px-2.5 py-1 rounded-lg font-bold transition-colors ${
-                    filterDiet === 'ALL' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  All Diet
-                </button>
-                <button
-                  onClick={() => setFilterDiet('VEG')}
-                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors ${
-                    filterDiet === 'VEG' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-emerald-700 hover:bg-emerald-50'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  Veg
-                </button>
-                <button
-                  onClick={() => setFilterDiet('NON_VEG')}
-                  className={`px-2.5 py-1 rounded-lg font-bold flex items-center gap-1 transition-colors ${
-                    filterDiet === 'NON_VEG' ? 'bg-red-600 text-white shadow-2xs' : 'text-red-700 hover:bg-red-50'
-                  }`}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                  Non-Veg
-                </button>
+          {/* Search, Filter & Dietary Controls */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {/* Search input */}
+              <div className="relative flex-1 min-w-[240px]">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Search dishes by Name, SKU, ID, or description..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#7A0C16]"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
 
-              {/* Stock Filter */}
-              <select
-                value={filterAvailability}
-                onChange={(e) => setFilterAvailability(e.target.value)}
-                className="px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700"
-              >
-                <option value="ALL">All Stock</option>
-                <option value="AVAILABLE">In Stock Only</option>
-                <option value="SOLD_OUT">Sold Out Only</option>
-              </select>
+              {/* Quick Filters */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                {/* Diet */}
+                <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
+                  <button
+                    onClick={() => setFilterDiet('ALL')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                      filterDiet === 'ALL' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All Diet
+                  </button>
+                  <button
+                    onClick={() => setFilterDiet('VEG')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors flex items-center gap-1 ${
+                      filterDiet === 'VEG' ? 'bg-emerald-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                    <span>Veg</span>
+                  </button>
+                  <button
+                    onClick={() => setFilterDiet('NON_VEG')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors flex items-center gap-1 ${
+                      filterDiet === 'NON_VEG' ? 'bg-red-600 text-white shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <span className="w-2 h-2 rounded-full bg-red-300" />
+                    <span>Non-Veg</span>
+                  </button>
+                </div>
 
-              {/* Bestseller Toggle */}
-              <button
-                onClick={() => setFilterBestseller(!filterBestseller)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-colors flex items-center gap-1 ${
-                  filterBestseller
-                    ? 'bg-amber-100 text-amber-900 border-amber-300'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-                <span>Bestsellers</span>
-              </button>
+                {/* Availability Filter */}
+                <div className="flex rounded-xl bg-slate-100 p-1 border border-slate-200 text-xs">
+                  <button
+                    onClick={() => setFilterAvailability('ALL')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                      filterAvailability === 'ALL' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    All Stock
+                  </button>
+                  <button
+                    onClick={() => setFilterAvailability('AVAILABLE')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                      filterAvailability === 'AVAILABLE' ? 'bg-white text-emerald-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    In Stock
+                  </button>
+                  <button
+                    onClick={() => setFilterAvailability('SOLD_OUT')}
+                    className={`px-2.5 py-1 rounded-lg font-bold transition-colors ${
+                      filterAvailability === 'SOLD_OUT' ? 'bg-white text-red-800 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    Sold Out
+                  </button>
+                </div>
 
-              <button
-                onClick={fetchMenu}
-                className="p-2 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 rounded-xl transition-colors cursor-pointer"
-                title="Refresh from Database"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-          </div>
-
-          {/* Category Tabs */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-slate-100">
-            <button
-              onClick={() => setSelectedCatId('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
-                selectedCatId === 'ALL'
-                  ? 'bg-[#7A0C16] text-[#D4AF37] shadow-2xs'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              All Categories ({allProducts.length})
-            </button>
-            {categories.map((cat) => {
-              const count = (cat.products || []).length;
-              return (
+                {/* Bestseller Toggle */}
                 <button
-                  key={cat.id}
-                  onClick={() => setSelectedCatId(cat.id)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
-                    selectedCatId === cat.id
-                      ? 'bg-[#7A0C16] text-[#D4AF37] shadow-2xs'
-                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  onClick={() => setFilterBestseller(!filterBestseller)}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1 transition-colors cursor-pointer ${
+                    filterBestseller
+                      ? 'bg-amber-100 border-amber-300 text-amber-900'
+                      : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  <span
-                    className={`w-1.5 h-1.5 rounded-full ${
-                      cat.isVegCategory ? 'bg-emerald-500' : 'bg-red-500'
-                    }`}
-                  />
-                  <span>{cat.name}</span>
-                  <span className="text-[10px] opacity-70">({count})</span>
+                  <Flame className={`w-3.5 h-3.5 ${filterBestseller ? 'text-amber-600' : 'text-slate-400'}`} />
+                  <span>Bestsellers</span>
                 </button>
-              );
-            })}
+
+                {/* Refresh */}
+                <button
+                  onClick={fetchMenu}
+                  className="p-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-slate-600 transition-colors cursor-pointer"
+                  title="Refresh from Database"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+            </div>
+
+            {/* Category Tabs */}
+            <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-1 border-t border-slate-100">
+              <button
+                onClick={() => setSelectedCatId('ALL')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors ${
+                  selectedCatId === 'ALL'
+                    ? 'bg-[#7A0C16] text-[#D4AF37] shadow-2xs'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                All Categories ({allProducts.length})
+              </button>
+              {categories.map((cat) => {
+                const count = (cat.products || []).length;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCatId(cat.id)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                      selectedCatId === cat.id
+                        ? 'bg-[#7A0C16] text-[#D4AF37] shadow-2xs'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    }`}
+                  >
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${
+                        cat.isVegCategory ? 'bg-emerald-500' : 'bg-red-500'
+                      }`}
+                    />
+                    <span>{cat.name}</span>
+                    <span className="text-[10px] opacity-70">({count})</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
 

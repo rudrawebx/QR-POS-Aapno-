@@ -83,17 +83,19 @@ export default function AdminCustomersPage() {
           </div>
         </div>
 
-        {/* Search */}
-        <div className="bg-white p-3.5 rounded-3xl border border-[#E8E1D6] shadow-xs">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              placeholder="Search patron by Name, WhatsApp phone number, or Car Plate..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
-            />
+        {/* Sticky Search Bar */}
+        <div className="sticky top-0 z-20 bg-[#FEFBF5] pt-0 pb-1">
+          <div className="bg-white p-3.5 rounded-3xl border border-[#E8E1D6] shadow-xs">
+            <div className="relative">
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search patron by Name, WhatsApp phone number, or Car Plate..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
+              />
+            </div>
           </div>
         </div>
 
