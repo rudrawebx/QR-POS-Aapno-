@@ -242,11 +242,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Brand Header */}
         <div className="p-4 border-b border-[#E09D3D]/20 flex items-center gap-3 flex-shrink-0">
           <Link href="/admin" className="flex-shrink-0 group">
-            <img
-              src="/images/aapno-khano-logo.png"
-              alt="Aapno Khaano"
-              className="h-12 w-auto object-contain drop-shadow-md flex-shrink-0 group-hover:scale-105 transition-transform duration-200"
-            />
+            <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-md border-2 border-[#E09D3D] flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+              <img
+                src="/images/aapno-khano-logo.png"
+                alt="Aapno Khaano"
+                className="w-full h-full object-contain"
+              />
+            </div>
           </Link>
           <div className="min-w-0">
             <h2 className="font-black text-sm text-white tracking-wide truncate">
