@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const contentType = request.headers.get('content-type') || '';
 
-    // Handle Multipart Form Data (Direct file upload)
+    // 1. Handle Multipart Form Data (Direct file upload)
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData();
       const file = formData.get('file') as File | null;
@@ -18,7 +20,6 @@ export async function POST(request: Request) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
-      // Determine extension
       let ext = 'jpg';
       if (file.type.includes('png')) ext = 'png';
       else if (file.type.includes('webp')) ext = 'webp';
@@ -27,21 +28,26 @@ export async function POST(request: Request) {
       const fileName = `dish-custom-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${ext}`;
       const uploadDir = path.join(process.cwd(), 'public', 'images', 'menu');
 
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+      try {
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, buffer);
+        const publicUrl = `/images/menu/${fileName}`;
+        return NextResponse.json({ success: true, url: publicUrl });
+      } catch (fsErr) {
+        console.warn('Filesystem write fallback, returning dataUrl representation:', fsErr);
+        const base64 = buffer.toString('base64');
+        const mime = ext === 'png' ? 'image/png' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+        return NextResponse.json({ success: true, url: `data:${mime};base64,${base64}` });
       }
-
-      const filePath = path.join(uploadDir, fileName);
-      fs.writeFileSync(filePath, buffer);
-
-      const publicUrl = `/images/menu/${fileName}`;
-      return NextResponse.json({ success: true, url: publicUrl });
     }
 
-    // Handle Base64 Data URL in JSON payload
+    // 2. Handle Base64 Data URL in JSON payload
     if (contentType.includes('application/json')) {
       const body = await request.json();
-      const { dataUrl, filename: originalName } = body;
+      const { dataUrl } = body;
 
       if (!dataUrl || !dataUrl.startsWith('data:image/')) {
         return NextResponse.json({ error: 'Invalid image data URL' }, { status: 400 });
@@ -60,15 +66,18 @@ export async function POST(request: Request) {
       const fileName = `dish-custom-${Date.now()}-${Math.random().toString(36).substring(2, 7)}.${ext}`;
       const uploadDir = path.join(process.cwd(), 'public', 'images', 'menu');
 
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
+      try {
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        const filePath = path.join(uploadDir, fileName);
+        fs.writeFileSync(filePath, buffer);
+        const publicUrl = `/images/menu/${fileName}`;
+        return NextResponse.json({ success: true, url: publicUrl });
+      } catch (fsErr) {
+        console.warn('Filesystem write fallback:', fsErr);
+        return NextResponse.json({ success: true, url: dataUrl });
       }
-
-      const filePath = path.join(uploadDir, fileName);
-      fs.writeFileSync(filePath, buffer);
-
-      const publicUrl = `/images/menu/${fileName}`;
-      return NextResponse.json({ success: true, url: publicUrl });
     }
 
     return NextResponse.json({ error: 'Unsupported Content-Type' }, { status: 400 });

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
+import { uploadImageToServer } from '@/lib/imageUtils';
 import {
   UtensilsCrossed,
   Plus,
@@ -27,6 +28,9 @@ import {
   Eye,
   CheckSquare,
   Square,
+  Image as ImageIcon,
+  Camera,
+  CheckCircle2,
 } from 'lucide-react';
 
 export default function AdminMenuPage() {
@@ -51,6 +55,8 @@ export default function AdminMenuPage() {
   // Form State for Adding / Editing Dish
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState('');
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     shortName: '',
@@ -85,6 +91,7 @@ export default function AdminMenuPage() {
   const [categoryFormData, setCategoryFormData] = useState({
     name: '',
     description: '',
+    imageUrl: '',
     icon: 'Utensils',
     isVegCategory: true,
     displayOrder: '0',
@@ -101,6 +108,29 @@ export default function AdminMenuPage() {
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
+  };
+
+  const handleImageFileSelect = async (file: File, isCategory = false) => {
+    if (!file) return;
+    try {
+      setIsUploadingImage(true);
+      const url = await uploadImageToServer(file, (status) => setUploadStatus(status));
+      if (url) {
+        if (isCategory) {
+          setCategoryFormData((prev) => ({ ...prev, imageUrl: url } as any));
+          showToast('✓ Category image uploaded successfully!');
+        } else {
+          setFormData((prev) => ({ ...prev, imageUrl: url }));
+          showToast('✓ Dish photo uploaded & optimized!');
+        }
+      }
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      alert('Unable to process photo. Please try another image file or enter a URL.');
+    } finally {
+      setIsUploadingImage(false);
+      setUploadStatus('');
+    }
   };
 
   const fetchMenu = async () => {
@@ -370,7 +400,7 @@ export default function AdminMenuPage() {
       if (res.ok) {
         showToast(`✓ Category "${categoryFormData.name}" created!`);
         setIsCategoryModalOpen(false);
-        setCategoryFormData({ name: '', description: '', icon: 'Utensils', isVegCategory: true, displayOrder: '0' });
+        setCategoryFormData({ name: '', description: '', imageUrl: '', icon: 'Utensils', isVegCategory: true, displayOrder: '0' });
         fetchMenu();
       }
     } catch (err) {
@@ -1216,8 +1246,8 @@ export default function AdminMenuPage() {
 
                 {/* Image URL & File Upload */}
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block font-bold text-slate-700">Dish Photo Image (Optional)</label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block font-bold text-slate-700">Dish Photo / Image</label>
                     {formData.imageUrl && (
                       <button
                         type="button"
@@ -1228,9 +1258,30 @@ export default function AdminMenuPage() {
                       </button>
                     )}
                   </div>
-                  <div className="flex gap-2 items-center">
-                    {formData.imageUrl && (
-                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+
+                  {/* Dropzone & 1-Click Upload */}
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDraggingImage(true);
+                    }}
+                    onDragLeave={() => setIsDraggingImage(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setIsDraggingImage(false);
+                      const file = e.dataTransfer.files?.[0];
+                      if (file) handleImageFileSelect(file);
+                    }}
+                    className={`border-2 border-dashed rounded-2xl p-3 transition-all flex flex-col sm:flex-row items-center gap-3 ${
+                      isDraggingImage
+                        ? 'border-[#AA1B2A] bg-red-50/60 scale-[1.01]'
+                        : formData.imageUrl
+                        ? 'border-emerald-300 bg-emerald-50/20'
+                        : 'border-slate-200 bg-slate-50/80 hover:border-slate-300'
+                    }`}
+                  >
+                    {formData.imageUrl ? (
+                      <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 relative shadow-xs">
                         <img
                           src={formData.imageUrl}
                           alt="Preview"
@@ -1241,56 +1292,50 @@ export default function AdminMenuPage() {
                           }}
                         />
                       </div>
+                    ) : (
+                      <div className="w-16 h-16 rounded-xl bg-[#FFF0E8] border border-[#E09D3D]/30 flex items-center justify-center flex-shrink-0 text-[#AA1B2A]">
+                        <ImageIcon className="w-7 h-7" />
+                      </div>
                     )}
+
+                    <div className="flex-1 text-center sm:text-left space-y-1">
+                      <div className="flex flex-wrap items-center gap-2 justify-center sm:justify-start">
+                        <label className={`px-4 py-2 rounded-xl text-xs font-bold cursor-pointer flex items-center gap-2 shadow-xs transition-all ${
+                          isUploadingImage
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300 animate-pulse'
+                            : 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#80101C] hover:to-[#B82E25] text-white'
+                        }`}>
+                          <Camera className="w-4 h-4" />
+                          <span>{isUploadingImage ? (uploadStatus || 'Processing Photo...') : 'Upload Photo / Gallery'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            disabled={isUploadingImage}
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleImageFileSelect(file);
+                            }}
+                          />
+                        </label>
+                        <span className="text-[11px] text-slate-400 font-medium hidden sm:inline">or drag & drop</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500">
+                        Select JPG, PNG or WebP from mobile or laptop. High quality auto-compressed.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Direct Path / URL input fallback */}
+                  <div className="mt-2 flex items-center gap-2">
                     <input
                       type="text"
-                      placeholder="/images/menu/p-1-sweet-corn-chaat.png or https://..."
+                      placeholder="Or enter direct URL: /images/menu/... or https://..."
                       value={formData.imageUrl}
                       onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                      className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs"
+                      className="flex-1 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs"
                     />
-                    <label className={`px-3 py-2 border rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all ${
-                      isUploadingImage
-                        ? 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse'
-                        : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
-                    }`}>
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>{isUploadingImage ? 'Uploading...' : 'Upload File'}</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        disabled={isUploadingImage}
-                        className="hidden"
-                        onChange={async (e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            try {
-                              setIsUploadingImage(true);
-                              const uploadData = new FormData();
-                              uploadData.append('file', file);
-                              const res = await fetch('/api/upload', {
-                                method: 'POST',
-                                body: uploadData,
-                              });
-                              const data = await res.json();
-                              if (res.ok && data.url) {
-                                setFormData((prev) => ({ ...prev, imageUrl: data.url }));
-                                showToast('✓ Dish photo uploaded successfully!');
-                              } else {
-                                alert(data.error || 'Failed to upload photo');
-                              }
-                            } catch (err) {
-                              console.error('Upload error:', err);
-                              alert('Unable to upload image. Please try entering a URL instead.');
-                            } finally {
-                              setIsUploadingImage(false);
-                            }
-                          }
-                        }}
-                      />
-                    </label>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1">Select an image file from your device, or enter any image URL / path.</p>
                 </div>
 
                 {/* Submit Buttons */}
@@ -1370,6 +1415,62 @@ export default function AdminMenuPage() {
                       value={categoryFormData.displayOrder}
                       onChange={(e) => setCategoryFormData({ ...categoryFormData, displayOrder: e.target.value })}
                       className="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 rounded-xl"
+                    />
+                  </div>
+                </div>
+
+                {/* Category Image Upload */}
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block font-bold text-slate-700">Category Banner / Image (Optional)</label>
+                    {categoryFormData.imageUrl && (
+                      <button
+                        type="button"
+                        onClick={() => setCategoryFormData({ ...categoryFormData, imageUrl: '' })}
+                        className="text-[10px] font-bold text-red-600 hover:text-red-800 cursor-pointer"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {categoryFormData.imageUrl && (
+                      <div className="w-10 h-10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
+                        <img
+                          src={categoryFormData.imageUrl}
+                          alt="Preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=200';
+                          }}
+                        />
+                      </div>
+                    )}
+                    <label className={`px-3 py-2 border rounded-xl text-xs font-bold cursor-pointer flex items-center gap-1.5 whitespace-nowrap transition-all ${
+                      isUploadingImage
+                        ? 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse'
+                        : 'bg-slate-100 hover:bg-slate-200 border-slate-300 text-slate-700'
+                    }`}>
+                      <Camera className="w-3.5 h-3.5" />
+                      <span>{isUploadingImage ? (uploadStatus || 'Uploading...') : 'Choose File'}</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={isUploadingImage}
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleImageFileSelect(file, true);
+                        }}
+                      />
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Or enter image URL: /images/menu/... or https://..."
+                      value={categoryFormData.imageUrl}
+                      onChange={(e) => setCategoryFormData({ ...categoryFormData, imageUrl: e.target.value })}
+                      className="flex-1 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
                     />
                   </div>
                 </div>
