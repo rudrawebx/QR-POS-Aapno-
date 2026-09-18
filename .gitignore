@@ -36,3 +36,4 @@ next-env.d.ts
 
 # temp drive downloads
 downloaded_drive_images/
+new_drive_images/
