@@ -230,7 +230,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: 'QR Standees & Codes', href: '/admin/qr-codes', icon: QrCode, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER'] },
     { label: 'CRM & Car Customers', href: '/admin/customers', icon: Users, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER'] },
     { label: 'Daily Expense Ledger', href: '/admin/expenses', icon: DollarSign, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'ACCOUNTANT'] },
-    { label: 'Table Reservations', href: '/admin/reservations', icon: Calendar, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER'] },
     { label: 'Sales & GST Reports', href: '/admin/reports', icon: TrendingUp, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'ACCOUNTANT'] },
     { label: 'Staff & Roles', href: '/admin/staff', icon: Users, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER'] },
     { label: 'Store & Payment Settings', href: '/admin/settings', icon: Settings, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER'] },

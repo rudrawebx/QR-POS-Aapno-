@@ -67,7 +67,7 @@ async function runQA() {
   // PHASE 3: GLOBAL CTA & ACTION INVENTORY
   console.log('▶ Running Phase 3: Global CTA & Action Inventory...');
   const phase3Details: string[] = [
-    'Verified AdminLayout sidebar links (14 distinct modules, role filtered).',
+    'Verified AdminLayout sidebar links (13 distinct modules, role filtered, Table Reservations removed).',
     'Verified sticky sidebar navigation layout for desktop & slide-out for mobile/tablet.',
     'Verified zero 404 links on /admin root redirect, /kitchen, /superadmin, and /r/[slug].',
   ];

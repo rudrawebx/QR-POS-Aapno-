@@ -38,12 +38,11 @@ export default function AdminPosPage() {
 
   // Active Cart State
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [orderType, setOrderType] = useState<'CAR_SERVICE' | 'TAKEAWAY' | 'DINE_IN'>('CAR_SERVICE');
+  const [orderType, setOrderType] = useState<'CAR_SERVICE' | 'TAKEAWAY'>('CAR_SERVICE');
   const [isQuickGuest, setIsQuickGuest] = useState(true);
   const [customerName, setCustomerName] = useState('');
   const [customerPhone, setCustomerPhone] = useState('');
   const [carNumber, setCarNumber] = useState('');
-  const [tableNumber, setTableNumber] = useState('');
   const [cookingInstructions, setCookingInstructions] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD' | 'SPLIT'>('UPI');
   const [discountAmount, setDiscountAmount] = useState<number>(0);
@@ -307,7 +306,7 @@ export default function AdminPosPage() {
           source: "POS_TERMINAL",
           customerName: guestDisplayName,
           customerPhone: guestPhone,
-          carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || null) : orderType === 'DINE_IN' && tableNumber ? `Table ${tableNumber.trim()}` : null,
+          carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || null) : null,
           orderType,
           cookingInstructions,
           paymentMethod: chosenMethod,
@@ -341,7 +340,6 @@ export default function AdminPosPage() {
         setCartItems([]);
         setCookingInstructions("");
         setCarNumber("");
-        setTableNumber("");
         setDiscountAmount(0);
         if (!isQuickGuest) {
           setCustomerName("");
@@ -556,14 +554,14 @@ export default function AdminPosPage() {
             </div>
           </div>
 
-          {/* QSR Order Type, Car/Table Number & Guest Inputs */}
+          {/* QSR Order Type, Car Number & Guest Inputs */}
           <div className="p-3 border-b border-slate-100 bg-[#FEFBF5] space-y-2 text-xs">
-            {/* 3 Main Order Types */}
-            <div className="grid grid-cols-3 gap-1 bg-[#F7F2EA] p-1 rounded-2xl font-bold text-[11px]">
+            {/* Main Order Types: Car Service & Takeaway */}
+            <div className="grid grid-cols-2 gap-1.5 bg-[#F7F2EA] p-1 rounded-2xl font-bold text-xs">
               <button
                 type="button"
                 onClick={() => setOrderType('CAR_SERVICE')}
-                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                className={`py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   orderType === 'CAR_SERVICE'
                     ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
                     : 'text-[#745E55] hover:text-[#331E17]'
@@ -574,24 +572,13 @@ export default function AdminPosPage() {
               <button
                 type="button"
                 onClick={() => setOrderType('TAKEAWAY')}
-                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
+                className={`py-2 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   orderType === 'TAKEAWAY'
                     ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
                     : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
                 <span>🛍️ Take away</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setOrderType('DINE_IN')}
-                className={`py-1.5 rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1 ${
-                  orderType === 'DINE_IN'
-                    ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs font-black'
-                    : 'text-[#745E55] hover:text-[#331E17]'
-                }`}
-              >
-                <span>🍽️ Dine in</span>
               </button>
             </div>
 
@@ -605,20 +592,6 @@ export default function AdminPosPage() {
                   value={carNumber}
                   onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
                   className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-mono font-bold text-[#AA1B2A] focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
-                />
-              </div>
-            )}
-
-            {/* Table Number (if Dine In) */}
-            {orderType === 'DINE_IN' && (
-              <div className="relative">
-                <Utensils className="w-3.5 h-3.5 text-[#AA1B2A] absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Table / Seat Number (e.g. Table 4)"
-                  value={tableNumber}
-                  onChange={(e) => setTableNumber(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-bold text-[#331E17] focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
                 />
               </div>
             )}
@@ -745,7 +718,7 @@ export default function AdminPosPage() {
                     paymentMethod === 'UPI' ? 'bg-[#AA1B2A] text-white shadow-2xs font-black' : 'text-[#745E55] hover:text-[#331E17]'
                   }`}
                 >
-                  📱 UPI / QR
+                  📱 UPI
                 </button>
                 <button
                   type="button"
