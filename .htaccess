@@ -1,0 +1,22 @@
+# Hostinger LiteSpeed / Apache Configuration for Next.js Node App
+# Reverse proxy all web traffic to local Node.js port 3000
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Disable directory indexing to avoid 403 errors
+    Options -Indexes
+
+    # Pass headers and handle proxy to Node.js backend
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ http://127.0.0.1:3000/$1 [P,L]
+</IfModule>
+
+# If using LiteSpeed Node.js Proxy
+<IfModule mod_proxy.c>
+    ProxyPreserveHost On
+    ProxyPass / http://127.0.0.1:3000/
+    ProxyPassReverse / http://127.0.0.1:3000/
+</IfModule>
