@@ -342,9 +342,11 @@ export default function RazorpayModal({
           {/* Header */}
           <div className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white p-3.5 flex items-center justify-between border-b border-[#E09D3D]/30">
             <div className="flex items-center gap-2.5">
-              <div className="w-16 h-16 rounded-2xl bg-white p-1 border-2 border-[#E09D3D] flex items-center justify-center overflow-hidden flex-shrink-0 shadow-md">
-                <img src="/images/aapno-khano-logo.png" alt="Aapno Khaano" className="w-full h-full object-contain" />
-              </div>
+              <img
+                src="/images/aapno-khano-logo.png"
+                alt="Aapno Khaano"
+                className="h-12 sm:h-14 w-auto object-contain drop-shadow-md flex-shrink-0"
+              />
               <div>
                 <h3 className="font-black text-xs sm:text-sm text-white">Choose Payment Method</h3>
                 <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1">

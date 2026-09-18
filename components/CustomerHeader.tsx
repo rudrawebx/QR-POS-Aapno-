@@ -43,15 +43,13 @@ export default function CustomerHeader({
       {/* Main Brand Header */}
       <div className="max-w-4xl mx-auto px-4 pt-3 pb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-1.5 shadow-lg border-2 border-[#E09D3D] overflow-hidden flex-shrink-0 flex items-center justify-center">
-            <img
-              src="/images/aapno-khano-logo.png"
-              alt="आपणो खाणो"
-              className="w-full h-full object-contain"
-            />
-          </div>
+          <img
+            src="/images/aapno-khano-logo.png"
+            alt="आपणो खाणो"
+            className="h-16 sm:h-20 w-auto object-contain drop-shadow-xl flex-shrink-0 hover:scale-105 transition-transform duration-200"
+          />
           <div>
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-1.5">
+            <h1 className="text-base sm:text-xl font-black tracking-tight text-white flex items-center gap-1.5">
               <span>आपणो खाणो</span>
               <span className="text-xs font-normal text-[#E09D3D] hidden sm:inline">(Aapno Khaano)</span>
             </h1>

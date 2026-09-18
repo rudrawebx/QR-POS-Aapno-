@@ -334,9 +334,13 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-[#FEFBF5] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-[#E09D3D] selection:text-[#AA1B2A]">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="w-18 h-18 rounded-3xl bg-white p-2.5 shadow-xl border-2 border-[#E09D3D] mx-auto flex items-center justify-center overflow-hidden mb-3">
-          <img src="/images/aapno-khano-logo.png" alt="Aapno Khaano" className="w-full h-full object-contain" />
-        </div>
+        <Link href="/" className="inline-block group mb-3">
+          <img
+            src="/images/aapno-khano-logo.png"
+            alt="Aapno Khaano"
+            className="h-20 sm:h-24 w-auto mx-auto object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-300"
+          />
+        </Link>
         <h1 className="text-2xl font-black text-[#331E17] tracking-tight">आपणो खाणो (Aapno Khaano)</h1>
         <p className="text-xs text-[#745E55] mt-1 font-medium">QSR POS, Kitchen KDS &amp; Multi-Tenant SaaS Platform</p>
       </div>

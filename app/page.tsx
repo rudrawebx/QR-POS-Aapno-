@@ -132,20 +132,22 @@ export default function MasterLandingPage() {
     <div className="min-h-screen bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans selection:bg-[#E09D3D] selection:text-[#AA1B2A]">
       {/* Main Luxury Header / Top Bar */}
       <header className="bg-white/95 backdrop-blur-md border-b border-[#E8E1D6] sticky top-0 z-30 shadow-2xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-[#FFF0E8] p-1 border-2 border-[#E09D3D] shadow-sm flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img src="/images/aapno-khano-logo.png" alt="Aapno Khaano" className="w-full h-full object-contain" />
-            </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-22 py-2 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3.5 group transition-transform hover:opacity-95">
+            <img
+              src="/images/aapno-khano-logo.png"
+              alt="Aapno Khaano"
+              className="h-14 sm:h-16 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300"
+            />
             <div>
-              <span className="text-base sm:text-lg font-black text-[#331E17] tracking-tight block">
+              <span className="text-lg sm:text-xl font-black text-[#331E17] tracking-tight block leading-tight">
                 आपणो खाणो <span className="text-[#AA1B2A] font-bold text-xs sm:text-sm font-serif italic">(Aapno Khaano)</span>
               </span>
-              <p className="text-[10px] text-[#745E55] font-bold tracking-wide uppercase">
+              <p className="text-[10px] sm:text-[11px] text-[#745E55] font-bold tracking-wide uppercase mt-0.5">
                 Royal Rajasthani QSR &amp; Multi-Tenant SaaS Platform
               </p>
             </div>
-          </div>
+          </Link>
 
           <div className="flex items-center gap-2 sm:gap-3">
             <Link

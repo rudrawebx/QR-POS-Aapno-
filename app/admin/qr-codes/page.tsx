@@ -105,13 +105,11 @@ export default function QrStudioPage() {
                 className="bg-white rounded-3xl border-2 border-slate-200 shadow-md p-5 flex flex-col items-center text-center space-y-3 relative overflow-hidden group hover:border-orange-500 transition-all"
               >
                 {/* Stand Header Branding */}
-                <div className="w-14 h-14 rounded-2xl bg-white p-1 shadow-sm border border-slate-200 flex items-center justify-center">
-                  <img
-                    src={restaurant?.logoUrl || '/images/aapno-khano-logo.png'}
-                    alt="Logo"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
+                <img
+                  src={restaurant?.logoUrl || '/images/aapno-khano-logo.png'}
+                  alt="Logo"
+                  className="h-14 w-auto object-contain drop-shadow-sm"
+                />
 
                 <div>
                   <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
