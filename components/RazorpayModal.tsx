@@ -54,7 +54,7 @@ export default function RazorpayModal({
   onPaymentSuccess,
 }: RazorpayModalProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"UPI_DIRECT" | "UPI_QR" | "RAZORPAY_GATEWAY" | "CASH">("UPI_DIRECT");
+  const [activeTab, setActiveTab] = useState<"UPI_DIRECT" | "UPI_QR" | "RAZORPAY_GATEWAY">("UPI_DIRECT");
   const [paymentState, setPaymentState] = useState<"WAITING" | "VERIFYING" | "SUCCESS" | "FAILED">("WAITING");
   const [errorMessage, setErrorMessage] = useState("");
   const [countdown, setCountdown] = useState(600); // 10 minutes
@@ -313,15 +313,7 @@ export default function RazorpayModal({
     });
   };
 
-  // Pay at Counter Handler
-  const handlePayAtCounter = () => {
-    handleVerifyPayment({
-      razorpay_order_id: `counter_${Date.now()}`,
-      razorpay_payment_id: `CASH_COUNTER_${Date.now()}`,
-      razorpay_signature: "sig_pos_bypass",
-      paymentMethod: "PAY_AT_COUNTER",
-    });
-  };
+
 
   const copyUpiId = () => {
     navigator.clipboard.writeText(upiId);
@@ -415,16 +407,6 @@ export default function RazorpayModal({
               }`}
             >
               💳 Cards / Net
-            </button>
-            <button
-              onClick={() => setActiveTab("CASH")}
-              className={`flex-1 py-2 rounded-xl text-center transition-all cursor-pointer ${
-                activeTab === "CASH"
-                  ? "bg-[#AA1B2A] text-white shadow-xs font-black"
-                  : "text-slate-600 hover:bg-slate-50"
-              }`}
-            >
-              💵 Cash
             </button>
           </div>
 
@@ -577,32 +559,6 @@ export default function RazorpayModal({
                         </div>
                       </div>
                       <ShieldCheck className="w-5 h-5 text-[#E09D3D]" />
-                    </button>
-                  </div>
-                )}
-
-                {/* TAB 4: PAY AT COUNTER (CASH) */}
-                {activeTab === "CASH" && (
-                  <div className="space-y-3">
-                    <p className="text-xs text-slate-600 font-bold">
-                      Pay with cash at the restaurant cashier desk:
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={handlePayAtCounter}
-                      className="w-full p-4 rounded-2xl bg-white hover:bg-slate-50 text-[#331E17] border-2 border-amber-300 shadow-md flex items-center justify-between transition-transform active:scale-98 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3 text-left">
-                        <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-900 flex items-center justify-center">
-                          <Coins className="w-5 h-5 text-amber-800" />
-                        </div>
-                        <div>
-                          <p className="font-black text-sm">Confirm Order &amp; Pay Cash</p>
-                          <p className="text-[10px] text-slate-500">Pay at the desk upon food delivery</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-amber-800" />
                     </button>
                   </div>
                 )}

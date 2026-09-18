@@ -19,17 +19,39 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 
+import { playKitchenAlert, unlockAudioContext } from '@/lib/sound';
+
 export default function KitchenDisplayPage() {
   const [kots, setKots] = useState<any[]>([]);
   const [selectedStation, setSelectedStation] = useState<string>('ALL');
   const [activeKotForPrint, setActiveKotForPrint] = useState<PrintKotData | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(true);
+  const seenKotIdsRef = React.useRef<Set<string>>(new Set());
+  const isInitialLoadRef = React.useRef(true);
 
   const fetchKots = async () => {
     try {
       const res = await fetch('/api/kot');
       const data = await res.json();
-      if (data.kots) {
+      if (data.kots && Array.isArray(data.kots)) {
+        if (isInitialLoadRef.current) {
+          data.kots.forEach((k: any) => {
+            if (k.id) seenKotIdsRef.current.add(k.id);
+            if (k.humanKotNumber) seenKotIdsRef.current.add(k.humanKotNumber);
+          });
+          isInitialLoadRef.current = false;
+        } else {
+          for (const k of data.kots) {
+            const kotKey = k.id || k.humanKotNumber;
+            if (kotKey && !seenKotIdsRef.current.has(kotKey)) {
+              seenKotIdsRef.current.add(kotKey);
+              if (audioEnabled) {
+                playKitchenAlert();
+              }
+              break;
+            }
+          }
+        }
         setKots(data.kots);
       }
     } catch (err) {
@@ -38,11 +60,11 @@ export default function KitchenDisplayPage() {
   };
 
   useEffect(() => {
-    // Seamless kitchen monitor access
+    unlockAudioContext();
     fetchKots();
     const interval = setInterval(fetchKots, 2000);
     return () => clearInterval(interval);
-  }, []);
+  }, [audioEnabled]);
 
   const handleUpdateKotStatus = async (kotId: string, nextStatus: string) => {
     try {
