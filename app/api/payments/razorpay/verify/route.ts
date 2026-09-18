@@ -268,6 +268,7 @@ export async function POST(request: Request) {
                   totalPrice: vi.totalPrice,
                   itemNotes: vi.itemNotes,
                   status: "PREPARING",
+                  product: { connect: { id: vi.productId } },
                 })),
               },
             },
@@ -293,14 +294,15 @@ export async function POST(request: Request) {
             sgstAmount,
             grandTotal,
             roundedTotal,
-            paymentMethod,
+            paymentMethod: finalPaymentMethod,
             paymentStatus: "PAID",
             transactionId: verifiedTxnId,
             razorpayPaymentId: razorpay_payment_id,
           },
         });
 
-        // Create 1 KOT Record
+        // Create 1 KOT Record with exact OrderItem foreign keys
+        const orderItemsList = orderRecord.items && orderRecord.items.length > 0 ? orderRecord.items : validatedItems;
         kotRecord = await prisma.kot.create({
           data: {
             humanKotNumber,
@@ -314,8 +316,8 @@ export async function POST(request: Request) {
             isPrinted: true,
             printCount: 1,
             kotItems: {
-              create: (orderRecord.items || validatedItems).map((it: any) => ({
-                orderItemId: it.id || `oi_${Date.now()}`,
+              create: orderItemsList.map((it: any) => ({
+                orderItemId: it.id,
                 productName: it.productName,
                 selectedVariation: it.selectedVariation,
                 isVeg: it.isVeg,
@@ -336,15 +338,47 @@ export async function POST(request: Request) {
             invoiceId: invoiceRecord.id,
             amount: grandTotal,
             currency: "INR",
-            paymentGateway: "RAZORPAY",
+            paymentGateway: finalPaymentMethod === "CASH" ? "CASH" : finalPaymentMethod === "UPI" ? "UPI_DIRECT" : "RAZORPAY",
             razorpayOrderId: razorpay_order_id,
             razorpayPaymentId: razorpay_payment_id,
             razorpaySignature: razorpay_signature,
             transactionId: verifiedTxnId,
-            paymentMethod,
+            paymentMethod: finalPaymentMethod,
             status: "CAPTURED",
           },
         });
+
+        // Upsert Customer in CRM
+        if (cleanPhone && cleanPhone.length >= 10) {
+          try {
+            await prisma.customer.upsert({
+              where: {
+                restaurantId_phone: {
+                  restaurantId,
+                  phone: cleanPhone,
+                },
+              },
+              update: {
+                name: customerName.trim(),
+                carNumber: carNumber ? carNumber.trim().toUpperCase() : undefined,
+                totalVisits: { increment: 1 },
+                totalSpend: { increment: grandTotal },
+                lastVisitAt: new Date(),
+              },
+              create: {
+                restaurantId,
+                name: customerName.trim(),
+                phone: cleanPhone,
+                carNumber: carNumber ? carNumber.trim().toUpperCase() : null,
+                totalVisits: 1,
+                totalSpend: grandTotal,
+                lastVisitAt: new Date(),
+              },
+            });
+          } catch (crmErr) {
+            console.warn("CRM customer upsert warning:", crmErr);
+          }
+        }
 
         // 6. Deduct Recipe BOM Inventory strictly after payment verification
         await deductInventoryForOrder(orderRecord.id, restaurantId);

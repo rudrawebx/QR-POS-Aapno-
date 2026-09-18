@@ -61,7 +61,7 @@ export async function GET(
           fssaiNumber: '12224026000189',
           settings: {
             create: {
-              upiId: '9996213962m@pnb',
+              upiId: '9996213962@hdfc',
               upiMerchantName: 'AAPNO KHANO',
               upiQrImageUrl: '/images/pnb-upi-qr.png',
               taxRateGst: 5.0,
@@ -115,7 +115,7 @@ export async function GET(
         currencySymbol: '₹',
         isOpen: true,
         settings: {
-          upiId: '9996213962m@pnb',
+          upiId: '9996213962@hdfc',
           upiMerchantName: 'AAPNO KHANO',
           upiQrImageUrl: '/images/pnb-upi-qr.png',
           taxRateGst: 5.0,

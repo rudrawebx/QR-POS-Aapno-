@@ -49,7 +49,7 @@ export default function AdminSettingsPage() {
   const [razorpayKeySecret, setRazorpayKeySecret] = useState('demo_secret_key_restaurant');
   const [razorpayWebhookSecret, setRazorpayWebhookSecret] = useState('demo_webhook_secret_restaurant');
   const [paymentMode, setPaymentMode] = useState('TEST');
-  const [upiId, setUpiId] = useState('9996213962m@pnb');
+  const [upiId, setUpiId] = useState('9996213962@hdfc');
   const [merchantName, setMerchantName] = useState('AAPNO KHANO');
 
   // Printer Configuration State
@@ -85,7 +85,7 @@ export default function AdminSettingsPage() {
             setRazorpayKeyId(s.razorpayKeyId || 'rzp_test_demo123456');
             setRazorpayKeySecret(s.razorpayKeySecret || 'demo_secret_key_restaurant');
             setRazorpayWebhookSecret(s.razorpayWebhookSecret || 'demo_webhook_secret_restaurant');
-            setUpiId(s.upiId || '9996213962m@pnb');
+            setUpiId(s.upiId || '9996213962@hdfc');
             setMerchantName(s.upiMerchantName || 'AAPNO KHANO');
             setPrinterIpBill(s.printerIpBill || '192.168.1.200:9100');
             setPrinterIpKot(s.printerIpKot || '192.168.1.201:9100');
@@ -313,7 +313,7 @@ export default function AdminSettingsPage() {
                   alt="Aapno Khaano UPI QR"
                   className="w-32 h-32 object-contain rounded-xl border border-slate-200 shadow-2xs"
                 />
-                <span className="text-[10px] font-black text-[#AA1B2A] mt-1.5 font-mono">9996213962m@pnb</span>
+                <span className="text-[10px] font-black text-[#AA1B2A] mt-1.5 font-mono">{upiId || "9996213962@hdfc"}</span>
               </div>
             </div>
           </div>

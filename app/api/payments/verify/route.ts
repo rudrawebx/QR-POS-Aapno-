@@ -182,6 +182,7 @@ export async function POST(request: Request) {
                   totalPrice: vi.totalPrice,
                   itemNotes: vi.itemNotes,
                   status: 'PREPARING',
+                  product: { connect: { id: vi.productId } },
                 })),
               },
             },
@@ -225,19 +226,66 @@ export async function POST(request: Request) {
               specialInstructions: cookingInstructions,
               isPrinted: true,
               kotItems: {
-                create: validatedItems.map((vi, idx) => ({
-                  orderItemId: dbOrder.items[idx]?.id || dbOrder.items[0]?.id || ("oi_" + Date.now()),
-                  productName: vi.selectedVariation ? `${vi.productName} (${vi.selectedVariation})` : vi.productName,
-                  selectedVariation: vi.selectedVariation,
-                  isVeg: vi.isVeg,
-                  quantity: vi.quantity,
-                  itemNotes: vi.itemNotes,
+                create: dbOrder.items.map((it: any) => ({
+                  orderItemId: it.id,
+                  productName: it.selectedVariation ? `${it.productName} (${it.selectedVariation})` : it.productName,
+                  selectedVariation: it.selectedVariation,
+                  isVeg: it.isVeg,
+                  quantity: it.quantity,
+                  itemNotes: it.itemNotes,
                 })),
               },
             },
             include: { kotItems: true },
           });
           createdKots.push(kot);
+
+          // Payment record in DB
+          await prisma.payment.create({
+            data: {
+              restaurantId: restaurant.id,
+              orderId: dbOrder.id,
+              invoiceId: dbInvoice.id,
+              amount: grandTotal,
+              currency: 'INR',
+              paymentGateway: paymentMethod === 'CASH' ? 'CASH' : 'UPI_DIRECT',
+              transactionId: verifiedTxnId,
+              paymentMethod: paymentMethod || 'UPI',
+              status: 'CAPTURED',
+            },
+          });
+
+          // CRM Customer upsert
+          if (cleanPhone && cleanPhone.length >= 10) {
+            try {
+              await prisma.customer.upsert({
+                where: {
+                  restaurantId_phone: {
+                    restaurantId: restaurant.id,
+                    phone: cleanPhone,
+                  },
+                },
+                update: {
+                  name: customerName.trim(),
+                  carNumber: carNumber ? carNumber.trim().toUpperCase() : undefined,
+                  totalVisits: { increment: 1 },
+                  totalSpend: { increment: grandTotal },
+                  lastVisitAt: new Date(),
+                },
+                create: {
+                  restaurantId: restaurant.id,
+                  name: customerName.trim(),
+                  phone: cleanPhone,
+                  carNumber: carNumber ? carNumber.trim().toUpperCase() : null,
+                  totalVisits: 1,
+                  totalSpend: grandTotal,
+                  lastVisitAt: new Date(),
+                },
+              });
+            } catch (crmErr) {
+              console.warn('CRM customer upsert warning:', crmErr);
+            }
+          }
 
           // Inventory Deduction
           await deductInventoryForOrder(dbOrder.id);

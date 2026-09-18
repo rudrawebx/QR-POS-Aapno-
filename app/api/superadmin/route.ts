@@ -328,7 +328,7 @@ export async function POST(request: Request) {
       await prisma.restaurantSettings.create({
         data: {
           restaurantId: restaurant.id,
-          upiId: '9996213962m@pnb',
+          upiId: '9996213962@hdfc',
           upiMerchantName: name,
         },
       });

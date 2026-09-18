@@ -270,7 +270,7 @@ export default function AdminPosPage() {
       },
       items: [
         { name: 'Total Completed Orders (Count)', quantity: 38, unitPrice: 0, totalPrice: 0 },
-        { name: 'PNB UPI Collections (9996213962m@pnb)', quantity: 24, unitPrice: 350, totalPrice: 8400 },
+        { name: 'UPI Collections (9996213962@hdfc)', quantity: 24, unitPrice: 350, totalPrice: 8400 },
         { name: 'Cash at Counter Collections', quantity: 10, unitPrice: 320, totalPrice: 3200 },
         { name: 'Card & Netbanking Collections', quantity: 4, unitPrice: 368, totalPrice: 1472.5 },
       ],

@@ -49,7 +49,7 @@ export default function CustomerQsrMenuPage() {
       isRestaurantOpen: true,
       openingHoursText: '11:00 AM - 11:30 PM',
       closureMessage: 'We are currently closed for orders. Please visit during regular hours.',
-      upiId: '9996213962m@pnb',
+      upiId: '9996213962@hdfc',
       upiMerchantName: 'AAPNO KHANO',
       upiQrImageUrl: '/images/pnb-upi-qr.png',
       taxRateGst: 5.0,

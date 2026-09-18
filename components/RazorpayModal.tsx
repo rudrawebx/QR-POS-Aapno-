@@ -67,11 +67,11 @@ export default function RazorpayModal({
   const [rzpOrderId, setRzpOrderId] = useState<string>("");
   const [keyId, setKeyId] = useState<string>("rzp_test_TWIx6ekD7pnyCY");
   const amount = orderDetails.grandTotal;
-  const upiId = "9996213962m@pnb";
+  const upiId = restaurant?.settings?.upiId || "9996213962@hdfc";
   const upiName = "Aapno Khaano";
   const upiRef = "AK" + Date.now().toString().slice(-6);
 
-    // Universal NPCI UPI Deep Links for 9996213962m@pnb
+  // Universal NPCI UPI Deep Links for 9996213962@hdfc
   const upiGenericUrl = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent("Aapno Khaano Bill " + (orderDetails.carNumber || orderDetails.customerName))}`;
   const gpayUrl = `tez://upi/pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent("Aapno Khaano Bill " + (orderDetails.carNumber || orderDetails.customerName))}`;
   const phonepeUrl = `phonepe://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent("Aapno Khaano Bill " + (orderDetails.carNumber || orderDetails.customerName))}`;

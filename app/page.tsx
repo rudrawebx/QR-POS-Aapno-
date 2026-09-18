@@ -186,7 +186,7 @@ export default function MasterLandingPage() {
 
         {/* Subtitle */}
         <p className="mt-4 text-xs sm:text-base text-[#745E55] max-w-2xl mx-auto leading-relaxed font-medium">
-          Pre-seeded with <b className="text-[#331E17]">आपणो खाणो (Aapno Khaano)</b> authentic 60+ dishes catalog, verified PNB Standee UPI (<code className="bg-[#FFF0E8] text-[#AA1B2A] px-2 py-0.5 rounded-md font-mono text-xs font-bold border border-[#E8E1D6]">9996213962m@pnb</code>), Recipe BOM inventory, and strict private role-based authentication.
+          Pre-seeded with <b className="text-[#331E17]">आपणो खाणो (Aapno Khaano)</b> authentic 60+ dishes catalog, verified Standee UPI (<code className="bg-[#FFF0E8] text-[#AA1B2A] px-2 py-0.5 rounded-md font-mono text-xs font-bold border border-[#E8E1D6]">9996213962@hdfc</code>), Recipe BOM inventory, and strict private role-based authentication.
         </p>
 
         {/* Quick Action CTAs */}
@@ -310,7 +310,7 @@ export default function MasterLandingPage() {
           <span>Royal Rajasthani QSR POS &amp; SaaS</span>
         </div>
         <p className="text-[#E8E1D6]/80 text-xs max-w-md mx-auto">
-          Official PNB Standee UPI: <b className="text-white font-mono">9996213962m@pnb</b> • 5% GST Compliant • 80mm Dual Thermal Printing
+          Official Standee UPI: <b className="text-white font-mono">9996213962@hdfc</b> • 5% GST Compliant • 80mm Dual Thermal Printing
         </p>
         <p className="text-[10px] text-[#E8E1D6]/50">
           © {new Date().getFullYear()} Aapno Khaano. All Rights Reserved. Reference: www.aapnokhano.com

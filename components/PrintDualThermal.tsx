@@ -357,7 +357,7 @@ export default function PrintDualThermal({
                   <span>TENDER METHOD:</span>
                   <span className="uppercase">{billData.order.paymentMethod} (PAID ✓)</span>
                 </div>
-                <p className="text-[9px] text-slate-600">UPI: 9996213962m@pnb</p>
+                <p className="text-[9px] text-slate-600">UPI: {billData.restaurant.upiId || "9996213962@hdfc"}</p>
               </div>
 
               {/* Footer */}
