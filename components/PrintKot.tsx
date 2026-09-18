@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { PrintKotData } from '@/lib/types';
 import { Printer, X } from 'lucide-react';
 
@@ -16,38 +17,118 @@ export default function PrintKot({
   autoPrint = false,
 }: PrintKotProps) {
   const { kot, items } = data;
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (autoPrint) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         window.print();
-      }, 400);
+      }, 300);
+      return () => clearTimeout(timer);
     }
-  }, [autoPrint]);
+  }, [mounted, autoPrint]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 overflow-y-auto">
-      {/* Top Floating Controls */}
-      <div className="fixed top-4 right-4 z-50 flex items-center gap-2 no-print">
-        <button
-          onClick={() => window.print()}
-          className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
-        >
-          <Printer className="w-4 h-4" />
-          <span>Print KOT Ticket</span>
-        </button>
-        {onClose && (
+  if (!mounted) return null;
+
+  return createPortal(
+    <>
+      <style jsx global>{`
+        @media print {
+          @page {
+            size: auto;
+            margin: 0mm !important;
+          }
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
+          html, body {
+            width: 100% !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            overflow: visible !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          body * {
+            visibility: hidden;
+          }
+          #thermal-kot-modal,
+          #thermal-kot-modal * {
+            visibility: visible;
+          }
+          .no-print, .no-print * {
+            display: none !important;
+            visibility: hidden !important;
+          }
+          #thermal-kot-modal {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            max-width: 80mm !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            display: block !important;
+            z-index: 999999 !important;
+          }
+          .print-container {
+            width: 72mm !important;
+            max-width: 72mm !important;
+            margin: 0mm auto !important;
+            padding: 1mm 1mm 2mm 1mm !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            border: 2px dashed #000000 !important;
+            box-shadow: none !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            display: block !important;
+          }
+        }
+      `}</style>
+      <div id="thermal-kot-modal" className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4 overflow-y-auto">
+        {/* Top Floating Controls */}
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 no-print">
           <button
-            onClick={onClose}
-            className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-xl shadow-lg cursor-pointer"
+            onClick={() => window.print()}
+            className="bg-red-700 hover:bg-red-800 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg cursor-pointer"
           >
-            <X className="w-4 h-4" />
+            <Printer className="w-4 h-4" />
+            <span>Print KOT Ticket</span>
           </button>
-        )}
-      </div>
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="bg-slate-800 hover:bg-slate-700 text-white p-2 rounded-xl shadow-lg cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
 
-      {/* 80mm KOT Ticket Container */}
-      <div className="print-container bg-white text-black p-4 rounded-xl shadow-2xl max-w-[340px] w-full font-mono text-[12px] leading-tight border-2 border-dashed border-black">
+        {/* 80mm KOT Ticket Container */}
+        <div className="print-container bg-white text-black p-4 rounded-xl shadow-2xl max-w-[340px] w-full font-mono text-[12px] leading-tight border-2 border-dashed border-black">
         {/* Header */}
         <div className="text-center pb-2 border-b-2 border-black space-y-1">
           <p className="text-xl font-black tracking-widest uppercase">*** KITCHEN ORDER TICKET ***</p>
@@ -124,5 +205,7 @@ export default function PrintKot({
         </div>
       </div>
     </div>
+    </>,
+    document.body
   );
 }

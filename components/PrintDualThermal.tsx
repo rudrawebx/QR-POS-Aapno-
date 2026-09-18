@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { PrintReceiptData, PrintKotData } from '@/lib/types';
-import { Printer, X, Scissors, PlusCircle, FileText, ChefHat } from 'lucide-react';
+import { Printer, Scissors, PlusCircle, FileText, ChefHat } from 'lucide-react';
 
 interface PrintDualThermalProps {
   billData?: PrintReceiptData | null;
@@ -20,10 +21,15 @@ export default function PrintDualThermal({
   autoPrint = true,
 }: PrintDualThermalProps) {
   const [activeMode, setActiveMode] = useState<'PRINT_BOTH' | 'PRINT_BILL' | 'PRINT_KOT'>(initialMode);
+  const [mounted, setMounted] = useState(false);
 
-  
   useEffect(() => {
-    // Trigger auto-print with small render delay to allow 2X logo & DOM to paint
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    // Trigger auto-print with small render delay to allow logo & DOM to paint
     const isPaidOrder = billData?.order?.paymentStatus === 'PAID' || !billData;
     if (autoPrint && isPaidOrder) {
       const timer = setTimeout(() => {
@@ -45,8 +51,7 @@ export default function PrintDualThermal({
 
       return () => clearTimeout(timer);
     }
-  }, [autoPrint, activeMode, billData]);
-
+  }, [mounted, autoPrint, activeMode, billData]);
 
   // Keyboard shortcut: Escape to close
   useEffect(() => {
@@ -85,14 +90,16 @@ export default function PrintDualThermal({
     window.open(whatsappUrl, "_blank");
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
-      {/* Universal 80mm ESC/POS CSS & Crisp PDF Export - 100% Guaranteed Non-Blank Print & Clean Alignment */}
+      {/* Universal 80mm ESC/POS CSS & Crisp PDF Export */}
       <style jsx global>{`
         @media print {
           @page {
             size: auto;
-            margin: 0mm 0mm 4mm 0mm !important;
+            margin: 0mm !important;
           }
           *, *:before, *:after {
             box-shadow: none !important;
@@ -102,40 +109,52 @@ export default function PrintDualThermal({
           }
           html, body {
             width: 100% !important;
-            max-width: 80mm !important;
-            margin: 0mm auto !important;
-            padding: 0mm !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: #ffffff !important;
             background-color: #ffffff !important;
             color: #000000 !important;
             overflow: visible !important;
-            height: auto !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          /* Hide all surrounding DOM, modals, fixed overlays and backgrounds */
-          .no-print, header, nav, aside, footer {
+          body * {
+            visibility: hidden;
+          }
+          #thermal-print-overlay,
+          #thermal-print-overlay * {
+            visibility: visible;
+          }
+          .no-print, .no-print * {
             display: none !important;
+            visibility: hidden !important;
           }
           #thermal-print-overlay {
-            position: static !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            max-width: 80mm !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
             background: #ffffff !important;
             background-color: #ffffff !important;
             backdrop-filter: none !important;
             box-shadow: none !important;
-            padding: 0mm !important;
-            margin: 0mm auto !important;
             overflow: visible !important;
-            width: 100% !important;
-            max-width: 80mm !important;
             display: block !important;
+            z-index: 999999 !important;
           }
           #thermal-print-root {
             position: static !important;
             width: 100% !important;
             max-width: 80mm !important;
-            margin: 0mm auto !important;
-            padding: 0mm !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
             background: #ffffff !important;
             background-color: #ffffff !important;
             display: block !important;
@@ -143,8 +162,8 @@ export default function PrintDualThermal({
           .thermal-doc {
             width: 72mm !important;
             max-width: 72mm !important;
-            margin: 0mm auto !important;
-            padding: 2mm 1mm 4mm 1mm !important;
+            margin: 0 auto !important;
+            padding: 1mm 1mm 2mm 1mm !important;
             background: #ffffff !important;
             background-color: #ffffff !important;
             color: #000000 !important;
@@ -154,7 +173,6 @@ export default function PrintDualThermal({
             break-inside: avoid !important;
             display: block !important;
           }
-          /* PHYSICAL HARDWARE AUTO-CUT TRIGGER: Sends Page Break to printer driver to fire cutter knife between Bill and KOT */
           .thermal-bill-page {
             page-break-after: always !important;
             break-after: page !important;
@@ -169,12 +187,11 @@ export default function PrintDualThermal({
             break-inside: avoid !important;
             display: block !important;
           }
-          /* Hide the visual on-screen tear banner during physical print so printer cuts cleanly without printing tear text */
           .thermal-cut-line {
             display: none !important;
           }
           .thermal-feed-spacer {
-            height: 10mm !important;
+            height: 6mm !important;
             display: block !important;
           }
         }
@@ -476,6 +493,8 @@ export default function PrintDualThermal({
           )}
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
+

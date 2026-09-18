@@ -1,6 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { PrintReceiptData } from '@/lib/types';
 import { Printer, X } from 'lucide-react';
 
@@ -16,14 +17,21 @@ export default function PrintThermalReceipt({
   autoPrint = false,
 }: PrintThermalReceiptProps) {
   const { restaurant, order, items } = data;
+  const [mounted, setMounted] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
     if (autoPrint) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         window.print();
-      }, 400);
+      }, 300);
+      return () => clearTimeout(timer);
     }
-  }, [autoPrint]);
+  }, [mounted, autoPrint]);
 
   const handleManualPrint = () => {
     window.print();
@@ -49,45 +57,71 @@ export default function PrintThermalReceipt({
     window.open(whatsappUrl, '_blank');
   };
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <>
       <style jsx global>{`
         @media print {
           @page {
             size: auto;
-            margin: 0mm 0mm 4mm 0mm !important;
+            margin: 0mm !important;
+          }
+          *, *:before, *:after {
+            box-shadow: none !important;
+            text-shadow: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
           }
           html, body {
             width: 100% !important;
-            margin: 0mm !important;
-            padding: 0mm !important;
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            margin: 0 !important;
+            padding: 0 !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             color: #000000 !important;
             overflow: visible !important;
-            height: auto !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
-          .no-print, header, nav, aside, footer {
+          body * {
+            visibility: hidden;
+          }
+          #thermal-receipt-modal,
+          #thermal-receipt-modal * {
+            visibility: visible;
+          }
+          .no-print, .no-print * {
             display: none !important;
+            visibility: hidden !important;
           }
           #thermal-receipt-modal {
-            position: static !important;
-            background: #ffffff !important;
-            backdrop-filter: none !important;
-            padding: 0mm !important;
-            margin: 0mm auto !important;
-            overflow: visible !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
             width: 100% !important;
             max-width: 80mm !important;
+            margin: 0 auto !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            background-color: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            overflow: visible !important;
             display: block !important;
+            z-index: 999999 !important;
           }
           .print-container {
             width: 72mm !important;
             max-width: 72mm !important;
             margin: 0mm auto !important;
-            padding: 2mm 1mm 4mm 1mm !important;
+            padding: 1mm 1mm 2mm 1mm !important;
             background: #ffffff !important;
+            background-color: #ffffff !important;
             color: #000000 !important;
             border: none !important;
             box-shadow: none !important;
@@ -230,7 +264,8 @@ export default function PrintThermalReceipt({
           <p className="text-slate-500">*** Software Powered by Aapno Khaano QSR ***</p>
         </div>
       </div>
-    </div>
-  </>
-);
+      </div>
+    </>,
+    document.body
+  );
 }

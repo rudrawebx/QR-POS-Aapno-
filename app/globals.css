@@ -51,33 +51,56 @@ body {
   }
   html, body {
     width: 100% !important;
-    max-width: 80mm !important;
-    margin: 0mm auto !important;
-    padding: 0mm !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
     overflow: visible !important;
-    height: auto !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
-  .no-print, header, nav, aside, footer {
+  body * {
+    visibility: hidden;
+  }
+  #thermal-print-overlay,
+  #thermal-print-overlay *,
+  #thermal-receipt-modal,
+  #thermal-receipt-modal *,
+  #thermal-kot-modal,
+  #thermal-kot-modal *,
+  .print-container,
+  .print-container *,
+  .thermal-doc,
+  .thermal-doc * {
+    visibility: visible;
+  }
+  .no-print, .no-print * {
     display: none !important;
+    visibility: hidden !important;
   }
   #thermal-print-overlay,
   #thermal-receipt-modal,
+  #thermal-kot-modal,
   .print-overlay {
-    position: static !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    max-width: 80mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
-    padding: 0mm !important;
-    margin: 0mm auto !important;
-    width: 100% !important;
-    max-width: 80mm !important;
+    overflow: visible !important;
     display: block !important;
+    z-index: 999999 !important;
   }
   .print-container,
   .thermal-print-wrapper,
@@ -85,8 +108,8 @@ body {
     position: static !important;
     width: 100% !important;
     max-width: 80mm !important;
-    margin: 0mm auto !important;
-    padding: 0mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
     font-family: "Courier New", Courier, monospace, sans-serif !important;
     font-size: 11px !important;
     line-height: 1.25 !important;
@@ -96,9 +119,39 @@ body {
     display: block !important;
   }
   .thermal-doc {
+    width: 72mm !important;
+    max-width: 72mm !important;
+    margin: 0 auto !important;
+    padding: 1mm 1mm 2mm 1mm !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     color: #000000 !important;
+    border: none !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+  }
+  .thermal-bill-page {
+    page-break-after: always !important;
+    break-after: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+  }
+  .thermal-kot-page {
+    page-break-before: always !important;
+    break-before: page !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    display: block !important;
+  }
+  .thermal-cut-line {
+    display: none !important;
+  }
+  .thermal-feed-spacer {
+    height: 6mm !important;
+    display: block !important;
   }
 }
 
