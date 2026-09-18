@@ -281,9 +281,8 @@ export async function POST(request: Request) {
               ingredients: {
                 create: recipeIngredients.map((ri: any) => ({
                   ingredientId: ri.ingredientId,
-                  quantity: parseFloat(ri.quantity || "0"),
+                  quantityUsed: parseFloat(ri.quantity || ri.quantityUsed || "0.1"),
                   unit: ri.unit || "KG",
-                  costPerUnit: parseFloat(ri.costPerUnit || "0"),
                 })),
               },
             },
