@@ -335,9 +335,9 @@ export default function SuperAdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans">
-      {/* Super Admin Header */}
-      <header className="h-16 px-4 sm:px-6 bg-[#311410] border-b border-[#E09D3D]/30 flex items-center justify-between text-[#FEFBF5] no-print">
+    <div className="h-screen w-screen overflow-hidden bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans">
+      {/* Super Admin Header - Sticky top */}
+      <header className="h-16 px-4 sm:px-6 bg-[#311410] border-b border-[#E09D3D]/30 flex items-center justify-between text-[#FEFBF5] flex-shrink-0 z-20 no-print">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-[#FFF0E8] text-[#AA1B2A] border border-[#E09D3D] flex items-center justify-center flex-shrink-0">
             <ShieldAlert className="w-5 h-5 text-[#AA1B2A]" />
