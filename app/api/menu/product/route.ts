@@ -154,8 +154,9 @@ export async function POST(request: Request) {
       console.warn('DB create product warning:', dbErr);
     }
 
-    if (product && product.id) { updateProductOverride(product.id, product); }
-    if (id) { updateProductOverride(id, { ...updateData, ...(product || {}) }); }
+    if (product && product.id) {
+      updateProductOverride(product.id, product);
+    }
     invalidateMenuCache(restaurantId);
     return NextResponse.json({ success: true, product });
   } catch (error) {

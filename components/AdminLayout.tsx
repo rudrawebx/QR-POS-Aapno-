@@ -226,8 +226,6 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     { label: 'Menu & Stock Catalog', href: '/admin/menu', icon: UtensilsCrossed, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER'] },
     { label: 'Billing & Tax Invoices', href: '/admin/invoices', icon: Receipt, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER', 'ACCOUNTANT'] },
     { label: 'Raw Inventory & BOM', href: '/admin/inventory', icon: Package, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER'] },
-    { label: 'Dining Tables & QR', href: '/admin/tables', icon: UtensilsCrossed, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER', 'WAITER'] },
-    { label: 'QR Standees & Codes', href: '/admin/qr-codes', icon: QrCode, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER'] },
     { label: 'CRM & Car Customers', href: '/admin/customers', icon: Users, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'CASHIER'] },
     { label: 'Daily Expense Ledger', href: '/admin/expenses', icon: DollarSign, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'ACCOUNTANT'] },
     { label: 'Sales & GST Reports', href: '/admin/reports', icon: TrendingUp, roles: ['SUPER_ADMIN', 'OWNER', 'MANAGER', 'ACCOUNTANT'] },

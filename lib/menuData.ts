@@ -531,7 +531,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-39-chana-masala.png",
+        "imageUrl": "/images/menu/p-39-chana-masala.webp",
         "description": "Freshly prepared Chana Masala made to order with authentic spices."
       },
       {
@@ -913,7 +913,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-69-egg-curry.jpg",
+        "imageUrl": "/images/menu/p-69-egg-curry.webp",
         "description": "Freshly prepared Egg Curry made to order with authentic spices."
       },
       {
@@ -1234,7 +1234,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": true,
-        "imageUrl": "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-93-coke-1-litre.webp",
         "description": "Chilled packaged soft drink (1 Litre)."
       },
       {
@@ -1270,7 +1270,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-96-sprite-500-ml.webp",
         "description": "Chilled packaged lemon-lime soft drink (500 ml)."
       },
       {
@@ -1306,7 +1306,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "https://images.unsplash.com/photo-1625772299848-391b6a87d7b3?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-99-sprite-2-litres.webp",
         "description": "Chilled packaged lemon-lime soft drink (2 Litres)."
       },
       {
@@ -1330,7 +1330,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-101-limca-500-ml.webp",
         "description": "Chilled cloudy lemon fizzy soft drink (500 ml)."
       },
       {
@@ -1342,7 +1342,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-102-limca-750-ml.webp",
         "description": "Chilled cloudy lemon fizzy soft drink (750 ml)."
       },
       {
@@ -1448,7 +1448,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&auto=format&fit=crop&q=80",
+        "imageUrl": "/images/menu/p-109-bisleri-water.webp",
         "description": "Pure packaged mineral water (1 Litre bottle)."
       },
       {
@@ -1614,10 +1614,12 @@ export function getMergedCategories(inputCategories?: any[]) {
           }),
         });
       } else {
-        // Check if DB category has new custom products not present in masterCat
+        // Check if DB category has new custom products not present in any category
         (cat.products || []).forEach((dbP: any) => {
-          const exists = masterCat.products.some((p: any) => p.id === dbP.id || p.name?.toLowerCase().trim() === dbP.name?.toLowerCase().trim());
-          if (!exists) {
+          const existsAnywhere = resultCategories.some((c) =>
+            c.products.some((p: any) => p.id === dbP.id || p.name?.toLowerCase().trim() === dbP.name?.toLowerCase().trim())
+          );
+          if (!existsAnywhere) {
             const override = menuProductOverrides.get(dbP.id);
             masterCat.products.push(override ? { ...dbP, ...override } : dbP);
           }
