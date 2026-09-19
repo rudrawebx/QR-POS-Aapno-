@@ -376,7 +376,7 @@ export default function AdminOrdersPage() {
                                 {ord.orderType?.replace('_', ' ')}
                               </span>
                               <span className="bg-slate-100 text-slate-800 font-bold text-[9px] px-1.5 py-0.5 rounded border border-slate-200">
-                                {ord.paymentMethod === 'UPI_DIRECT' || ord.paymentMethod === 'UPI' ? '📱 UPI/QR' : ord.paymentMethod === 'CASH' ? '💵 Cash' : ord.paymentMethod === 'CARD' ? '💳 Card' : ord.paymentMethod || 'Pay'}
+                                {ord.paymentMethod === 'PAY_AT_COUNTER' ? '🏪 Pay at Counter' : ord.paymentMethod === 'RAZORPAY' ? '⚡ Razorpay' : ord.paymentMethod === 'UPI_DIRECT' || ord.paymentMethod === 'UPI' ? '📱 UPI' : ord.paymentMethod === 'CASH' ? '💵 Cash' : ord.paymentMethod === 'CARD' ? '💳 Card' : ord.paymentMethod || 'Pay'}
                               </span>
                             </div>
                             <p className="text-[11px] text-[#745E55] font-semibold mt-0.5">
@@ -391,9 +391,9 @@ export default function AdminOrdersPage() {
                                 ? 'text-red-700'
                                 : ord.paymentStatus === 'PAID'
                                 ? 'text-emerald-700'
-                                : 'text-amber-700 bg-amber-100 px-1 rounded'
+                                : 'text-amber-800 bg-amber-100 px-1 rounded font-black'
                             }`}>
-                              {ord.paymentStatus === 'REFUNDED' ? 'REFUNDED' : ord.paymentStatus === 'PAID' ? 'PAID ✓' : 'UNPAID ⏳'}
+                              {ord.paymentStatus === 'REFUNDED' ? 'REFUNDED' : ord.paymentStatus === 'PAID' ? 'PAID ✓' : 'UNPAID (COUNTER)'}
                             </span>
                           </div>
                         </div>
@@ -474,10 +474,10 @@ export default function AdminOrdersPage() {
                             <div className="flex items-center gap-1 w-full">
                               <button
                                 onClick={() => handleConfirmCashOrder(ord)}
-                                className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold py-1.5 px-2 rounded-xl text-[10px] flex items-center justify-center gap-1 shadow-2xs cursor-pointer"
+                                className="flex-1 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black py-2 px-2.5 rounded-xl text-[11px] flex items-center justify-center gap-1.5 shadow-sm cursor-pointer border border-emerald-400"
                               >
-                                <CheckCircle2 className="w-3 h-3 text-emerald-300" />
-                                <span>Confirm Cash Received</span>
+                                <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                                <span>💰 Collect Payment &amp; Settle Bill (₹{ord.grandTotal})</span>
                               </button>
                             </div>
                           )}

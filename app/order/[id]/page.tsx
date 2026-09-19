@@ -204,9 +204,15 @@ export default function CustomerOrderTrackerPage() {
           </div>
 
           <div className="text-right">
-            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-300 uppercase">
-              Paid ✓ ({order.paymentMethod})
-            </span>
+            {order.paymentStatus === 'PAID' ? (
+              <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full border border-emerald-300 uppercase">
+                Paid ✓ ({order.paymentMethod || 'Online'})
+              </span>
+            ) : (
+              <span className="bg-amber-100 text-amber-900 text-[10px] font-black px-2.5 py-1 rounded-full border border-amber-300 uppercase animate-pulse">
+                ⚠️ Pay at Counter: ₹{Number(order.grandTotal || 0).toFixed(2)}
+              </span>
+            )}
           </div>
         </div>
 
@@ -217,7 +223,7 @@ export default function CustomerOrderTrackerPage() {
           </h3>
 
           <div className="space-y-4">
-            {/* Step 1: Payment Verified */}
+            {/* Step 1: Order Confirmed / Payment */}
             <div className="flex items-start gap-3">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black flex-shrink-0 ${
@@ -227,8 +233,14 @@ export default function CustomerOrderTrackerPage() {
                 ✓
               </div>
               <div className="flex-1 pt-0.5">
-                <p className="text-xs font-bold text-slate-900">Payment Verified &amp; KOT Fired</p>
-                <p className="text-[11px] text-slate-500">Order successfully verified via UPI</p>
+                <p className="text-xs font-bold text-slate-900">
+                  {order.paymentStatus === 'PAID' ? 'Payment Verified & KOT Fired' : 'Order Placed & KOT Fired'}
+                </p>
+                <p className="text-[11px] text-slate-500">
+                  {order.paymentStatus === 'PAID'
+                    ? 'Payment verified • Kitchen cooking underway'
+                    : `Food preparation started • Please pay ₹${Number(order.grandTotal || 0).toFixed(2)} at billing counter`}
+                </p>
               </div>
             </div>
 

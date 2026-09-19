@@ -45,45 +45,63 @@ export async function POST(request: Request) {
       process.env.RAZORPAY_KEY_SECRET ||
       "Zbn2W1RvnXnWFT2dMxVldrjT";
 
-    // 2. Strict HMAC SHA-256 Signature Verification or Direct UPI / Counter Confirmation
-    const isDirectUpiOrCounter =
-      paymentMethod === "UPI_DIRECT" ||
-      paymentMethod === "UPI" ||
-      paymentMethod === "PAY_AT_COUNTER" ||
-      paymentMethod === "CASH" ||
-      (razorpay_order_id && (razorpay_order_id.startsWith("upi_") || razorpay_order_id.startsWith("counter_") || razorpay_order_id.startsWith("order_sim_"))) ||
-      razorpay_signature === "sig_upi_direct_verified" ||
-      razorpay_signature === "sig_bypass_verified" ||
-      razorpay_signature === "sig_pos_bypass";
+    // 2. Strict Verification for Online Payments vs Pay at Counter
+    const isPayAtCounter = paymentMethod === "PAY_AT_COUNTER";
 
-    if (!isDirectUpiOrCounter) {
-      if (razorpay_order_id && razorpay_payment_id && razorpay_signature) {
-        const candidateSecrets = [
-          keySecret,
-          process.env.RAZORPAY_KEY_SECRET,
-          restaurant?.settings?.razorpayKeySecret,
-          "Zbn2W1RvnXnWFT2dMxVldrjT",
-          "g3rJ8h8yK9mN2pQ5sT7vW4xZ",
-        ].filter(Boolean) as string[];
-
-        const isValidSignature = candidateSecrets.some((secret) => {
-          const gen = crypto
-            .createHmac("sha256", secret)
-            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-            .digest("hex");
-          return gen === razorpay_signature;
-        });
-
-        if (!isValidSignature) {
-          console.error("[Payment Security] Cryptographic signature mismatch!");
-          return NextResponse.json(
-            { error: "Payment verification failed: Invalid cryptographic signature. Bill cannot be generated." },
-            { status: 400 }
-          );
-        }
-      } else {
+    if (!isPayAtCounter) {
+      if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return NextResponse.json(
-          { error: "Missing required cryptographic payment parameters (payment ID, order ID, or signature)." },
+          { success: false, error: "Missing required payment verification parameters (Payment ID, Order ID, or Signature)." },
+          { status: 400 }
+        );
+      }
+
+      // Check candidate secrets for HMAC-SHA256 signature verification
+      const candidateSecrets = [
+        keySecret,
+        process.env.RAZORPAY_KEY_SECRET,
+        restaurant?.settings?.razorpayKeySecret,
+        "Zbn2W1RvnXnWFT2dMxVldrjT",
+      ].filter(Boolean) as string[];
+
+      let isValidSignature = candidateSecrets.some((secret) => {
+        const gen = crypto
+          .createHmac("sha256", secret)
+          .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+          .digest("hex");
+        return gen === razorpay_signature;
+      });
+
+      // If HMAC local check didn't match, verify directly with Razorpay REST API
+      if (!isValidSignature) {
+        try {
+          const keyId = restaurant?.settings?.razorpayKeyId || process.env.RAZORPAY_KEY_ID || "rzp_test_TWIx6ekD7pnyCY";
+          const authHeader = "Basic " + Buffer.from(`${keyId}:${keySecret}`).toString("base64");
+          const rzpApiRes = await fetch(`https://api.razorpay.com/v1/payments/${razorpay_payment_id}`, {
+            headers: { Authorization: authHeader },
+          });
+
+          if (rzpApiRes.ok) {
+            const paymentInfo = await rzpApiRes.json();
+            if (
+              (paymentInfo.status === "captured" || paymentInfo.status === "authorized") &&
+              (paymentInfo.order_id === razorpay_order_id || !razorpay_order_id.startsWith("order_"))
+            ) {
+              isValidSignature = true;
+            }
+          }
+        } catch (apiErr) {
+          console.warn("[Razorpay API check warning]:", apiErr);
+        }
+      }
+
+      if (!isValidSignature) {
+        console.error("[Payment Security] Payment signature mismatch or failed verification:", {
+          razorpay_order_id,
+          razorpay_payment_id,
+        });
+        return NextResponse.json(
+          { success: false, error: "Payment verification failed: Invalid payment signature or payment not captured by bank. Please try again or pay at counter." },
           { status: 400 }
         );
       }
@@ -210,20 +228,15 @@ export async function POST(request: Request) {
     const humanOrderId = existingOrder?.humanOrderId || `AK-2026-${orderNum}`;
     const humanInvoiceNumber = `AK-INV-2026-${String(orderNum).padStart(6, "0")}`;
     const humanKotNumber = `KOT-${orderNum}`;
-    const finalPaymentMethod =
-      paymentMethod === "PAY_AT_COUNTER" || paymentMethod === "CASH" || razorpay_order_id?.startsWith("counter_")
-        ? "CASH"
-        : paymentMethod === "UPI_DIRECT" || paymentMethod === "UPI" || razorpay_order_id?.startsWith("upi_")
-        ? "UPI"
-        : "RAZORPAY";
-
-    const verifiedTxnId = razorpay_payment_id || `${finalPaymentMethod}_${Date.now()}`;
+    const finalPaymentMethod = isPayAtCounter ? "PAY_AT_COUNTER" : "RAZORPAY";
+    const initialPaymentStatus = isPayAtCounter ? "UNPAID" : "PAID";
+    const verifiedTxnId = razorpay_payment_id || (isPayAtCounter ? `COUNTER_${Date.now()}` : `RAZORPAY_${Date.now()}`);
 
     let orderRecord: any = null;
     let invoiceRecord: any = null;
     let kotRecord: any = null;
 
-    // 5. Atomic Database Persistence for Confirmed & Paid Order
+    // 5. Atomic Database Persistence
     if (prisma) {
       try {
         if (existingOrder) {
@@ -231,10 +244,10 @@ export async function POST(request: Request) {
             where: { id: existingOrder.id },
             data: {
               status: "CONFIRMED",
-              paymentStatus: "PAID",
+              paymentStatus: initialPaymentStatus,
               paymentMethod: finalPaymentMethod,
               transactionId: verifiedTxnId,
-              razorpayPaymentId: razorpay_payment_id,
+              razorpayPaymentId: razorpay_payment_id || null,
             },
             include: { items: true },
           });
@@ -253,11 +266,11 @@ export async function POST(request: Request) {
               taxAmount,
               grandTotal,
               cookingInstructions: cookingInstructions ? cookingInstructions.trim() : null,
-              paymentStatus: "PAID",
+              paymentStatus: initialPaymentStatus,
               paymentMethod: finalPaymentMethod,
               transactionId: verifiedTxnId,
-              razorpayOrderId: razorpay_order_id,
-              razorpayPaymentId: razorpay_payment_id,
+              razorpayOrderId: razorpay_order_id || null,
+              razorpayPaymentId: razorpay_payment_id || null,
               items: {
                 create: validatedItems.map((vi) => ({
                   productName: vi.productName,
@@ -276,32 +289,34 @@ export async function POST(request: Request) {
           });
         }
 
-        // Create 1 Permanent Invoice
-        invoiceRecord = await prisma.invoice.create({
-          data: {
-            humanInvoiceNumber,
-            restaurantId,
-            orderId: orderRecord.id,
-            carNumber: orderRecord.carNumber,
-            customerName: orderRecord.customerName,
-            customerPhone: orderRecord.customerPhone,
-            orderType: orderRecord.orderType,
-            subtotal: calculatedSubtotal,
-            discountAmount: discountVal,
-            cgstRate: 2.5,
-            cgstAmount,
-            sgstRate: 2.5,
-            sgstAmount,
-            grandTotal,
-            roundedTotal,
-            paymentMethod: finalPaymentMethod,
-            paymentStatus: "PAID",
-            transactionId: verifiedTxnId,
-            razorpayPaymentId: razorpay_payment_id,
-          },
-        });
+        // Create 1 Permanent Invoice ONLY if payment is verified/paid
+        if (!isPayAtCounter) {
+          invoiceRecord = await prisma.invoice.create({
+            data: {
+              humanInvoiceNumber,
+              restaurantId,
+              orderId: orderRecord.id,
+              carNumber: orderRecord.carNumber,
+              customerName: orderRecord.customerName,
+              customerPhone: orderRecord.customerPhone,
+              orderType: orderRecord.orderType,
+              subtotal: calculatedSubtotal,
+              discountAmount: discountVal,
+              cgstRate: 2.5,
+              cgstAmount,
+              sgstRate: 2.5,
+              sgstAmount,
+              grandTotal,
+              roundedTotal,
+              paymentMethod: finalPaymentMethod,
+              paymentStatus: "PAID",
+              transactionId: verifiedTxnId,
+              razorpayPaymentId: razorpay_payment_id,
+            },
+          });
+        }
 
-        // Create 1 KOT Record with exact OrderItem foreign keys
+        // Create 1 KOT Record so the kitchen starts food preparation immediately
         const orderItemsList = orderRecord.items && orderRecord.items.length > 0 ? orderRecord.items : validatedItems;
         kotRecord = await prisma.kot.create({
           data: {
@@ -330,25 +345,28 @@ export async function POST(request: Request) {
           include: { kotItems: true },
         });
 
-        // Create Payment Record
-        await prisma.payment.create({
-          data: {
-            restaurantId,
-            orderId: orderRecord.id,
-            invoiceId: invoiceRecord.id,
-            amount: grandTotal,
-            currency: "INR",
-            paymentGateway: finalPaymentMethod === "CASH" ? "CASH" : finalPaymentMethod === "UPI" ? "UPI_DIRECT" : "RAZORPAY",
-            razorpayOrderId: razorpay_order_id,
-            razorpayPaymentId: razorpay_payment_id,
-            razorpaySignature: razorpay_signature,
-            transactionId: verifiedTxnId,
-            paymentMethod: finalPaymentMethod,
-            status: "CAPTURED",
-          },
-        });
+        // Create Payment Record ONLY if payment is verified/paid
+        if (!isPayAtCounter) {
+          await prisma.payment.create({
+            data: {
+              restaurantId,
+              orderId: orderRecord.id,
+              invoiceId: invoiceRecord?.id || null,
+              amount: grandTotal,
+              currency: "INR",
+              paymentGateway: "RAZORPAY",
+              razorpayOrderId: razorpay_order_id,
+              razorpayPaymentId: razorpay_payment_id,
+              razorpaySignature: razorpay_signature,
+              transactionId: verifiedTxnId,
+              paymentMethod: finalPaymentMethod,
+              status: "CAPTURED",
+            },
+          });
 
-        // Upsert Customer in CRM
+          // Deduct Recipe BOM Inventory strictly after payment verification
+          await deductInventoryForOrder(orderRecord.id, restaurantId);
+        }
         if (cleanPhone && cleanPhone.length >= 10) {
           try {
             await prisma.customer.upsert({
@@ -401,27 +419,29 @@ export async function POST(request: Request) {
         discountAmount: discountVal,
         taxAmount,
         grandTotal,
-        paymentStatus: "PAID",
-        paymentMethod,
+        paymentStatus: initialPaymentStatus,
+        paymentMethod: finalPaymentMethod,
         transactionId: verifiedTxnId,
         createdAt: new Date(),
         items: validatedItems,
       };
-      invoiceRecord = {
-        id: `inv_${Date.now()}`,
-        humanInvoiceNumber,
-        restaurantId,
-        orderId: orderRecord.id,
-        customerName: orderRecord.customerName,
-        customerPhone: orderRecord.customerPhone,
-        subtotal: calculatedSubtotal,
-        cgstAmount,
-        sgstAmount,
-        grandTotal,
-        paymentMethod,
-        paymentStatus: "PAID",
-        createdAt: new Date(),
-      };
+      if (!isPayAtCounter) {
+        invoiceRecord = {
+          id: `inv_${Date.now()}`,
+          humanInvoiceNumber,
+          restaurantId,
+          orderId: orderRecord.id,
+          customerName: orderRecord.customerName,
+          customerPhone: orderRecord.customerPhone,
+          subtotal: calculatedSubtotal,
+          cgstAmount,
+          sgstAmount,
+          grandTotal,
+          paymentMethod: finalPaymentMethod,
+          paymentStatus: "PAID",
+          createdAt: new Date(),
+        };
+      }
       kotRecord = {
         id: `kot_${Date.now()}`,
         humanKotNumber,
@@ -434,7 +454,9 @@ export async function POST(request: Request) {
 
     // 7. Update Live In-Memory Real-time State & Broadcast Events
     recordLiveOrder({ ...orderRecord, source: 'QR_MENU' });
-    recordLiveInvoice(invoiceRecord);
+    if (invoiceRecord) {
+      recordLiveInvoice(invoiceRecord);
+    }
     broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: { ...orderRecord, source: 'QR_MENU' }, invoice: invoiceRecord, source: 'QR_MENU' });
     broadcastEvent("kds_rest_aapno_khano", { type: "NEW_KOT", kot: kotRecord });
 
@@ -458,7 +480,7 @@ export async function POST(request: Request) {
         orderType: orderRecord.orderType,
         cookingInstructions: orderRecord.cookingInstructions,
         paymentMethod: orderRecord.paymentMethod,
-        paymentStatus: "PAID",
+        paymentStatus: orderRecord.paymentStatus,
         transactionId: verifiedTxnId,
         subtotal: subtotalAfterDiscount,
         cgstAmount,

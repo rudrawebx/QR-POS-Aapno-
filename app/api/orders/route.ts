@@ -96,6 +96,140 @@ export async function POST(request: Request) {
   try {
     const session = await getCurrentSession();
     const data = await request.json();
+
+    // HANDLER FOR CASHIER SETTLING / CONFIRMING CASH PAYMENT AT COUNTER
+    if (data.action === "CONFIRM_CASH" || data.action === "SETTLE_PAYMENT") {
+      const targetOrderId = data.orderId || data.id;
+      if (!targetOrderId) {
+        return NextResponse.json({ error: "Missing order ID for cash confirmation" }, { status: 400 });
+      }
+
+      let existingOrder: any = null;
+      if (prisma) {
+        try {
+          existingOrder = await prisma.order.findFirst({
+            where: {
+              OR: [{ id: targetOrderId }, { humanOrderId: targetOrderId }],
+            },
+            include: { items: true, invoices: true, kots: true },
+          });
+        } catch (e) {
+          console.warn("DB find order for cash confirm warning:", e);
+        }
+      }
+
+      if (!existingOrder) {
+        const liveOrders = getLiveOrders() || [];
+        existingOrder = liveOrders.find((o: any) => o.id === targetOrderId || o.humanOrderId === targetOrderId);
+      }
+
+      if (!existingOrder) {
+        return NextResponse.json({ error: "Order not found" }, { status: 404 });
+      }
+
+      const paymentMethod = data.paymentMethod || "CASH";
+      const txnId = `${paymentMethod}_COLLECTED_${Date.now()}`;
+      let updatedOrder = existingOrder;
+      let invoiceRecord = existingOrder.invoices?.[0] || null;
+
+      if (prisma) {
+        try {
+          updatedOrder = await prisma.order.update({
+            where: { id: existingOrder.id },
+            data: {
+              paymentStatus: "PAID",
+              paymentMethod,
+              transactionId: txnId,
+              takenByStaffId: session?.userId || null,
+            },
+            include: { items: true },
+          });
+
+          if (!invoiceRecord) {
+            const orderNum = Math.floor(1000 + (Date.now() % 9000));
+            const humanInvoiceNumber = `AK-INV-2026-${String(orderNum).padStart(6, "0")}`;
+            const subtotal = existingOrder.subtotal || 0;
+            const discountVal = existingOrder.discountAmount || 0;
+            const subtotalAfterDiscount = Math.max(0, subtotal - discountVal);
+            const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+            const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+
+            invoiceRecord = await prisma.invoice.create({
+              data: {
+                humanInvoiceNumber,
+                restaurantId: existingOrder.restaurantId,
+                orderId: existingOrder.id,
+                carNumber: existingOrder.carNumber,
+                customerName: existingOrder.customerName,
+                customerPhone: existingOrder.customerPhone,
+                orderType: existingOrder.orderType,
+                subtotal,
+                discountAmount: discountVal,
+                cgstRate: 2.5,
+                cgstAmount,
+                sgstRate: 2.5,
+                sgstAmount,
+                grandTotal: existingOrder.grandTotal,
+                roundedTotal: Math.round(existingOrder.grandTotal),
+                paymentMethod,
+                paymentStatus: "PAID",
+                transactionId: txnId,
+              },
+            });
+          } else {
+            invoiceRecord = await prisma.invoice.update({
+              where: { id: invoiceRecord.id },
+              data: {
+                paymentStatus: "PAID",
+                paymentMethod,
+                transactionId: txnId,
+              },
+            });
+          }
+
+          // Create payment record
+          await prisma.payment.create({
+            data: {
+              restaurantId: existingOrder.restaurantId,
+              orderId: existingOrder.id,
+              invoiceId: invoiceRecord?.id || null,
+              amount: existingOrder.grandTotal,
+              currency: "INR",
+              paymentGateway: paymentMethod,
+              transactionId: txnId,
+              paymentMethod,
+              status: "CAPTURED",
+            },
+          });
+
+          // Deduct recipe BOM inventory
+          await deductInventoryForOrder(existingOrder.id, existingOrder.restaurantId);
+        } catch (dbErr) {
+          console.warn("DB settle order warning:", dbErr);
+        }
+      }
+
+      // Update in memory & broadcast
+      recordLiveOrder({ ...updatedOrder, paymentStatus: "PAID", paymentMethod });
+      if (invoiceRecord) {
+        recordLiveInvoice(invoiceRecord);
+      }
+      broadcastEvent("pos_rest_aapno_khano", {
+        type: "ORDER_STATUS_UPDATED",
+        orderId: existingOrder.id,
+        humanOrderId: existingOrder.humanOrderId,
+        paymentStatus: "PAID",
+        paymentMethod,
+      });
+
+      return NextResponse.json({
+        success: true,
+        order: updatedOrder,
+        invoice: invoiceRecord,
+        message: "Payment confirmed successfully",
+      });
+    }
+
     const {
       restaurantId = session?.restaurantId || "rest_aapno_khano",
       customerName = "Direct Guest",
