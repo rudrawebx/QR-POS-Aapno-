@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import PrintDualThermal from '@/components/PrintDualThermal';
+import PosHoldOrdersDrawer, { HeldOrder, getAmountColorTier } from '@/components/PosHoldOrdersDrawer';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
 import { CartItem } from '@/lib/types';
 import {
@@ -28,7 +29,13 @@ import {
   PauseCircle,
   FileText,
   Calendar,
+  AlertTriangle,
+  Play,
+  X,
+  Layers,
 } from 'lucide-react';
+
+const MAX_HELD_ORDERS = 20;
 
 export default function AdminPosPage() {
   const [categories, setCategories] = useState<any[]>(MASTER_AAPNO_KHANO_CATEGORIES);
@@ -48,8 +55,11 @@ export default function AdminPosPage() {
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Held Orders (Parking Tickets)
-  const [heldOrders, setHeldOrders] = useState<any[]>([]);
+  // Held Orders (Parking Tickets) State & UI
+  const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
+  const [isHoldDrawerOpen, setIsHoldDrawerOpen] = useState(false);
+  const [holdLimitAlert, setHoldLimitAlert] = useState<string | null>(null);
+  const [resumePromptHeld, setResumePromptHeld] = useState<HeldOrder | null>(null);
 
   // Dual Thermal Printing State
   const [dualPrintData, setDualPrintData] = useState<{ billData: any; kotData: any } | null>(null);
@@ -58,8 +68,44 @@ export default function AdminPosPage() {
   // Customization Modal for Portion Variations
   const [customizingProduct, setCustomizingProduct] = useState<any | null>(null);
   const [showCashModal, setShowCashModal] = useState(false);
-  const [cashTendered, setCashTendered] = useState<string>("");
+  const [cashTendered, setCashTendered] = useState<string>('');
 
+  // Load Held Orders from API & LocalStorage on mount
+  useEffect(() => {
+    async function loadHeldOrders() {
+      try {
+        const saved = localStorage.getItem('AAPNO_POS_HELD_ORDERS_V1');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setHeldOrders(parsed);
+          }
+        }
+        // Fetch latest synced held orders from database
+        const res = await fetch('/api/pos/hold?restaurantId=rest_aapno_khano');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.heldOrders) && data.heldOrders.length > 0) {
+            setHeldOrders(data.heldOrders);
+            localStorage.setItem('AAPNO_POS_HELD_ORDERS_V1', JSON.stringify(data.heldOrders));
+          }
+        }
+      } catch (err) {
+        console.error('Error loading held orders:', err);
+      }
+    }
+    loadHeldOrders();
+  }, []);
+
+  // Helper to persist held orders to localStorage & Database
+  const updateHeldOrders = (newList: HeldOrder[]) => {
+    setHeldOrders(newList);
+    try {
+      localStorage.setItem('AAPNO_POS_HELD_ORDERS_V1', JSON.stringify(newList));
+    } catch (err) {
+      console.error('Error saving held orders to localStorage:', err);
+    }
+  };
 
   useEffect(() => {
     async function loadData() {
@@ -199,29 +245,197 @@ export default function AdminPosPage() {
     setCartItems(updated);
   };
 
+  const rawSubtotal = cartItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
+  const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+  const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+  const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
+  const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
+
+  // Dynamic color zone tier info for current active ticket
+  const activeTier = getAmountColorTier(grandTotal);
+
+  // HOLD ORDER FUNCTION (Up to 20 Capacity)
   const handleHoldOrder = () => {
-    if (cartItems.length === 0) return;
-    const newHeld = {
+    if (cartItems.length === 0) {
+      alert('Cart is empty. Please add dishes to ticket before holding.');
+      return;
+    }
+
+    if (heldOrders.length >= MAX_HELD_ORDERS) {
+      setHoldLimitAlert(
+        `Maximum ${MAX_HELD_ORDERS} orders limit reached. Please settle or resume existing held orders before placing a new one on hold.`
+      );
+      return;
+    }
+
+    // Assign next available hold token slot # (1 to 20)
+    const usedSlots = new Set(heldOrders.map((h) => h.holdNumber));
+    let nextSlot = 1;
+    for (let i = 1; i <= MAX_HELD_ORDERS; i++) {
+      if (!usedSlots.has(i)) {
+        nextSlot = i;
+        break;
+      }
+    }
+
+    const now = new Date();
+    const newHeld: HeldOrder = {
       id: `hold_${Date.now()}`,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      cartItems,
+      holdNumber: nextSlot,
+      title: carNumber ? `Car ${carNumber}` : (customerName || 'Direct Guest'),
+      createdAt: now.toISOString(),
+      time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      cartItems: [...cartItems],
       customerName,
       customerPhone,
       carNumber,
+      cookingInstructions,
       orderType,
+      paymentMethod,
+      discountAmount,
+      subtotal: rawSubtotal,
+      taxAmount,
+      grandTotal,
+      itemCount: cartItems.reduce((acc, it) => acc + it.quantity, 0),
     };
-    setHeldOrders([newHeld, ...heldOrders]);
+
+    const updated = [newHeld, ...heldOrders];
+    updateHeldOrders(updated);
+
+    // Sync to Database in background
+    fetch('/api/pos/hold', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newHeld),
+    }).catch((e) => console.warn('Failed to sync held order to database:', e));
+
+    // Reset active cart
     setCartItems([]);
     setCarNumber('');
+    setCookingInstructions('');
+    setDiscountAmount(0);
+    if (!isQuickGuest) {
+      setCustomerName('');
+      setCustomerPhone('');
+    }
   };
 
-  const handleResumeOrder = (held: any) => {
+  // RESUME ORDER FLOW
+  const handleInitiateResume = (held: HeldOrder) => {
+    if (cartItems.length > 0) {
+      setResumePromptHeld(held);
+      return;
+    }
+    executeResume(held);
+  };
+
+  const executeResume = (held: HeldOrder) => {
     setCartItems(held.cartItems);
-    setCustomerName(held.customerName);
-    setCustomerPhone(held.customerPhone);
+    setCustomerName(held.customerName || '');
+    setCustomerPhone(held.customerPhone || '');
     setCarNumber(held.carNumber || '');
+    setCookingInstructions(held.cookingInstructions || '');
     setOrderType(held.orderType);
-    setHeldOrders(heldOrders.filter((h) => h.id !== held.id));
+    setPaymentMethod(held.paymentMethod || 'UPI');
+    setDiscountAmount(held.discountAmount || 0);
+    setIsQuickGuest(!held.customerName);
+
+    const updated = heldOrders.filter((h) => h.id !== held.id);
+    updateHeldOrders(updated);
+    setIsHoldDrawerOpen(false);
+    setResumePromptHeld(null);
+
+    // Remove from Database in background
+    fetch(`/api/pos/hold?id=${held.id}&restaurantId=rest_aapno_khano`, {
+      method: 'DELETE',
+    }).catch((e) => console.warn('Failed to remove resumed order from database:', e));
+  };
+
+  const handleHoldCurrentAndResume = (held: HeldOrder) => {
+    handleHoldOrder();
+    executeResume(held);
+  };
+
+  const handleDeleteHeldOrder = (id: string) => {
+    const updated = heldOrders.filter((h) => h.id !== id);
+    updateHeldOrders(updated);
+
+    // Delete from Database in background
+    fetch(`/api/pos/hold?id=${id}&restaurantId=rest_aapno_khano`, {
+      method: 'DELETE',
+    }).catch((e) => console.warn('Failed to delete held order from database:', e));
+  };
+
+  const handleClearAllHeldOrders = () => {
+    if (confirm(`Are you sure you want to clear all ${heldOrders.length} held orders?`)) {
+      updateHeldOrders([]);
+      fetch('/api/pos/hold', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CLEAR_ALL', restaurantId: 'rest_aapno_khano' }),
+      }).catch((e) => console.warn('Failed to clear held orders in database:', e));
+    }
+  };
+
+  // DIRECT SETTLE FROM HELD DRAWER
+  const handleDirectSettleHeldOrder = async (held: HeldOrder) => {
+    setIsSubmitting(true);
+    try {
+      const guestDisplayName = held.customerName.trim() || (isQuickGuest ? 'Walk-in Guest' : 'Direct Guest');
+      const guestPhone = (held.customerPhone.trim() || '9996213962').replace(/\D/g, '');
+
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantId: 'rest_aapno_khano',
+          source: 'POS_TERMINAL',
+          customerName: guestDisplayName,
+          customerPhone: guestPhone,
+          carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber.trim() || null) : null,
+          orderType: held.orderType,
+          cookingInstructions: held.cookingInstructions,
+          paymentMethod: held.paymentMethod || 'CASH',
+          isStaffCashConfirmed: true,
+          receivedAmount: held.grandTotal,
+          discountAmount: held.discountAmount,
+          items: held.cartItems.map((it) => ({
+            productId: it.productId,
+            name: it.name,
+            selectedVariation: it.selectedVariation,
+            quantity: it.quantity,
+            unitPrice: it.unitPrice,
+            isVeg: it.isVeg,
+            specialNotes: it.specialNotes,
+            kitchenStationId: it.kitchenStationId,
+          })),
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success && data.printReceiptData) {
+        setLastBillData(data.printReceiptData);
+        setDualPrintData({
+          billData: data.printReceiptData,
+          kotData: data.kot ? {
+            kot: data.kot,
+            items: data.kot.kotItems || held.cartItems.map(c => ({ productName: c.name, quantity: c.quantity, isVeg: c.isVeg, selectedVariation: c.selectedVariation })),
+          } : null,
+        });
+
+        // Remove settled order from held list
+        handleDeleteHeldOrder(held.id);
+        setIsHoldDrawerOpen(false);
+      } else {
+        alert(data.error || 'Failed to settle held order.');
+      }
+    } catch (err) {
+      console.error('POS order settlement error:', err);
+      alert('Error processing order. Please check server connection.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Reprint Last Bill
@@ -282,14 +496,6 @@ export default function AdminPosPage() {
     });
   };
 
-  const rawSubtotal = cartItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
-  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
-  const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
-  const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
-  const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
-  const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
-
-  
   // Direct POS Settlement (Cash, UPI QR, Card EDC, Split) & Bill Generation
   const handleSettleAndPrint = async (chosenMethod: 'CASH' | 'UPI' | 'CARD' | 'SPLIT' = paymentMethod) => {
     if (cartItems.length === 0) return;
@@ -356,17 +562,49 @@ export default function AdminPosPage() {
     }
   };
 
-  // Staff Confirmed Cash Payment with Custom Received Amount
   const handleConfirmCashPayment = async () => {
     return handleSettleAndPrint("CASH");
   };
 
+  // Count active tiers among held orders for quick display
+  const heldGreenCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'GREEN').length;
+  const heldOrangeCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'ORANGE').length;
+  const heldRedCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'RED').length;
 
   return (
     <AdminLayout>
       {/* Top Quick Actions Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-[#E8E1D6] shadow-2xs mb-4">
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Prominent Held Orders Section Button */}
+          <button
+            type="button"
+            onClick={() => setIsHoldDrawerOpen(true)}
+            className={`px-3.5 py-1.5 rounded-xl text-xs font-black flex items-center gap-2 border cursor-pointer shadow-2xs transition-all active:scale-95 ${
+              heldOrders.length > 0
+                ? 'bg-[#FFF8E7] hover:bg-[#ffefc9] text-[#9A5B00] border-[#E09D3D] ring-2 ring-[#E09D3D]/30'
+                : 'bg-[#F7F2EA] hover:bg-slate-200 text-[#745E55] border-[#E8E1D6]'
+            }`}
+            title="Open Held Orders Section (20 orders capacity)"
+          >
+            <PauseCircle className={`w-4 h-4 ${heldOrders.length > 0 ? 'text-[#E09D3D] animate-pulse' : 'text-[#745E55]'}`} />
+            <span>⏸️ Held Orders ({heldOrders.length}/{MAX_HELD_ORDERS})</span>
+
+            {heldOrders.length > 0 && (
+              <div className="flex items-center gap-1 ml-0.5">
+                {heldRedCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" title={`${heldRedCount} Red Zone (>₹2000)`} />
+                )}
+                {heldOrangeCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-orange-500" title={`${heldOrangeCount} Orange Zone (>₹1000)`} />
+                )}
+                {heldGreenCount > 0 && (
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" title={`${heldGreenCount} Green Zone (<₹100)`} />
+                )}
+              </div>
+            )}
+          </button>
+
           <button
             type="button"
             onClick={handleReprintLastBill}
@@ -398,7 +636,6 @@ export default function AdminPosPage() {
           >
             <span>💬 WhatsApp Customer</span>
           </button>
-
         </div>
 
         {/* Store Open/Close Switch */}
@@ -539,13 +776,16 @@ export default function AdminPosPage() {
             <div className="flex items-center gap-2">
               {heldOrders.length > 0 && (
                 <button
-                  onClick={() => handleResumeOrder(heldOrders[0])}
-                  className="bg-amber-400 text-[#331E17] text-[10px] font-black px-2 py-0.5 rounded-full animate-bounce cursor-pointer"
+                  type="button"
+                  onClick={() => setIsHoldDrawerOpen(true)}
+                  className="bg-amber-400 hover:bg-amber-300 text-[#331E17] text-[10px] font-black px-2.5 py-0.5 rounded-full animate-bounce cursor-pointer shadow-2xs flex items-center gap-1"
                 >
-                  Resume ({heldOrders.length})
+                  <PauseCircle className="w-3 h-3 text-[#331E17]" />
+                  <span>Held ({heldOrders.length})</span>
                 </button>
               )}
               <button
+                type="button"
                 onClick={() => setCartItems([])}
                 className="text-[11px] font-bold text-amber-200 hover:text-white cursor-pointer"
               >
@@ -750,7 +990,7 @@ export default function AdminPosPage() {
               </div>
             </div>
 
-            {/* Calculations */}
+            {/* Calculations Breakdown */}
             <div className="space-y-1 text-[11px] text-[#745E55] border-b border-[#E8E1D6] pb-1.5">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
@@ -760,9 +1000,44 @@ export default function AdminPosPage() {
                 <span>GST (5% split 2.5% CGST + 2.5% SGST):</span>
                 <span className="font-bold text-[#331E17]">₹{taxAmount.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-xs font-black text-[#AA1B2A] pt-0.5">
-                <span>Grand Total ({paymentMethod}):</span>
-                <span className="text-base font-black text-[#AA1B2A]">₹{grandTotal.toFixed(2)}</span>
+            </div>
+
+            {/* DYNAMIC COLOR ZONE TOTAL BOX (Green < ₹100, Orange > ₹1000, Red > ₹2000) */}
+            <div
+              className={`p-2.5 rounded-2xl border transition-all duration-300 ${
+                cartItems.length > 0
+                  ? activeTier.tier === 'RED'
+                    ? 'border-l-4 border-l-red-600 border-red-300 bg-red-50/70 shadow-sm ring-1 ring-red-400'
+                    : activeTier.tier === 'ORANGE'
+                    ? 'border-l-4 border-l-orange-500 border-orange-300 bg-orange-50/60 shadow-2xs ring-1 ring-orange-300'
+                    : activeTier.tier === 'GREEN'
+                    ? 'border-l-4 border-l-emerald-500 border-emerald-300 bg-emerald-50/60 shadow-2xs'
+                    : 'border-[#E8E1D6] bg-white'
+                  : 'border-[#E8E1D6] bg-white'
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-black text-[#331E17]">
+                      Grand Total ({paymentMethod}):
+                    </span>
+                    {cartItems.length > 0 && (
+                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border ${activeTier.badgeClass}`}>
+                        {activeTier.label}
+                      </span>
+                    )}
+                  </div>
+                  {cartItems.length > 0 && activeTier.subtext && (
+                    <span className="text-[10px] text-[#745E55] block font-medium">
+                      {activeTier.subtext}
+                    </span>
+                  )}
+                </div>
+
+                <span className={`text-base font-black ${cartItems.length > 0 ? activeTier.textClass : 'text-[#AA1B2A]'}`}>
+                  ₹{grandTotal.toFixed(2)}
+                </span>
               </div>
             </div>
 
@@ -772,10 +1047,15 @@ export default function AdminPosPage() {
                 type="button"
                 onClick={handleHoldOrder}
                 disabled={cartItems.length === 0}
-                className="py-2.5 bg-white hover:bg-slate-50 border border-[#E8E1D6] text-[#331E17] font-bold rounded-2xl text-xs flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                className={`py-2.5 rounded-2xl text-xs font-black flex items-center justify-center gap-1.5 border transition-all cursor-pointer disabled:opacity-50 ${
+                  heldOrders.length >= MAX_HELD_ORDERS
+                    ? 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100'
+                    : 'bg-white hover:bg-amber-50 border-[#E8E1D6] text-[#331E17] hover:border-[#E09D3D]'
+                }`}
+                title={`Hold order (Capacity: ${heldOrders.length}/${MAX_HELD_ORDERS})`}
               >
-                <PauseCircle className="w-3.5 h-3.5 text-amber-600" />
-                <span>Hold Order</span>
+                <PauseCircle className="w-4 h-4 text-amber-600" />
+                <span>Hold ({heldOrders.length}/{MAX_HELD_ORDERS})</span>
               </button>
 
               <button
@@ -868,7 +1148,117 @@ export default function AdminPosPage() {
         </div>
       )}
 
-      
+      {/* HOLD LIMIT ALERT MODAL */}
+      {holdLimitAlert && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl border-2 border-red-500 max-w-sm w-full p-5 shadow-2xl space-y-4 animate-in zoom-in-95 text-center">
+            <div className="w-14 h-14 rounded-3xl bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-1">
+              <AlertTriangle className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="font-black text-base text-[#331E17]">Hold Order Limit Reached!</h3>
+              <p className="text-xs text-[#745E55] mt-1">
+                You currently have <b>{MAX_HELD_ORDERS} orders on hold</b>. The maximum limit is {MAX_HELD_ORDERS}.
+              </p>
+            </div>
+
+            <div className="p-3 bg-red-50 rounded-2xl border border-red-200 text-xs text-red-800 text-left font-medium">
+              💡 Please open the <b>Held Orders Section</b> to resume, settle, or clear old held orders before adding new ones.
+            </div>
+
+            <div className="flex gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setHoldLimitAlert(null)}
+                className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#331E17] font-bold rounded-2xl text-xs cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setHoldLimitAlert(null);
+                  setIsHoldDrawerOpen(true);
+                }}
+                className="flex-2 py-2.5 bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white font-black rounded-2xl text-xs cursor-pointer shadow-md"
+              >
+                View Held Orders ({heldOrders.length})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* RESUME CONFLICT PROMPT MODAL (When active cart is not empty) */}
+      {resumePromptHeld && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl border-2 border-[#E09D3D] max-w-md w-full p-5 shadow-2xl space-y-4 animate-in zoom-in-95">
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+              <div className="w-11 h-11 rounded-2xl bg-amber-100 text-[#AA1B2A] flex items-center justify-center">
+                <PauseCircle className="w-6 h-6 text-amber-600" />
+              </div>
+              <div>
+                <h3 className="font-black text-sm text-[#331E17]">Active Ticket Has Items</h3>
+                <p className="text-xs text-[#745E55]">
+                  You are loading <b>Hold #{resumePromptHeld.holdNumber} (₹{resumePromptHeld.grandTotal.toFixed(2)})</b>
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#745E55]">
+              Your current active ticket has <b>{cartItems.length} items (₹{grandTotal.toFixed(2)})</b>. What would you like to do?
+            </p>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => handleHoldCurrentAndResume(resumePromptHeld)}
+                disabled={heldOrders.length >= MAX_HELD_ORDERS}
+                className="w-full p-3 bg-amber-50 hover:bg-amber-100 border border-amber-300 rounded-2xl text-left font-bold text-xs text-amber-900 flex items-center justify-between cursor-pointer disabled:opacity-50"
+              >
+                <div>
+                  <div className="font-black text-amber-950">1. Hold Current Ticket &amp; Load Selected</div>
+                  <div className="text-[11px] text-amber-800 font-normal">Saves current {cartItems.length} items to Hold list first</div>
+                </div>
+                <PauseCircle className="w-4 h-4 text-amber-700 shrink-0" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => executeResume(resumePromptHeld)}
+                className="w-full p-3 bg-red-50 hover:bg-red-100 border border-red-200 rounded-2xl text-left font-bold text-xs text-red-900 flex items-center justify-between cursor-pointer"
+              >
+                <div>
+                  <div className="font-black text-red-950">2. Discard Current Ticket &amp; Load Selected</div>
+                  <div className="text-[11px] text-red-700 font-normal">Replaces current cart without saving</div>
+                </div>
+                <Trash2 className="w-4 h-4 text-red-600 shrink-0" />
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setResumePromptHeld(null)}
+              className="w-full py-2 bg-slate-100 hover:bg-slate-200 text-[#331E17] font-bold rounded-xl text-xs cursor-pointer"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* DEDICATED HELD ORDERS DRAWER SECTION */}
+      <PosHoldOrdersDrawer
+        isOpen={isHoldDrawerOpen}
+        onClose={() => setIsHoldDrawerOpen(false)}
+        heldOrders={heldOrders}
+        onResumeOrder={handleInitiateResume}
+        onDeleteHeldOrder={handleDeleteHeldOrder}
+        onClearAllHeldOrders={handleClearAllHeldOrders}
+        onDirectSettle={handleDirectSettleHeldOrder}
+        maxHoldCapacity={MAX_HELD_ORDERS}
+      />
+
       {/* CASH PAYMENT CONFIRMATION MODAL */}
       {showCashModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs p-4">

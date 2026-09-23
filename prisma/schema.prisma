@@ -88,6 +88,7 @@ model Restaurant {
   auditLogs           AuditLog[]
   subscriptions       RestaurantSubscription[]
   daySessions         DaySession[]
+  heldOrders          HeldOrder[]
 }
 
 model RestaurantSettings {
@@ -867,5 +868,30 @@ model DaySession {
   restaurant       Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   @@unique([restaurantId, sessionDate])
+}
+
+model HeldOrder {
+  id                   String     @id @default(cuid())
+  restaurantId         String     @default("rest_aapno_khano")
+  holdNumber           Int        @default(1)
+  title                String?
+  customerName         String?
+  customerPhone        String?
+  carNumber            String?
+  orderType            String     @default("CAR_SERVICE") // CAR_SERVICE, TAKEAWAY
+  cookingInstructions  String?
+  paymentMethod        String     @default("UPI") // CASH, UPI, CARD, SPLIT
+  discountAmount       Float      @default(0.0)
+  subtotal             Float      @default(0.0)
+  taxAmount            Float      @default(0.0)
+  grandTotal           Float      @default(0.0)
+  itemCount            Int        @default(0)
+  itemsJson            String     @db.Text
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  restaurant           Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+
+  @@index([restaurantId])
 }
 
