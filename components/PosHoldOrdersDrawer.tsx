@@ -15,7 +15,7 @@ import {
   ChevronRight,
   Sparkles,
   CheckCircle2,
-  ArrowRight,
+  ChefHat,
   Layers,
 } from 'lucide-react';
 import { CartItem } from '@/lib/types';
@@ -97,6 +97,7 @@ interface PosHoldOrdersDrawerProps {
   onDeleteHeldOrder: (id: string) => void;
   onClearAllHeldOrders: () => void;
   onDirectSettle?: (held: HeldOrder) => void;
+  onPrintKot?: (held: HeldOrder) => void;
   maxHoldCapacity?: number;
 }
 
@@ -108,6 +109,7 @@ export default function PosHoldOrdersDrawer({
   onDeleteHeldOrder,
   onClearAllHeldOrders,
   onDirectSettle,
+  onPrintKot,
   maxHoldCapacity = 20,
 }: PosHoldOrdersDrawerProps) {
   const [filterTier, setFilterTier] = useState<'ALL' | 'GREEN' | 'ORANGE' | 'RED'>('ALL');
@@ -391,8 +393,20 @@ export default function PosHoldOrdersDrawer({
                       className="flex-1 py-2 bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-2xs border border-[#E09D3D]/40 cursor-pointer transition-transform active:scale-98"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Resume Order (लोड करें)</span>
+                      <span>Resume (लोड करें)</span>
                     </button>
+
+                    {onPrintKot && (
+                      <button
+                        type="button"
+                        onClick={() => onPrintKot(held)}
+                        className="px-3 py-2 bg-[#FFF0E8] hover:bg-[#ffe2d4] text-[#AA1B2A] border border-[#E09D3D]/50 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs cursor-pointer transition-transform active:scale-95"
+                        title="Print Kitchen Order Ticket (KOT)"
+                      >
+                        <ChefHat className="w-3.5 h-3.5 text-[#AA1B2A]" />
+                        <span>🍳 Print KOT</span>
+                      </button>
+                    )}
 
                     {onDirectSettle && (
                       <button

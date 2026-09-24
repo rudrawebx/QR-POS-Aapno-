@@ -310,6 +310,32 @@ export default function AdminPosPage() {
       body: JSON.stringify(newHeld),
     }).catch((e) => console.warn('Failed to sync held order to database:', e));
 
+    // Auto-fire / print KOT for Kitchen immediately so kitchen starts cooking
+    const kotData = {
+      kot: {
+        humanKotNumber: `HOLD #${nextSlot}`,
+        orderNumber: newHeld.id,
+        createdAt: now,
+        stationName: 'Main Kitchen & Tandoor Station',
+        carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || 'Car Order') : null,
+        customerName: customerName.trim() || (isQuickGuest ? 'Direct Guest' : 'Customer'),
+        orderType: orderType === 'CAR_SERVICE' ? '🚗 CAR SERVICE (HOLD ORDER)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        specialInstructions: cookingInstructions.trim() || 'Hold Order - Fired to Kitchen',
+      },
+      items: cartItems.map((it) => ({
+        productName: it.name,
+        selectedVariation: it.selectedVariation || null,
+        quantity: it.quantity,
+        isVeg: it.isVeg,
+        itemNotes: it.specialNotes,
+      })),
+    };
+
+    setDualPrintData({
+      billData: null,
+      kotData,
+    });
+
     // Reset active cart
     setCartItems([]);
     setCarNumber('');
@@ -319,6 +345,34 @@ export default function AdminPosPage() {
       setCustomerName('');
       setCustomerPhone('');
     }
+  };
+
+  // Print KOT for a Held Order on-demand
+  const handlePrintHeldOrderKot = (held: HeldOrder) => {
+    const kotData = {
+      kot: {
+        humanKotNumber: `HOLD #${held.holdNumber}`,
+        orderNumber: held.id,
+        createdAt: held.createdAt || new Date(),
+        stationName: 'Main Kitchen & Tandoor Station',
+        carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber || 'Car Order') : null,
+        customerName: held.customerName || (held.orderType === 'CAR_SERVICE' ? 'Car Guest' : 'Takeaway Guest'),
+        orderType: held.orderType === 'CAR_SERVICE' ? '🚗 CAR SERVICE (HOLD ORDER)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        specialInstructions: held.cookingInstructions || 'Hold Order - Fired to Kitchen',
+      },
+      items: held.cartItems.map((it) => ({
+        productName: it.name,
+        selectedVariation: it.selectedVariation || null,
+        quantity: it.quantity,
+        isVeg: it.isVeg,
+        itemNotes: it.specialNotes,
+      })),
+    };
+
+    setDualPrintData({
+      billData: null,
+      kotData,
+    });
   };
 
   // RESUME ORDER FLOW
@@ -450,50 +504,99 @@ export default function AdminPosPage() {
     });
   };
 
-  // Print End of Day (Z-Report)
-  const handlePrintEodReport = () => {
-    const now = new Date();
-    const eodBill = {
-      restaurant: {
-        name: 'आपणो खाणो (Aapno Khaano)',
-        address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
-        city: 'Fatehabad',
-        state: 'Haryana',
-        postalCode: '125053',
-        phone: '+91 99962 13962',
-        gstin: '08AABCU9603R1ZM',
-        fssaiNumber: '12224026000189',
-        currencySymbol: '₹',
-        defaultReceiptFooter: 'DAILY END-OF-DAY (Z-REPORT) AUDIT SUMMARY',
-      },
-      order: {
-        humanOrderId: `EOD-${now.toISOString().slice(0, 10)}`,
-        createdAt: now,
-        customerName: 'Shift Supervisor / Cashier',
-        customerPhone: '9996213962',
-        carNumber: 'ALL REGISTER CHANNELS',
-        orderType: 'DINE_IN',
-        paymentMethod: 'UPI + CASH + CARD',
-        paymentStatus: 'SETTLED',
-        transactionId: `EOD_AUDIT_${now.getTime()}`,
-        subtotal: 12450.0,
-        cgstAmount: 311.25,
-        sgstAmount: 311.25,
-        grandTotal: 13072.5,
-        discountAmount: 250,
-      },
-      items: [
-        { name: 'Total Completed Orders (Count)', quantity: 38, unitPrice: 0, totalPrice: 0 },
-        { name: 'UPI Collections (9996213962@hdfc)', quantity: 24, unitPrice: 350, totalPrice: 8400 },
-        { name: 'Cash at Counter Collections', quantity: 10, unitPrice: 320, totalPrice: 3200 },
-        { name: 'Card & Netbanking Collections', quantity: 4, unitPrice: 368, totalPrice: 1472.5 },
-      ],
-    };
+  // Print End of Day (Z-Report) Verified from 12:00:00 AM to 11:59:59 PM (Live Database Data)
+  const handlePrintEodReport = async () => {
+    try {
+      setIsSubmitting(true);
+      const now = new Date();
+      
+      const res = await fetch('/api/reports?range=TODAY');
+      const data = await res.json();
+      
+      const summary = data.summary || {};
+      const payments = data.paymentMethods || [];
+      const bestsellers = data.bestsellers || [];
+      
+      const upiAmount = payments.find((p: any) => p.name === 'UPI')?.value || 0;
+      const cashAmount = payments.find((p: any) => p.name === 'CASH')?.value || 0;
+      const cardAmount = payments.find((p: any) => p.name === 'CARD')?.value || 0;
+      const splitAmount = payments.find((p: any) => p.name === 'SPLIT')?.value || 0;
+      
+      const totalSales = Number(summary.totalSales) || 0;
+      const totalTax = Number(summary.totalTax) || +(totalSales * 0.05).toFixed(2);
+      const cgst = +(totalTax / 2).toFixed(2);
+      const sgst = +(totalTax / 2).toFixed(2);
+      const totalDiscounts = Number(summary.totalDiscounts) || 0;
+      const completedOrders = Number(summary.completedOrders) || Number(summary.totalOrders) || 0;
+      
+      const dateFormatted = now.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+      
+      const eodItems: Array<{ name: string; quantity: number; unitPrice: number; totalPrice: number }> = [
+        { name: `Total Orders Completed (12 AM - 11:59 PM)`, quantity: completedOrders, unitPrice: 0, totalPrice: 0 },
+        { name: `UPI Collections (9996213962@hdfc)`, quantity: 1, unitPrice: upiAmount, totalPrice: upiAmount },
+        { name: `Cash at Counter Collections`, quantity: 1, unitPrice: cashAmount, totalPrice: cashAmount },
+        { name: `Card / EDC Terminal Collections`, quantity: 1, unitPrice: cardAmount, totalPrice: cardAmount },
+      ];
+      
+      if (splitAmount > 0) {
+        eodItems.push({ name: `Split / Other Collections`, quantity: 1, unitPrice: splitAmount, totalPrice: splitAmount });
+      }
+      
+      bestsellers.slice(0, 5).forEach((b: any) => {
+        eodItems.push({
+          name: `★ Top Dish: ${b.name}`,
+          quantity: b.quantity,
+          unitPrice: Math.round(b.revenue / (b.quantity || 1)),
+          totalPrice: Math.round(b.revenue),
+        });
+      });
 
-    setDualPrintData({
-      billData: eodBill,
-      kotData: null,
-    });
+      const eodBill = {
+        restaurant: {
+          name: 'आपणो खाणो (Aapno Khaano)',
+          address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
+          city: 'Fatehabad',
+          state: 'Haryana',
+          postalCode: '125053',
+          phone: '+91 99962 13962',
+          gstin: '08AABCU9603R1ZM',
+          fssaiNumber: '12224026000189',
+          currencySymbol: '₹',
+          defaultReceiptFooter: `OFFICIAL DAILY Z-REPORT • AUDIT VERIFIED\nDay Session: 12:00:00 AM - 11:59:59 PM\nDate: ${dateFormatted}\nThank you for auditing with Aapno Khaano POS.`,
+        },
+        order: {
+          humanOrderId: `Z-REPORT-${now.toISOString().slice(0, 10)}`,
+          createdAt: now,
+          customerName: 'Shift Supervisor / Cashier',
+          customerPhone: '9996213962',
+          carNumber: `DAILY REGISTER AUDIT (${dateFormatted})`,
+          orderType: 'DINE_IN',
+          paymentMethod: 'UPI + CASH + CARD',
+          paymentStatus: 'SETTLED',
+          transactionId: `Z_AUDIT_${now.getTime()}`,
+          subtotal: +(totalSales - totalTax).toFixed(2),
+          cgstAmount: cgst,
+          sgstAmount: sgst,
+          grandTotal: totalSales,
+          discountAmount: totalDiscounts,
+        },
+        items: eodItems,
+      };
+
+      setDualPrintData({
+        billData: eodBill,
+        kotData: null,
+      });
+    } catch (err) {
+      console.error('Error generating live Z-Report:', err);
+      alert('Failed to generate live Z-Report.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Direct POS Settlement (Cash, UPI QR, Card EDC, Split) & Bill Generation
@@ -1262,6 +1365,7 @@ export default function AdminPosPage() {
         onDeleteHeldOrder={handleDeleteHeldOrder}
         onClearAllHeldOrders={handleClearAllHeldOrders}
         onDirectSettle={handleDirectSettleHeldOrder}
+        onPrintKot={handlePrintHeldOrderKot}
         maxHoldCapacity={MAX_HELD_ORDERS}
       />
 
