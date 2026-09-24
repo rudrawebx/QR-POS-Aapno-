@@ -208,6 +208,9 @@ export default function PosHoldOrdersDrawer({
               placeholder="Search held orders by Car plate, Guest Name, Dish, Token..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.preventDefault();
+              }}
               className="w-full pl-9 pr-4 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs text-[#331E17] placeholder-[#745E55] focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
             />
           </div>

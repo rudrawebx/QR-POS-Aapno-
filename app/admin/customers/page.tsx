@@ -93,6 +93,9 @@ export default function AdminCustomersPage() {
                 placeholder="Search patron by Name, WhatsApp phone number, or Car Plate..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.preventDefault();
+                }}
                 className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
               />
             </div>

@@ -212,7 +212,12 @@ export default function AdminInvoicesPage() {
                 placeholder="Search Bill #, Guest Name, Mobile, Car Plate..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && fetchInvoices(range, customStartDate, customEndDate)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    fetchInvoices(range, customStartDate, customEndDate);
+                  }
+                }}
                 className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs"
               />
             </div>

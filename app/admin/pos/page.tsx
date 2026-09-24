@@ -667,6 +667,9 @@ export default function AdminPosPage() {
                 placeholder="Search 60+ dishes by name, Hindi, or SKU..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.preventDefault();
+                }}
                 className="w-full pl-9 pr-4 py-2 bg-white border border-[#E8E1D6] rounded-2xl text-xs text-[#331E17] placeholder-[#745E55] focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
               />
             </div>
@@ -674,6 +677,7 @@ export default function AdminPosPage() {
             {/* Category Filter Pills */}
             <div className="flex items-center gap-1 overflow-x-auto no-scrollbar">
               <button
+                type="button"
                 onClick={() => setSelectedCategoryId('ALL')}
                 className={`px-3.5 py-1.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
                   selectedCategoryId === 'ALL'
@@ -686,6 +690,7 @@ export default function AdminPosPage() {
               {categories.map((c) => (
                 <button
                   key={c.id}
+                  type="button"
                   onClick={() => setSelectedCategoryId(c.id)}
                   className={`px-3.5 py-1.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all cursor-pointer ${
                     selectedCategoryId === c.id
@@ -706,6 +711,7 @@ export default function AdminPosPage() {
               return (
                 <button
                   key={product.id}
+                  type="button"
                   onClick={() => handleAddProduct(product)}
                   className="p-2.5 rounded-3xl border border-[#E8E1D6] hover:border-[#E09D3D] bg-white hover:bg-[#FFF0E8] shadow-2xs flex flex-col justify-between text-left transition-all group cursor-pointer"
                 >
