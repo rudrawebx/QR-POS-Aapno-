@@ -5,12 +5,7 @@ import { getCurrentSession } from '@/lib/auth';
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const session = await getCurrentSession();
-    const restaurantId = searchParams.get('restaurantId') || session?.restaurantId;
-
-    if (!restaurantId) {
-      return NextResponse.json({ error: 'Restaurant ID required' }, { status: 400 });
-    }
+    const restaurantId = searchParams.get('restaurantId') || session?.restaurantId || 'rest_aapno_khano';
 
     const tables = await prisma.table.findMany({
       where: { restaurantId },
