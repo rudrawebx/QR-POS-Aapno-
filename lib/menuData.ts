@@ -844,6 +844,30 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-117-tandoori-paratha.png",
         "description": "Crisp clay-oven baked tandoori whole wheat paratha topped with fresh butter."
+      },
+      {
+        "id": "p-118",
+        "name": "Tea",
+        "basePrice": 20.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-118-tea.png",
+        "description": "Freshly brewed special hot tea / kulhad chai prepared with aromatic spices."
+      },
+      {
+        "id": "p-119",
+        "name": "Coffee",
+        "basePrice": 40.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-119-coffee.jpg",
+        "description": "Rich and creamy freshly brewed hot coffee with frothy texture."
       }
     ]
   },
