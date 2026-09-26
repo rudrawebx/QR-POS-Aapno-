@@ -1195,13 +1195,15 @@ export default function AdminPosPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    const isHalf = customizingProduct.variationType === 'HALF_FULL' || !customizingProduct.variationType;
+                    const varLabel = isHalf ? 'Half' : 'Small';
                     setCartItems([
                       ...cartItems,
                       {
                         cartId: `${customizingProduct.id}_half_${Date.now()}`,
                         productId: customizingProduct.id,
                         name: customizingProduct.name,
-                        selectedVariation: 'Half / Small',
+                        selectedVariation: varLabel,
                         basePrice: customizingProduct.priceSmallHalf,
                         unitPrice: customizingProduct.priceSmallHalf,
                         quantity: 1,
@@ -1213,7 +1215,7 @@ export default function AdminPosPage() {
                   }}
                   className="w-full p-3 rounded-2xl border border-[#E8E1D6] hover:border-[#E09D3D] bg-[#FEFBF5] hover:bg-[#FFF0E8] flex items-center justify-between font-bold cursor-pointer"
                 >
-                  <span>Half / Small Portion</span>
+                  <span>{customizingProduct.variationType === 'SMALL_LARGE' ? 'Small Portion' : 'Half Portion'}</span>
                   <span className="font-black text-[#AA1B2A]">₹{customizingProduct.priceSmallHalf}</span>
                 </button>
               )}
@@ -1222,13 +1224,15 @@ export default function AdminPosPage() {
                 <button
                   type="button"
                   onClick={() => {
+                    const isFull = customizingProduct.variationType === 'HALF_FULL' || !customizingProduct.variationType;
+                    const varLabel = isFull ? 'Full' : 'Large';
                     setCartItems([
                       ...cartItems,
                       {
                         cartId: `${customizingProduct.id}_full_${Date.now()}`,
                         productId: customizingProduct.id,
                         name: customizingProduct.name,
-                        selectedVariation: 'Full / Large',
+                        selectedVariation: varLabel,
                         basePrice: customizingProduct.priceLargeFull,
                         unitPrice: customizingProduct.priceLargeFull,
                         quantity: 1,
@@ -1240,7 +1244,7 @@ export default function AdminPosPage() {
                   }}
                   className="w-full p-3 rounded-2xl border border-[#E8E1D6] hover:border-[#E09D3D] bg-[#FEFBF5] hover:bg-[#FFF0E8] flex items-center justify-between font-bold cursor-pointer"
                 >
-                  <span>Full / Large Portion</span>
+                  <span>{customizingProduct.variationType === 'SMALL_LARGE' ? 'Large Portion' : 'Full Portion'}</span>
                   <span className="font-black text-[#AA1B2A]">₹{customizingProduct.priceLargeFull}</span>
                 </button>
               )}

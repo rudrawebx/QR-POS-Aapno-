@@ -79,10 +79,13 @@ export async function POST(request: Request) {
       }
 
       let itemPrice = product.basePrice;
-      if (it.selectedVariation === "Small" || it.selectedVariation === "Half") {
-        itemPrice = product.priceSmallHalf || product.basePrice * 0.6;
-      } else if (it.selectedVariation === "Large" || it.selectedVariation === "Full") {
-        itemPrice = product.priceLargeFull || product.basePrice;
+      const varStr = (it.selectedVariation || "").toLowerCase();
+      if (varStr.includes("half") || varStr.includes("small")) {
+        itemPrice = product.priceSmallHalf ?? (product.basePrice * 0.6);
+      } else if (varStr.includes("full") || varStr.includes("large")) {
+        itemPrice = product.priceLargeFull ?? product.basePrice;
+      } else if (it.unitPrice) {
+        itemPrice = it.unitPrice;
       } else if (product.discountPrice) {
         itemPrice = product.discountPrice;
       }
