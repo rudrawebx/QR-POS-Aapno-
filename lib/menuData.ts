@@ -1584,7 +1584,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       {
         "id": "p-114",
         "name": "Empty Glass",
-        "basePrice": 20.0,
+        "basePrice": 10.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
