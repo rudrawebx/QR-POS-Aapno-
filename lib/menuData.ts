@@ -226,15 +226,15 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
     "products": [
       {
         "id": "p-16",
-        "name": "Malai Sweet Corn",
-        "basePrice": 69.0,
+        "name": "Butter Sweet Corn",
+        "basePrice": 99.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-16-malai-sweet-corn.png",
-        "description": "Freshly prepared Malai Sweet Corn made to order with authentic spices."
+        "description": "Fresh sweet corn tossed in rich butter and savory seasonings."
       },
       {
         "id": "p-17",
@@ -832,6 +832,18 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-63-churma--desi-ghee-.png",
         "description": "Freshly prepared Churma (Desi Ghee) made to order with authentic spices."
+      },
+      {
+        "id": "p-117",
+        "name": "Tandoori Paratha",
+        "basePrice": 69.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-117-tandoori-paratha.png",
+        "description": "Crisp clay-oven baked tandoori whole wheat paratha topped with fresh butter."
       }
     ]
   },
@@ -939,6 +951,30 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-71-golden-leg-chest.png",
         "description": "Authentic chef prepared specialty available in Half (\u20b9279) and Full (\u20b9529) portions."
+      },
+      {
+        "id": "p-115",
+        "name": "Veg Sandwich",
+        "basePrice": 129.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-115-veg-sandwich.png",
+        "description": "Freshly prepared grilled vegetable sandwich with authentic spices."
+      },
+      {
+        "id": "p-116",
+        "name": "Cheese Sandwich",
+        "basePrice": 149.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-116-cheese-sandwich.png",
+        "description": "Delicious grilled sandwich loaded with fresh veggies and melted cheese."
       }
     ]
   },
@@ -1520,6 +1556,18 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-113-ice-cubes.jpg",
         "description": "Food-grade crystal clear chilled ice bucket."
+      },
+      {
+        "id": "p-114",
+        "name": "Empty Glass",
+        "basePrice": 20.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-114-empty-glass.png",
+        "description": "Disposable empty glass for drinks and beverages."
       }
     ]
   }
