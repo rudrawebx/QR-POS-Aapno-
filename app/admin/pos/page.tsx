@@ -157,14 +157,14 @@ export default function AdminPosPage() {
               sgstAmount: latest.sgstAmount,
               grandTotal: latest.grandTotal,
             },
-            items: latest.order?.items?.map((it: any) => ({
-              name: it.productName,
-              selectedVariation: it.selectedVariation,
-              quantity: it.quantity,
-              unitPrice: it.unitPrice,
-              totalPrice: it.totalPrice,
-              isVeg: it.isVeg,
-            })) || [{ name: 'Assorted Royal Dishes', quantity: 1, unitPrice: latest.subtotal, totalPrice: latest.subtotal }],
+            items: (latest.order?.items || latest.items || []).map((it: any) => ({
+              name: it.productName || it.name || "Dish Item",
+              selectedVariation: it.selectedVariation || null,
+              quantity: it.quantity || 1,
+              unitPrice: it.unitPrice || 0,
+              totalPrice: it.totalPrice || (it.unitPrice * (it.quantity || 1)),
+              isVeg: it.isVeg !== undefined ? it.isVeg : true,
+            })),
           });
         }
       } catch (err) {

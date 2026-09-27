@@ -142,6 +142,8 @@ export async function POST(request: Request) {
       paymentStatus: paymentStatus || 'PAID',
       transactionId: verifiedTxnId,
       createdAt: new Date(),
+      order: orderRecord,
+      items: validatedItems,
     };
 
     let createdKots: any[] = [];
@@ -210,6 +212,11 @@ export async function POST(request: Request) {
               paymentMethod: dbOrder.paymentMethod,
               paymentStatus: paymentStatus || 'PAID',
               transactionId: verifiedTxnId,
+            },
+            include: {
+              order: {
+                include: { items: true },
+              },
             },
           });
           invoiceRecord = dbInvoice;

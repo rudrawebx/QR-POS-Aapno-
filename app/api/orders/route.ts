@@ -469,6 +469,11 @@ export async function POST(request: Request) {
             paymentStatus: "PAID",
             transactionId,
           },
+          include: {
+            order: {
+              include: { items: true },
+            },
+          },
         });
 
         // 1 KOT Record
@@ -545,15 +550,22 @@ export async function POST(request: Request) {
         humanInvoiceNumber,
         restaurantId,
         orderId: orderRecord.id,
+        carNumber: orderRecord.carNumber,
         customerName: orderRecord.customerName,
         customerPhone: orderRecord.customerPhone,
+        orderType: orderRecord.orderType,
         subtotal: calculatedSubtotal,
+        discountAmount: discountVal,
         cgstAmount,
         sgstAmount,
         grandTotal,
+        roundedTotal: Math.round(grandTotal),
         paymentMethod: effectivePaymentMethod,
         paymentStatus: "PAID",
+        transactionId,
         createdAt: new Date(),
+        order: orderRecord,
+        items: validatedItems,
       };
       kotRecord = {
         id: `kot_${Date.now()}`,

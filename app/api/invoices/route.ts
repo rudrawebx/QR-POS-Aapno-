@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { getCurrentSession } from '@/lib/auth';
-import { getLiveInvoices } from '@/lib/events';
+import { getLiveInvoices, getLiveOrders } from '@/lib/events';
 
 export async function GET(request: Request) {
   try {
@@ -73,17 +73,36 @@ export async function GET(request: Request) {
       console.warn('Invoices DB fetch failed, using fallback list:', dbErr);
     }
 
-    const liveMemInvoices = getLiveInvoices();
+    const liveMemInvoices = getLiveInvoices() || [];
+    const liveMemOrders = getLiveOrders() || [];
+    const liveOrdersMap = new Map();
+    (liveMemOrders || []).forEach((o) => {
+      if (o.id) liveOrdersMap.set(o.id, o);
+      if (o.humanOrderId) liveOrdersMap.set(o.humanOrderId, o);
+    });
+
     const combinedInvoicesMap = new Map();
 
     (liveMemInvoices || []).forEach((inv) => {
       const invDate = new Date(inv.createdAt);
       if (invDate >= startDate && invDate <= endDate && (inv.paymentStatus === "PAID" || !inv.paymentStatus)) {
+        if (!inv.order && inv.orderId && liveOrdersMap.has(inv.orderId)) {
+          inv.order = liveOrdersMap.get(inv.orderId);
+        }
+        if (!inv.carNumber && inv.order?.carNumber) {
+          inv.carNumber = inv.order.carNumber;
+        }
         combinedInvoicesMap.set(inv.id || inv.humanInvoiceNumber, inv);
       }
     });
 
     (dbInvoices || []).forEach((inv) => {
+      if (!inv.order && inv.orderId && liveOrdersMap.has(inv.orderId)) {
+        inv.order = liveOrdersMap.get(inv.orderId);
+      }
+      if (!inv.carNumber && inv.order?.carNumber) {
+        inv.carNumber = inv.order.carNumber;
+      }
       combinedInvoicesMap.set(inv.id || inv.humanInvoiceNumber, inv);
     });
 

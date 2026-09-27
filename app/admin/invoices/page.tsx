@@ -69,7 +69,51 @@ export default function AdminInvoicesPage() {
     fetchInvoices("CUSTOM", customStartDate, customEndDate);
   };
 
-  const handleReprint = (inv: any) => {
+  const handleReprint = async (inv: any) => {
+    let orderDetails = inv.order || null;
+    let itemsList = inv.order?.items || inv.items || inv.orderItems || [];
+
+    if (!itemsList || itemsList.length === 0) {
+      try {
+        const orderIdentifier = inv.orderId || inv.humanInvoiceNumber;
+        if (orderIdentifier) {
+          const res = await fetch(`/api/orders/${encodeURIComponent(orderIdentifier)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.order) {
+              orderDetails = data.order;
+              itemsList = data.order.items || [];
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch detailed order for invoice reprint:", e);
+      }
+    }
+
+    const receiptItems = (itemsList && itemsList.length > 0)
+      ? itemsList.map((it: any) => ({
+          name: it.productName || it.name || "Dish Item",
+          selectedVariation: it.selectedVariation || null,
+          quantity: Number(it.quantity) || 1,
+          unitPrice: Number(it.unitPrice) || 0,
+          totalPrice: Number(it.totalPrice || (Number(it.unitPrice || 0) * Number(it.quantity || 1))),
+          isVeg: it.isVeg !== undefined ? it.isVeg : true,
+        }))
+      : [
+          {
+            name: "Food & Dining Order",
+            selectedVariation: null,
+            quantity: 1,
+            unitPrice: inv.subtotal,
+            totalPrice: inv.subtotal,
+            isVeg: true,
+          },
+        ];
+
+    const carPlate = inv.carNumber || orderDetails?.carNumber || null;
+    const cleanPhone = inv.customerPhone && inv.customerPhone !== "N/A" && inv.customerPhone !== "9996213962" ? inv.customerPhone : (orderDetails?.customerPhone && orderDetails.customerPhone !== "N/A" && orderDetails.customerPhone !== "9996213962" ? orderDetails.customerPhone : null);
+
     setActivePrintReceipt({
       restaurant: {
         name: "आपणो खाणो (Aapno Khaano)",
@@ -82,42 +126,58 @@ export default function AdminInvoicesPage() {
         defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
       },
       order: {
-        humanOrderId: inv.order?.humanOrderId || inv.humanInvoiceNumber,
+        humanOrderId: orderDetails?.humanOrderId || inv.order?.humanOrderId || inv.humanInvoiceNumber,
         createdAt: inv.createdAt,
-        customerName: inv.customerName || "Direct Guest",
-        customerPhone: inv.customerPhone || "7082040809",
-        carNumber: inv.carNumber,
-        orderType: inv.orderType || "CAR_SERVICE",
-        cookingInstructions: inv.order?.cookingInstructions || null,
-        paymentMethod: inv.paymentMethod || "UPI",
-        paymentStatus: inv.paymentStatus || "PAID",
-        transactionId: inv.transactionId,
+        customerName: inv.customerName || orderDetails?.customerName || "Direct Guest",
+        customerPhone: cleanPhone,
+        carNumber: carPlate,
+        orderType: inv.orderType || orderDetails?.orderType || "CAR_SERVICE",
+        cookingInstructions: orderDetails?.cookingInstructions || inv.cookingInstructions || null,
+        paymentMethod: inv.paymentMethod || orderDetails?.paymentMethod || "UPI",
+        paymentStatus: inv.paymentStatus || orderDetails?.paymentStatus || "PAID",
+        transactionId: inv.transactionId || orderDetails?.transactionId,
         subtotal: inv.subtotal,
         cgstAmount: inv.cgstAmount,
         sgstAmount: inv.sgstAmount,
         grandTotal: inv.grandTotal,
         discountAmount: inv.discountAmount,
       },
-      items: inv.order?.items?.map((it: any) => ({
-        name: it.productName,
-        selectedVariation: it.selectedVariation,
-        quantity: it.quantity,
-        unitPrice: it.unitPrice,
-        totalPrice: it.totalPrice,
-        isVeg: it.isVeg,
-      })) || [{ name: "Assorted Royal Dishes", quantity: 1, unitPrice: inv.subtotal, totalPrice: inv.subtotal, isVeg: true }],
+      items: receiptItems,
     });
   };
 
-  const handleShareWhatsapp = (inv: any) => {
-    const phone = (inv.customerPhone || "").replace(/\D/g, "");
-    const cleanPhone = phone.length === 10 ? "91" + phone : phone;
+  const handleShareWhatsapp = async (inv: any) => {
+    let orderDetails = inv.order || null;
+    let itemsList = inv.order?.items || inv.items || [];
 
-    const itemsText = (inv.order?.items || [])
-      .map((it: any) => `• ${it.quantity}x ${it.productName}${it.selectedVariation ? " [" + it.selectedVariation + "]" : ""} - ₹${(it.totalPrice || it.unitPrice * it.quantity).toFixed(2)}`)
+    if (!itemsList || itemsList.length === 0) {
+      try {
+        const orderIdentifier = inv.orderId || inv.humanInvoiceNumber;
+        if (orderIdentifier) {
+          const res = await fetch(`/api/orders/${encodeURIComponent(orderIdentifier)}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.order) {
+              orderDetails = data.order;
+              itemsList = data.order.items || [];
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch detailed order for whatsapp share:", e);
+      }
+    }
+
+    const rawPhone = inv.customerPhone || orderDetails?.customerPhone || "";
+    const phone = rawPhone !== "9996213962" ? rawPhone.replace(/\D/g, "") : "";
+    const cleanPhone = phone.length === 10 ? "91" + phone : "";
+    const carPlate = inv.carNumber || orderDetails?.carNumber || null;
+
+    const itemsText = (itemsList || [])
+      .map((it: any) => `• ${it.quantity}x ${it.productName || it.name}${it.selectedVariation ? " [" + it.selectedVariation + "]" : ""} - ₹${(it.totalPrice || (it.unitPrice * it.quantity)).toFixed(2)}`)
       .join("\n");
 
-    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${inv.carNumber ? "🚗 *CAR / TABLE:* " + inv.carNumber + "\n" : ""}👤 *Customer:* ${inv.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
+    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${carPlate ? "🚗 *CAR / TABLE:* " + carPlate + "\n" : ""}👤 *Customer:* ${inv.customerName || orderDetails?.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
 
     const whatsappUrl = cleanPhone
       ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`
