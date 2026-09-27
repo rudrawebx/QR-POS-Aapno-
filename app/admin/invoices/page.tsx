@@ -75,7 +75,7 @@ export default function AdminInvoicesPage() {
         name: "आपणो खाणो (Aapno Khaano)",
         address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
         city: "Fatehabad",
-        phone: "+91 99962 13962",
+        phone: "+91 70820 40809, +91 70820 40892",
         gstin: "08AABCU9603R1ZM",
         fssaiNumber: "12224026000189",
         currencySymbol: "₹",
@@ -85,7 +85,7 @@ export default function AdminInvoicesPage() {
         humanOrderId: inv.order?.humanOrderId || inv.humanInvoiceNumber,
         createdAt: inv.createdAt,
         customerName: inv.customerName || "Direct Guest",
-        customerPhone: inv.customerPhone || "9996213962",
+        customerPhone: inv.customerPhone || "7082040809",
         carNumber: inv.carNumber,
         orderType: inv.orderType || "CAR_SERVICE",
         cookingInstructions: inv.order?.cookingInstructions || null,
@@ -117,7 +117,7 @@ export default function AdminInvoicesPage() {
       .map((it: any) => `• ${it.quantity}x ${it.productName}${it.selectedVariation ? " [" + it.selectedVariation + "]" : ""} - ₹${(it.totalPrice || it.unitPrice * it.quantity).toFixed(2)}`)
       .join("\n");
 
-    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 99962 13962\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${inv.carNumber ? "🚗 *CAR / TABLE:* " + inv.carNumber + "\n" : ""}👤 *Customer:* ${inv.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
+    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${inv.carNumber ? "🚗 *CAR / TABLE:* " + inv.carNumber + "\n" : ""}👤 *Customer:* ${inv.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
 
     const whatsappUrl = cleanPhone
       ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`

@@ -36,7 +36,7 @@ export default function CustomerQsrMenuPage() {
     name: 'आपणो खाणो (Aapno Khaano)',
     slug: 'aapno-khano',
     logoUrl: '/images/aapno-khano-logo.png',
-    phone: '+91 99962 13962',
+    phone: '+91 70820 40809, +91 70820 40892',
     address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
     city: 'Fatehabad',
     state: 'Haryana',
@@ -53,7 +53,7 @@ export default function CustomerQsrMenuPage() {
       upiMerchantName: 'AAPNO KHANO',
       upiQrImageUrl: '/images/pnb-upi-qr.png',
       taxRateGst: 5.0,
-      supportWhatsappNumber: '+919996213962',
+      supportWhatsappNumber: '+917082040809',
       themePrimaryColor: '#AA1B2A',
       themeGoldColor: '#E09D3D',
     },
@@ -217,7 +217,7 @@ export default function CustomerQsrMenuPage() {
       return cat.products.length > 0;
     });
 
-  const whatsappNumber = (restaurant.settings?.supportWhatsappNumber || '9996213962').replace(/\D/g, '');
+  const whatsappNumber = (restaurant.settings?.supportWhatsappNumber || '7082040809').replace(/\D/g, '');
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     `Hello Aapno Khaano team, I am looking at the menu${lockedTableNumber ? ` at Table ${lockedTableNumber}` : ''} and need some assistance.`
   )}`;

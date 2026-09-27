@@ -1322,7 +1322,7 @@ export default function SuperAdminPage() {
                     <label className="block font-bold text-[#331E17] mb-1">Phone</label>
                     <input
                       type="tel"
-                      placeholder="+91 99962 13962"
+                      placeholder="+91 70820 40809"
                       value={userPhone}
                       onChange={(e) => setUserPhone(e.target.value)}
                       className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl"

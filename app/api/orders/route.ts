@@ -577,7 +577,7 @@ export async function POST(request: Request) {
         name: "आपणो खाणो (Aapno Khaano)",
         address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
         city: "Fatehabad",
-        phone: "+91 99962 13962",
+        phone: "+91 70820 40809, +91 70820 40892",
         gstin: "08AABCU9603R1ZM",
         fssaiNumber: "12224026000189",
         currencySymbol: "₹",

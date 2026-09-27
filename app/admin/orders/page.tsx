@@ -105,7 +105,7 @@ export default function AdminOrdersPage() {
         city: 'Fatehabad',
         state: 'Haryana',
         postalCode: '125053',
-        phone: '+91 99962 13962',
+        phone: '+91 70820 40809, +91 70820 40892',
         gstin: '08AABCU9603R1ZM',
         fssaiNumber: '12224026000189',
         currencySymbol: '₹',

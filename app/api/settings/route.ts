@@ -142,7 +142,7 @@ export async function POST(request: Request) {
         upiQrImageUrl: upiQrImageUrl || '/images/pnb-upi-qr.png',
         razorpayKeyId: razorpayKeyId || 'rzp_test_demo123456',
         razorpayKeySecret: razorpayKeySecret || 'demo_secret_key_restaurant',
-        supportWhatsappNumber: supportWhatsappNumber || '+919996213962',
+        supportWhatsappNumber: supportWhatsappNumber || '+917082040809',
       },
     });
 

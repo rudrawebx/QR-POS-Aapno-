@@ -465,7 +465,7 @@ export async function POST(request: Request) {
         name: restaurant?.name || "आपणो खाणो (Aapno Khaano)",
         address: restaurant?.address || "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
         city: restaurant?.city || "Fatehabad",
-        phone: restaurant?.phone || "+91 99962 13962",
+        phone: restaurant?.phone || "+91 70820 40809, +91 70820 40892",
         gstin: restaurant?.gstin || "08AABCU9603R1ZM",
         fssaiNumber: restaurant?.fssaiNumber || "12224026000189",
         currencySymbol: "₹",

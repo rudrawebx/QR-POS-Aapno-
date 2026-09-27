@@ -126,7 +126,7 @@ model RestaurantSettings {
   razorpayKeyId          String   @default("rzp_test_demo123456")
   razorpayKeySecret      String   @default("demo_secret_key_restaurant")
   razorpayWebhookSecret  String   @default("demo_webhook_secret_restaurant")
-  supportWhatsappNumber  String   @default("+919996213962")
+  supportWhatsappNumber  String   @default("+917082040809")
   instagramUrl           String   @default("https://www.instagram.com/aapnokhano")
   facebookUrl            String   @default("https://www.facebook.com/aapnokhano")
   googleMapsUrl          String   @default("https://maps.google.com/?q=Aapno+Khaano")

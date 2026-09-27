@@ -284,7 +284,7 @@ export default function AdminStaffPage() {
                   <label className="block font-bold text-slate-700 mb-1">Contact Phone</label>
                   <input
                     type="tel"
-                    placeholder="+91 99962 13962"
+                    placeholder="+91 70820 40809"
                     value={newPhone}
                     onChange={(e) => setNewPhone(e.target.value)}
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl"

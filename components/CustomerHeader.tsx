@@ -33,9 +33,9 @@ export default function CustomerHeader({
           <span className="font-bold text-[#E09D3D]">Car-Service &amp; QSR Drive-In Available</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <a href="tel:+919996213962" className="flex items-center gap-1 hover:text-white transition-colors">
+          <a href="tel:+917082040809" className="flex items-center gap-1 hover:text-white transition-colors">
             <Phone className="w-3 h-3 text-[#E09D3D]" />
-            <span className="hidden sm:inline">+91 99962 13962</span>
+            <span className="hidden sm:inline">+91 70820 40809 / +91 70820 40892</span>
           </a>
         </div>
       </div>

@@ -32,7 +32,7 @@ export default function AdminSettingsPage() {
 
   // Profile State
   const [name, setName] = useState('आपणो खाणो (Aapno Khaano)');
-  const [phone, setPhone] = useState('+91 99962 13962');
+  const [phone, setPhone] = useState('+91 70820 40809, +91 70820 40892');
   const [email, setEmail] = useState('contact@aapnokhano.com');
   const [address, setAddress] = useState('Main Highway Plaza, Car-Service & QSR Drive-In');
   const [gstin, setGstin] = useState('08AABCU9603R1ZM');
@@ -42,7 +42,7 @@ export default function AdminSettingsPage() {
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
   const [openingHoursText, setOpeningHoursText] = useState('11:00 AM - 11:30 PM');
   const [closureMessage, setClosureMessage] = useState('We are currently closed for orders. Please visit during regular hours.');
-  const [supportWhatsapp, setSupportWhatsapp] = useState('+919996213962');
+  const [supportWhatsapp, setSupportWhatsapp] = useState('+917082040809');
 
   // Payment Gateway Configuration State
   const [razorpayKeyId, setRazorpayKeyId] = useState('rzp_test_demo123456');
@@ -81,7 +81,7 @@ export default function AdminSettingsPage() {
             setIsRestaurantOpen(s.isRestaurantOpen ?? true);
             setOpeningHoursText(s.openingHoursText || '11:00 AM - 11:30 PM');
             setClosureMessage(s.closureMessage || 'We are currently closed for orders.');
-            setSupportWhatsapp(s.supportWhatsappNumber || '+919996213962');
+            setSupportWhatsapp(s.supportWhatsappNumber || '+917082040809');
             setRazorpayKeyId(s.razorpayKeyId || 'rzp_test_demo123456');
             setRazorpayKeySecret(s.razorpayKeySecret || 'demo_secret_key_restaurant');
             setRazorpayWebhookSecret(s.razorpayWebhookSecret || 'demo_webhook_secret_restaurant');
@@ -148,7 +148,7 @@ export default function AdminSettingsPage() {
         name: 'आपणो खाणो (Aapno Khaano)',
         address: 'Main Highway Plaza, QSR Drive-In',
         city: 'Jaipur',
-        phone: '+91 99962 13962',
+        phone: '+91 70820 40809, +91 70820 40892',
         gstin: gstin || '08AABCU9603R1ZM',
         fssaiNumber: fssai || '12224026000189',
         currencySymbol: '₹',
@@ -158,7 +158,7 @@ export default function AdminSettingsPage() {
         humanOrderId: 'AK-2026-TEST',
         createdAt: new Date(),
         customerName: 'Vikramaditya Singh',
-        customerPhone: '9996213962',
+        customerPhone: '7082040809',
         carNumber: 'RJ 14 CA 9999',
         orderType: 'CAR_SERVICE',
         paymentMethod: 'UPI',
