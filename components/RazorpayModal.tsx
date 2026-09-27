@@ -240,8 +240,8 @@ export default function RazorpayModal({
     setErrorMessage("");
 
     try {
-      const cleanPhone = (orderDetails.customerPhone || "9996213962").replace(/\D/g, "");
-      const txnId = upiUtr.trim() || `UPI_${Date.now()}_${cleanPhone.slice(-4)}`;
+      const cleanPhone = (orderDetails.customerPhone || "").replace(/\D/g, "");
+      const txnId = upiUtr.trim() || `UPI_${Date.now()}_${cleanPhone ? cleanPhone.slice(-4) : "DIR"}`;
 
       const res = await fetch("/api/payments/verify", {
         method: "POST",
@@ -361,8 +361,8 @@ export default function RazorpayModal({
 
       // Auto-trigger WhatsApp GST Bill
       try {
-        const phone = (orderDetails.customerPhone || "9996213962").replace(/\D/g, "");
-        const cleanPhone = phone.length === 10 ? "91" + phone : phone;
+        const phone = (orderDetails.customerPhone || "").replace(/\D/g, "");
+        const cleanPhone = phone.length === 10 ? "91" + phone : "";
         const itemsText = cart
           .map(
             (c) =>
@@ -370,8 +370,10 @@ export default function RazorpayModal({
           )
           .join("\n");
         const waBillMsg = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad\n📞 +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM | FSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${result.humanOrderId || "AK-2026-ORDER"}\n${orderDetails.carNumber ? `🚗 *CAR / TABLE:* ${orderDetails.carNumber}\n` : ""}👤 *Customer:* ${orderDetails.customerName}\n📅 *Date:* ${new Date().toLocaleDateString("en-IN")} | *Time:* ${new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText}\n----------------------------------------\n💵 Subtotal: ₹${orderDetails.subtotal.toFixed(2)}\n🏛️ GST (5%): ₹${orderDetails.taxAmount.toFixed(2)}\n💰 *GRAND TOTAL: ₹${orderDetails.grandTotal.toFixed(2)}*\n✅ *Payment:* PAID ✓ (Verified Online)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for ordering with Aapno Khaano._`;
-        const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waBillMsg)}`;
-        window.open(waUrl, "_blank");
+        if (cleanPhone) {
+          const waUrl = `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(waBillMsg)}`;
+          window.open(waUrl, "_blank");
+        }
       } catch (waErr) {
         console.warn("WhatsApp popup warning:", waErr);
       }

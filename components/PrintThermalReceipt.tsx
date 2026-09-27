@@ -182,8 +182,8 @@ export default function PrintThermalReceipt({
           )}
 
           <div className="flex justify-between">
-            <span>Customer: {order.customerName}</span>
-            <span>Mob: {order.customerPhone}</span>
+            <span>Customer: {order.customerName || "Direct Guest"}</span>
+            <span>Mob: {order.customerPhone && order.customerPhone !== "N/A" && order.customerPhone !== "9996213962" ? order.customerPhone : "—"}</span>
           </div>
 
           <div className="flex justify-between text-slate-600">

@@ -8,7 +8,7 @@ export async function POST(request: Request) {
     const {
       restaurantSlug = "aapno-khano",
       customerName = "Direct Guest",
-      customerPhone = "9996213962",
+      customerPhone,
       carNumber,
       orderType = "CAR_SERVICE",
       cookingInstructions,
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Order must contain at least one valid item" }, { status: 400 });
     }
 
-    const cleanPhone = (customerPhone || "9996213962").replace(/\D/g, "");
+    const cleanPhone = customerPhone && customerPhone.toString().trim() ? customerPhone.toString().trim().replace(/\D/g, "") : null;
 
     // 1. Fetch Restaurant & Settings
     let restaurant: any = null;

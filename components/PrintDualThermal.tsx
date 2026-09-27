@@ -315,8 +315,8 @@ export default function PrintDualThermal({
                 )}
 
                 <div className="flex justify-between">
-                  <span>Customer: {billData.order.customerName}</span>
-                  <span>Mob: {billData.order.customerPhone}</span>
+                  <span>Customer: {billData.order.customerName || "Direct Guest"}</span>
+                  <span>Mob: {billData.order.customerPhone && billData.order.customerPhone !== "N/A" && billData.order.customerPhone !== "9996213962" ? billData.order.customerPhone : "—"}</span>
                 </div>
 
                 <div className="flex justify-between text-slate-600">

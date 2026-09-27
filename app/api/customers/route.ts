@@ -47,8 +47,8 @@ export async function GET(request: Request) {
     const aggregatedCustomerMap = new Map<string, any>();
 
     allOrders.forEach((order) => {
-      const phone = (order.customerPhone || "9996213962").replace(/\D/g, "");
-      if (!phone) return;
+      const phone = order.customerPhone ? order.customerPhone.toString().replace(/\D/g, "") : null;
+      if (!phone || phone.length < 10 || phone === "9996213962") return;
 
       if (!aggregatedCustomerMap.has(phone)) {
         aggregatedCustomerMap.set(phone, {

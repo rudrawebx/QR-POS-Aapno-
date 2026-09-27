@@ -146,7 +146,7 @@ export default function AdminPosPage() {
               humanOrderId: latest.order?.humanOrderId || latest.humanInvoiceNumber,
               createdAt: latest.createdAt,
               customerName: latest.customerName || 'Direct Guest',
-              customerPhone: latest.customerPhone || '9996213962',
+              customerPhone: latest.customerPhone || null,
               carNumber: latest.carNumber,
               orderType: latest.orderType || 'CAR_SERVICE',
               paymentMethod: latest.paymentMethod || 'UPI',
@@ -436,8 +436,8 @@ export default function AdminPosPage() {
   const handleDirectSettleHeldOrder = async (held: HeldOrder) => {
     setIsSubmitting(true);
     try {
-      const guestDisplayName = held.customerName.trim() || (isQuickGuest ? 'Walk-in Guest' : 'Direct Guest');
-      const guestPhone = (held.customerPhone.trim() || '9996213962').replace(/\D/g, '');
+      const guestDisplayName = held.customerName?.trim() || (isQuickGuest ? 'Walk-in Guest' : 'Direct Guest');
+      const guestPhone = held.customerPhone?.trim() ? held.customerPhone.trim().replace(/\D/g, '') : null;
 
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -572,7 +572,7 @@ export default function AdminPosPage() {
           humanOrderId: `Z-REPORT-${now.toISOString().slice(0, 10)}`,
           createdAt: now,
           customerName: 'Shift Supervisor / Cashier',
-          customerPhone: '9996213962',
+          customerPhone: null,
           carNumber: `DAILY REGISTER AUDIT (${dateFormatted})`,
           orderType: 'DINE_IN',
           paymentMethod: 'UPI + CASH + CARD',
@@ -605,7 +605,7 @@ export default function AdminPosPage() {
     setIsSubmitting(true);
     try {
       const guestDisplayName = customerName.trim() || (isQuickGuest ? "Walk-in Guest" : "Direct Guest");
-      const guestPhone = (customerPhone.trim() || "9996213962").replace(/\D/g, "");
+      const guestPhone = customerPhone.trim() ? customerPhone.trim().replace(/\D/g, "") : null;
 
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -729,10 +729,14 @@ export default function AdminPosPage() {
           <button
             type="button"
             onClick={() => {
-              const clean = (customerPhone || "9996213962").replace(/\D/g, "");
+              const clean = (customerPhone || "").replace(/\D/g, "");
               const target = clean.length === 10 ? "91" + clean : clean;
               const text = encodeURIComponent(`Hello ${customerName || "Guest"}, thank you for visiting Aapno Khaano (आपणो खाणो)! How can we assist you with your order today?`);
-              window.open(`https://api.whatsapp.com/send?phone=${target}&text=${text}`, "_blank");
+              if (target) {
+                window.open(`https://api.whatsapp.com/send?phone=${target}&text=${text}`, "_blank");
+              } else {
+                window.open(`https://api.whatsapp.com/send?text=${text}`, "_blank");
+              }
             }}
             className="px-3.5 py-1.5 bg-[#25D366]/15 hover:bg-[#25D366]/25 text-[#128C7E] rounded-xl text-xs font-black flex items-center gap-1.5 border border-[#25D366]/40 cursor-pointer shadow-2xs transition-transform active:scale-95"
             title="Chat with current customer on WhatsApp"
