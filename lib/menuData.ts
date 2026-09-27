@@ -73,15 +73,27 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       },
       {
         "id": "p-6",
-        "name": "Sirka Onion Rings",
-        "basePrice": 79.0,
+        "name": "Onion Rings",
+        "basePrice": 29.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
-        "imageUrl": "/images/menu/p-6-sirka-onion-rings.png",
-        "description": "Freshly prepared Sirka Onion Rings made to order with authentic spices."
+        "imageUrl": "/images/menu/p-6-onion-rings.png",
+        "description": "Freshly prepared crunchy Onion Rings made to order with authentic spices."
+      },
+      {
+        "id": "p-120",
+        "name": "Green Chutney",
+        "basePrice": 29.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-120-green-chutney.png",
+        "description": "Freshly prepared spicy mint & coriander green chutney."
       }
     ]
   },
