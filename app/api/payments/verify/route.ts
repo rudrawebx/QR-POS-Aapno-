@@ -362,6 +362,9 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      order: orderRecord,
+      invoice: invoiceRecord,
+      kot: createdKots[0] || null,
       orderId: orderRecord?.id || `ord_${Date.now()}`,
       humanOrderId,
       humanInvoiceNumber,
