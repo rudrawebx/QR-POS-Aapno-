@@ -677,6 +677,25 @@ export default function AdminPosPage() {
       });
 
       const data = await res.json();
+
+      // 🚨 DB FAILED — Show RED alert, keep cart so cashier can retry
+      if (!res.ok && data.dbFailed) {
+        alert(
+          `🚨 DATABASE ERROR — BILL SAVE NAHI HUAA!\n\n` +
+          `Order: ${data.humanOrderId || 'N/A'}\n` +
+          `Amount: ₹${data.grandTotal || grandTotal}\n\n` +
+          `❗ YEH BILL DATABASE MEIN NAHI GAYA!\n` +
+          `Manually note kar lo:\n` +
+          `  - Bill number: ${data.humanOrderId || 'N/A'}\n` +
+          `  - Amount: ₹${data.grandTotal || grandTotal}\n` +
+          `  - Method: ${chosenMethod}\n\n` +
+          `10 second baad dobara "Settle & Print" try karo.\n` +
+          `Agar phir bhi fail ho to manager ko batao.`
+        );
+        // ❌ Do NOT clear cart — let cashier retry
+        return;
+      }
+
       if (res.ok && data.success && data.printReceiptData) {
         setLastBillData(data.printReceiptData);
         setDualPrintData({
@@ -688,7 +707,7 @@ export default function AdminPosPage() {
         });
         // ✅ Add new bill to recentOrders so it stays visible after future refreshes
         if (data.order) {
-          setRecentOrders((prev) => [data.order, ...prev].slice(0, 20));
+          setRecentOrders((prev) => [data.order, ...prev].slice(0, 300));
         }
         setShowCashModal(false);
         setCartItems([]);
@@ -704,7 +723,7 @@ export default function AdminPosPage() {
       }
     } catch (err) {
       console.error("POS order settlement error:", err);
-      alert("Error processing order. Please check server connection.");
+      alert("Error processing order. Please check server connection and try again.");
     } finally {
       setIsSubmitting(false);
     }

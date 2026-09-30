@@ -410,8 +410,12 @@ export async function POST(request: Request) {
     let invoiceRecord: any = null;
     let kotRecord: any = null;
 
+    // 🔒 SAFE DB WRITE — Retry once on failure, then return error (no silent data loss)
+    let dbError: string | null = null;
+
     if (prisma) {
-      try {
+      // Helper to attempt full DB write
+      const attemptDbWrite = async () => {
         orderRecord = await prisma.order.create({
           data: {
             humanOrderId,
@@ -447,7 +451,6 @@ export async function POST(request: Request) {
           include: { items: true },
         });
 
-        // 1 Permanent Invoice
         invoiceRecord = await prisma.invoice.create({
           data: {
             humanInvoiceNumber,
@@ -469,14 +472,9 @@ export async function POST(request: Request) {
             paymentStatus: "PAID",
             transactionId,
           },
-          include: {
-            order: {
-              include: { items: true },
-            },
-          },
+          include: { order: { include: { items: true } } },
         });
 
-        // 1 KOT Record
         kotRecord = await prisma.kot.create({
           data: {
             humanKotNumber,
@@ -502,7 +500,6 @@ export async function POST(request: Request) {
           include: { kotItems: true },
         });
 
-        // Payment Record
         const paymentGateway = effectivePaymentMethod === "CASH" ? "CASH" : effectivePaymentMethod === "UPI" ? "UPI_DIRECT" : effectivePaymentMethod === "CARD" ? "POS_CARD" : "MANUAL";
         await prisma.payment.create({
           data: {
@@ -518,63 +515,40 @@ export async function POST(request: Request) {
           },
         });
 
-        // Deduct inventory
         await deductInventoryForOrder(orderRecord.id, restaurantId);
-      } catch (dbErr) {
-        console.warn("DB create confirmed order fallback:", dbErr);
+      };
+
+      // First attempt
+      try {
+        await attemptDbWrite();
+      } catch (firstErr: any) {
+        console.error("DB write attempt 1 failed:", firstErr?.message);
+        // Wait 2 seconds, then retry once
+        await new Promise((r) => setTimeout(r, 2000));
+        try {
+          // Reset so retry starts fresh
+          orderRecord = null;
+          invoiceRecord = null;
+          kotRecord = null;
+          await attemptDbWrite();
+        } catch (secondErr: any) {
+          console.error("DB write attempt 2 also failed:", secondErr?.message);
+          dbError = secondErr?.message || "Database unavailable";
+        }
       }
     }
 
-    if (!orderRecord) {
-      orderRecord = {
-        id: `ord_${effectivePaymentMethod.toLowerCase()}_${Date.now()}`,
+    // ❌ BOTH DB ATTEMPTS FAILED — Return error so cashier knows, no silent data loss
+    if (dbError || !orderRecord) {
+      return NextResponse.json({
+        success: false,
+        dbFailed: true,
+        error: "⚠️ DATABASE ERROR! Bill DB mein save nahi hua. 10 second baad dobara try karo.",
+        errorDetail: dbError,
         humanOrderId,
-        restaurantId,
-        customerName: customerName.trim(),
-        customerPhone: cleanPhone,
-        carNumber,
-        orderType,
-        status: "CONFIRMED",
-        subtotal: calculatedSubtotal,
-        discountAmount: discountVal,
-        taxAmount,
         grandTotal,
-        paymentStatus: "PAID",
-        paymentMethod: effectivePaymentMethod,
-        transactionId,
-        createdAt: new Date(),
         items: validatedItems,
-      };
-      invoiceRecord = {
-        id: `inv_${Date.now()}`,
-        humanInvoiceNumber,
-        restaurantId,
-        orderId: orderRecord.id,
-        carNumber: orderRecord.carNumber,
-        customerName: orderRecord.customerName,
-        customerPhone: orderRecord.customerPhone,
-        orderType: orderRecord.orderType,
-        subtotal: calculatedSubtotal,
-        discountAmount: discountVal,
-        cgstAmount,
-        sgstAmount,
-        grandTotal,
-        roundedTotal: Math.round(grandTotal),
-        paymentMethod: effectivePaymentMethod,
-        paymentStatus: "PAID",
-        transactionId,
-        createdAt: new Date(),
-        order: orderRecord,
-        items: validatedItems,
-      };
-      kotRecord = {
-        id: `kot_${Date.now()}`,
-        humanKotNumber,
-        orderNumber: humanOrderId,
-        createdAt: new Date(),
-        status: "PREPARING",
-        items: validatedItems,
-      };
+      }, { status: 503 });
     }
 
     const effectiveOrderSource = data.source || (isStaffCashConfirmed || isStaff ? "POS_TERMINAL" : "QR_MENU");
