@@ -324,7 +324,7 @@ export default function AdminPosPage() {
     const newHeld: HeldOrder = {
       id: `hold_${Date.now()}`,
       holdNumber: nextSlot,
-      title: carNumber ? `Car ${carNumber}` : (customerName || 'Direct Guest'),
+      title: carNumber ? `Table ${carNumber}` : (customerName || 'Direct Guest'),
       createdAt: now.toISOString(),
       time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       cartItems: [...cartItems],
@@ -358,9 +358,9 @@ export default function AdminPosPage() {
         orderNumber: newHeld.id,
         createdAt: now,
         stationName: 'Main Kitchen & Tandoor Station',
-        carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || 'Car Order') : null,
+        carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() ? `Table ${carNumber.trim()}` : 'Table Order') : null,
         customerName: customerName.trim() || (isQuickGuest ? 'Direct Guest' : 'Customer'),
-        orderType: orderType === 'CAR_SERVICE' ? '🚗 CAR SERVICE (HOLD ORDER)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        orderType: orderType === 'CAR_SERVICE' ? '🍽️ TABLE ORDER (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
         specialInstructions: cookingInstructions.trim() || 'Hold Order - Fired to Kitchen',
       },
       items: cartItems.map((it) => ({
@@ -396,9 +396,9 @@ export default function AdminPosPage() {
         orderNumber: held.id,
         createdAt: held.createdAt || new Date(),
         stationName: 'Main Kitchen & Tandoor Station',
-        carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber || 'Car Order') : null,
-        customerName: held.customerName || (held.orderType === 'CAR_SERVICE' ? 'Car Guest' : 'Takeaway Guest'),
-        orderType: held.orderType === 'CAR_SERVICE' ? '🚗 CAR SERVICE (HOLD ORDER)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber ? `Table ${held.carNumber}` : 'Table Order') : null,
+        customerName: held.customerName || (held.orderType === 'CAR_SERVICE' ? 'Table Guest' : 'Takeaway Guest'),
+        orderType: held.orderType === 'CAR_SERVICE' ? '🍽️ TABLE ORDER (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
         specialInstructions: held.cookingInstructions || 'Hold Order - Fired to Kitchen',
       },
       items: held.cartItems.map((it) => ({
@@ -966,7 +966,7 @@ export default function AdminPosPage() {
                     : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
-                <span>🚗 Car Order</span>
+                <span>🍽️ Table Order</span>
               </button>
               <button
                 type="button"
@@ -981,15 +981,20 @@ export default function AdminPosPage() {
               </button>
             </div>
 
-            {/* Vehicle Number (if Car Order) */}
+            {/* Table Number (4 Digits) */}
             {orderType === 'CAR_SERVICE' && (
               <div className="relative">
-                <Car className="w-3.5 h-3.5 text-[#AA1B2A] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Utensils className="w-3.5 h-3.5 text-[#AA1B2A] absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
-                  placeholder="Car Plate (e.g. HR 03 AF 5256 / RJ 14 CA 9999)"
+                  inputMode="numeric"
+                  maxLength={4}
+                  placeholder="Table No. (4 Digits e.g. 0001, 0012, 1001)"
                   value={carNumber}
-                  onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
+                  onChange={(e) => {
+                    const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                    setCarNumber(digits);
+                  }}
                   className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#E8E1D6] rounded-xl text-xs font-mono font-bold text-[#AA1B2A] focus:outline-none focus:ring-1 focus:ring-[#AA1B2A]"
                 />
               </div>
@@ -1272,7 +1277,7 @@ export default function AdminPosPage() {
                 const istTime = dateObj ? dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '—';
                 const istDate = dateObj ? dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '';
                 const label = ord.carNumber
-                  ? `🚗 ${ord.carNumber}`
+                  ? `🍽️ Table ${ord.carNumber}`
                   : ord.customerName && ord.customerName !== 'Direct Guest' && ord.customerName !== 'Walk-in Guest'
                   ? `👤 ${ord.customerName}`
                   : '🛍️ Walk-in';

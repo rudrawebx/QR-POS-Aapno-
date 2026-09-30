@@ -177,7 +177,7 @@ export default function PrintThermalReceipt({
 
           {order.carNumber && (
             <div className="bg-slate-100 p-1 border border-black font-black text-center text-xs tracking-wider">
-              🚗 CAR NO: {order.carNumber}
+              🍽️ TABLE NO: {order.carNumber}
             </div>
           )}
 

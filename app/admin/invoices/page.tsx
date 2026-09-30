@@ -179,7 +179,7 @@ export default function AdminInvoicesPage() {
       .map((it: any) => `• ${it.quantity}x ${it.productName || it.name}${it.selectedVariation ? " [" + it.selectedVariation + "]" : ""} - ₹${(it.totalPrice || (it.unitPrice * it.quantity)).toFixed(2)}`)
       .join("\n");
 
-    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${carPlate ? "🚗 *CAR / TABLE:* " + carPlate + "\n" : ""}👤 *Customer:* ${inv.customerName || orderDetails?.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
+    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${carPlate ? "🍽️ *TABLE NO:* " + carPlate + "\n" : ""}👤 *Customer:* ${inv.customerName || orderDetails?.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
 
     const whatsappUrl = cleanPhone
       ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`
@@ -271,7 +271,7 @@ export default function AdminInvoicesPage() {
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search Bill #, Guest Name, Mobile, Car Plate..."
+                placeholder="Search Bill #, Guest Name, Mobile, Table No..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => {
@@ -318,7 +318,7 @@ export default function AdminInvoicesPage() {
               <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 font-bold uppercase text-[10px]">
                 <tr>
                   <th className="py-3 px-3.5">Invoice #</th>
-                  <th className="py-3 px-3.5">Customer &amp; Vehicle</th>
+                  <th className="py-3 px-3.5">Customer &amp; Table</th>
                   <th className="py-3 px-3.5">Date &amp; Time</th>
                   <th className="py-3 px-3.5">Order Type</th>
                   <th className="py-3 px-3.5">Payment</th>
@@ -343,7 +343,7 @@ export default function AdminInvoicesPage() {
                         <p className="font-bold text-[#331E17]">{inv.customerName || "Direct Guest"}</p>
                         <p className="text-[10px] text-slate-400 font-mono">
                           {inv.customerPhone ? "+91 " + inv.customerPhone.replace(/\D/g, "").slice(-10) : "No Mobile"}
-                          {inv.carNumber && " • " + inv.carNumber}
+                          {inv.carNumber && " • Table " + inv.carNumber}
                         </p>
                       </td>
                       <td className="py-3 px-3.5 font-mono text-[11px] text-slate-600">

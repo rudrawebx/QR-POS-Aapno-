@@ -310,7 +310,7 @@ export default function PrintDualThermal({
 
                 {billData.order.carNumber && (
                   <div className="bg-white p-1 border-2 border-black font-black text-center text-xs tracking-wider uppercase">
-                    🚗 CAR NO: {billData.order.carNumber}
+                    🍽️ TABLE NO: {billData.order.carNumber}
                   </div>
                 )}
 
@@ -430,7 +430,7 @@ export default function PrintDualThermal({
               <div className="py-2 border-b-2 border-black text-xs space-y-1">
                 {kotData.kot.carNumber ? (
                   <div className="border-2 border-black bg-white text-black p-1 text-center font-black text-sm tracking-widest uppercase rounded-sm">
-                    🚗 CAR NO: {kotData.kot.carNumber}
+                    🍽️ TABLE NO: {kotData.kot.carNumber}
                   </div>
                 ) : (
                   <div className="border-2 border-black bg-white text-black p-1 text-center font-bold uppercase rounded-sm">

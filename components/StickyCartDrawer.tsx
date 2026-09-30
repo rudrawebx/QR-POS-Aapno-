@@ -90,8 +90,8 @@ export default function StickyCartDrawer({
 
     if (orderType === 'CAR_SERVICE') {
       const cleanCar = carNumber.trim();
-      if (!cleanCar || cleanCar.length < 3) {
-        setFormError('Please enter a valid car / vehicle registration number (e.g. RJ 14 CA 9999).');
+      if (!cleanCar) {
+        setFormError('Please enter your 4-digit table number.');
         return;
       }
     }
@@ -287,8 +287,8 @@ export default function StickyCartDrawer({
                           : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                       }`}
                     >
-                      <Car className="w-4 h-4 mx-auto mb-1 text-[#AA1B2A]" />
-                      <span className="text-[11px] block font-bold">Car Service</span>
+                      <Utensils className="w-4 h-4 mx-auto mb-1 text-[#AA1B2A]" />
+                      <span className="text-[11px] block font-bold">Table Order</span>
                     </button>
 
                     <button
@@ -370,19 +370,23 @@ export default function StickyCartDrawer({
                 {orderType === 'CAR_SERVICE' && (
                   <div>
                     <label className="block text-[11px] font-bold text-slate-700 mb-1">
-                      Car / Vehicle Registration Number <span className="text-red-500">*</span>
+                      Table Number (4 Digits) <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
+                      inputMode="numeric"
                       required
-                      maxLength={15}
-                      placeholder="e.g. RJ 14 CA 9999"
+                      maxLength={4}
+                      placeholder="e.g. 0001, 1001"
                       value={carNumber}
-                      onChange={(e) => setCarNumber(e.target.value.toUpperCase())}
+                      onChange={(e) => {
+                        const digits = e.target.value.replace(/\D/g, '').slice(0, 4);
+                        setCarNumber(digits);
+                      }}
                       className="w-full px-3 py-2 bg-amber-50/50 border border-amber-300 rounded-xl text-xs text-slate-900 uppercase font-mono font-bold focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
                     />
                     <span className="text-[10px] text-slate-500 mt-0.5 block">
-                      Our runner will deliver your hot order directly to your car window!
+                      Our runner will deliver your hot order directly to your table!
                     </span>
                   </div>
                 )}

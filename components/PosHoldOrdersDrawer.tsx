@@ -7,6 +7,7 @@ import {
   Trash2,
   X,
   Car,
+  Utensils,
   ShoppingBag,
   Clock,
   Printer,
@@ -207,7 +208,7 @@ export default function PosHoldOrdersDrawer({
             <Search className="w-4 h-4 text-[#745E55] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Search held orders by Car plate, Guest Name, Dish, Token..."
+              placeholder="Search held orders by Table no., Guest Name, Dish, Token..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {
@@ -318,8 +319,8 @@ export default function PosHoldOrdersDrawer({
                         <div className="flex items-center gap-1.5">
                           {held.orderType === 'CAR_SERVICE' ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-[#AA1B2A] font-black text-[10px] border border-red-200">
-                              <Car className="w-3 h-3" />
-                              <span>{held.carNumber || 'Car Order'}</span>
+                              <Utensils className="w-3 h-3" />
+                              <span>{held.carNumber ? (held.carNumber.startsWith('Table') ? held.carNumber : `Table ${held.carNumber}`) : 'Table Order'}</span>
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 font-bold text-[10px] border border-blue-200">
