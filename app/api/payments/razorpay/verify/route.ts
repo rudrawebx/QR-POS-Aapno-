@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       discountAmount = 0,
     } = body;
 
-    const cleanPhone = customerPhone && customerPhone.toString().trim() ? customerPhone.toString().trim().replace(/\D/g, "") : null;
+    const cleanPhone = customerPhone && customerPhone.toString().trim() ? customerPhone.toString().trim().replace(/\D/g, "") : "";
 
     // 1. Fetch Restaurant & Settings
     let restaurant: any = null;

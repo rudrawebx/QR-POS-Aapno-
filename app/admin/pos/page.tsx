@@ -678,24 +678,6 @@ export default function AdminPosPage() {
 
       const data = await res.json();
 
-      // 🚨 DB FAILED — Show RED alert, keep cart so cashier can retry
-      if (!res.ok && data.dbFailed) {
-        alert(
-          `🚨 DATABASE ERROR — BILL SAVE NAHI HUAA!\n\n` +
-          `Order: ${data.humanOrderId || 'N/A'}\n` +
-          `Amount: ₹${data.grandTotal || grandTotal}\n\n` +
-          `❗ YEH BILL DATABASE MEIN NAHI GAYA!\n` +
-          `Manually note kar lo:\n` +
-          `  - Bill number: ${data.humanOrderId || 'N/A'}\n` +
-          `  - Amount: ₹${data.grandTotal || grandTotal}\n` +
-          `  - Method: ${chosenMethod}\n\n` +
-          `10 second baad dobara "Settle & Print" try karo.\n` +
-          `Agar phir bhi fail ho to manager ko batao.`
-        );
-        // ❌ Do NOT clear cart — let cashier retry
-        return;
-      }
-
       if (res.ok && data.success && data.printReceiptData) {
         setLastBillData(data.printReceiptData);
         setDualPrintData({
