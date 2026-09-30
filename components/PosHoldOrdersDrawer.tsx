@@ -414,10 +414,10 @@ export default function PosHoldOrdersDrawer({
                         type="button"
                         onClick={() => onDirectSettle(held)}
                         className="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-2xs cursor-pointer"
-                        title="Direct Settle & Print Bill"
+                        title="Direct Print Bill"
                       >
                         <Printer className="w-3.5 h-3.5" />
-                        <span>Settle Bill</span>
+                        <span>Print Bill</span>
                       </button>
                     )}
 

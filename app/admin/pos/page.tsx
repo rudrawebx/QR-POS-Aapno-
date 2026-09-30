@@ -1187,7 +1187,7 @@ export default function AdminPosPage() {
                 className="py-2.5 bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black rounded-2xl text-xs flex items-center justify-center gap-1.5 shadow-md border border-[#E09D3D]/50 cursor-pointer disabled:opacity-50 transition-transform active:scale-98"
               >
                 <Printer className="w-3.5 h-3.5 text-[#E09D3D]" />
-                <span>{isSubmitting ? 'Firing...' : '🖨️ Settle & Print Bill'}</span>
+                <span>{isSubmitting ? 'Printing...' : '🖨️ Print Bill'}</span>
               </button>
             </div>
           </div>
