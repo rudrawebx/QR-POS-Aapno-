@@ -53,11 +53,12 @@ export const eventBus = globalForEvents.eventBus ?? new RealtimeEventBus();
 export const globalOrders = globalForEvents.globalOrders ?? [];
 export const globalInvoices = globalForEvents.globalInvoices ?? [];
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForEvents.eventBus = eventBus;
-  globalForEvents.globalOrders = globalOrders;
-  globalForEvents.globalInvoices = globalInvoices;
-}
+// Always persist to globalThis — both in dev AND production
+// This survives Next.js hot-reloads and module re-evaluations
+// (Full Node.js process restart will still clear memory — that's handled by DB reload on POS page)
+globalForEvents.eventBus = eventBus;
+globalForEvents.globalOrders = globalOrders;
+globalForEvents.globalInvoices = globalInvoices;
 
 export function broadcastEvent(channel: string, data: any) {
   eventBus.emit(channel, data);
