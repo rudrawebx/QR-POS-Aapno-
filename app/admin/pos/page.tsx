@@ -68,6 +68,7 @@ export default function AdminPosPage() {
   // Recent Orders — loaded from DB on page refresh so cashier doesn't lose billing context
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [recentOrdersLoading, setRecentOrdersLoading] = useState(false);
+  const [recentOrdersRange, setRecentOrdersRange] = useState<'TODAY'|'YESTERDAY'|'7DAYS'|'ALL'>('7DAYS');
 
   // Customization Modal for Portion Variations
   const [customizingProduct, setCustomizingProduct] = useState<any | null>(null);
@@ -175,25 +176,44 @@ export default function AdminPosPage() {
         console.error('Error fetching POS data:', err);
       }
 
-      // ✅ Load today's orders from DB — so bills don't disappear on page refresh
+      // ✅ Load bills from DB — so bills stay visible on page refresh
       try {
         setRecentOrdersLoading(true);
-        const todayRes = await fetch('/api/orders?range=TODAY&status=PAID');
+        const todayRes = await fetch(`/api/invoices?range=7DAYS&limit=300`);
         if (todayRes.ok) {
           const todayData = await todayRes.json();
-          if (Array.isArray(todayData.orders)) {
-            // Show last 20 paid orders of the day, newest first
-            setRecentOrders(todayData.orders.slice(0, 20));
+          if (Array.isArray(todayData.invoices)) {
+            setRecentOrders(todayData.invoices);
           }
         }
       } catch (err) {
-        console.error('Error fetching today orders from DB:', err);
+        console.error('Error fetching bills from DB:', err);
       } finally {
         setRecentOrdersLoading(false);
       }
     }
     loadData();
   }, []);
+
+  // Reload bills when range changes
+  const loadRecentOrdersByRange = async (range: 'TODAY'|'YESTERDAY'|'7DAYS'|'ALL') => {
+    setRecentOrdersRange(range);
+    setRecentOrdersLoading(true);
+    try {
+      const limit = range === 'ALL' ? 500 : 300;
+      const res = await fetch(`/api/invoices?range=${range}&limit=${limit}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.invoices)) {
+          setRecentOrders(data.invoices);
+        }
+      }
+    } catch (err) {
+      console.error('Error loading bills:', err);
+    } finally {
+      setRecentOrdersLoading(false);
+    }
+  };
 
   const handleToggleStoreStatus = async () => {
     try {
@@ -1212,41 +1232,64 @@ export default function AdminPosPage() {
         {/* ✅ TODAY'S BILLS — Loaded from DB, survives page refresh */}
         <div className="bg-white rounded-3xl border border-[#E8E1D6] shadow-xs overflow-hidden">
           <div className="flex items-center justify-between px-3.5 py-2.5 border-b border-[#E8E1D6] bg-[#FEFBF5]">
-            <div className="flex items-center gap-2">
-              <Receipt className="w-3.5 h-3.5 text-[#AA1B2A]" />
+            <div className="flex items-center gap-2 flex-wrap">
+              <Receipt className="w-3.5 h-3.5 text-[#AA1B2A] shrink-0" />
               <span className="text-xs font-black text-[#331E17]">
-                आज के Bills ({recentOrders.length})
+                Bills ({recentOrders.length}) — ₹{recentOrders.reduce((s: number, o: any) => s + (o.grandTotal || 0), 0).toFixed(0)}
               </span>
               {recentOrdersLoading && (
                 <span className="text-[10px] text-[#745E55] animate-pulse">loading...</span>
               )}
             </div>
-            <span className="text-[10px] text-[#745E55]">Page refresh ke baad bhi dikhenge ✅</span>
+
+            {/* Date Range Filter Buttons */}
+            <div className="flex items-center gap-1">
+              {(['TODAY','YESTERDAY','7DAYS','ALL'] as const).map((r) => (
+                <button
+                  key={r}
+                  onClick={() => loadRecentOrdersByRange(r)}
+                  className={`px-2 py-0.5 rounded-lg text-[9px] font-black border transition-all cursor-pointer ${
+                    recentOrdersRange === r
+                      ? 'bg-[#AA1B2A] text-white border-[#AA1B2A]'
+                      : 'bg-white text-[#745E55] border-[#E8E1D6] hover:border-[#AA1B2A]'
+                  }`}
+                >
+                  {r === 'TODAY' ? 'Aaj' : r === 'YESTERDAY' ? 'Kal' : r === '7DAYS' ? '7 Din' : 'Sab'}
+                </button>
+              ))}
+            </div>
           </div>
 
           {recentOrders.length === 0 && !recentOrdersLoading ? (
-            <div className="px-3.5 py-3 text-center text-[11px] text-[#745E55]">
-              Aaj abhi tak koi bill nahi. Pehla bill settle karo! 🍽️
+            <div className="px-3.5 py-4 text-center text-[11px] text-[#745E55]">
+              {recentOrdersRange === 'TODAY' ? 'Aaj abhi tak koi bill nahi. Pehla bill settle karo! 🍽️' : 'Is period mein koi bill nahi mila.'}
             </div>
           ) : (
-            <div className="divide-y divide-[#F0E8DC] max-h-[220px] overflow-y-auto">
+            <div className="divide-y divide-[#F0E8DC] max-h-[280px] overflow-y-auto">
               {recentOrders.map((ord: any, idx: number) => {
-                const istTime = ord.createdAt
-                  ? new Date(new Date(ord.createdAt).getTime() + 0).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })
-                  : '—';
+                const dateObj = ord.createdAt ? new Date(new Date(ord.createdAt).getTime() + 5.5 * 3600 * 1000) : null;
+                const istTime = dateObj ? dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }) : '—';
+                const istDate = dateObj ? dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' }) : '';
                 const label = ord.carNumber
                   ? `🚗 ${ord.carNumber}`
                   : ord.customerName && ord.customerName !== 'Direct Guest' && ord.customerName !== 'Walk-in Guest'
                   ? `👤 ${ord.customerName}`
                   : '🛍️ Walk-in';
                 const pm = ord.paymentMethod === 'CASH' ? '💵' : ord.paymentMethod === 'UPI' ? '📱' : ord.paymentMethod === 'CARD' ? '💳' : '🔀';
+                const invNum = ord.humanInvoiceNumber ? ord.humanInvoiceNumber.replace('AK-INV-2026-', '#') : '';
                 return (
                   <div key={ord.id || idx} className="flex items-center justify-between px-3 py-1.5 hover:bg-[#FFF8F0] text-[10px]">
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-[#9A5B00] font-bold shrink-0">{istTime}</span>
-                      <span className="text-[#331E17] truncate max-w-[100px]" title={label}>{label}</span>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[#9A5B00] font-bold">{istTime}</div>
+                        {recentOrdersRange !== 'TODAY' && <div className="text-[#b0a090] text-[8px]">{istDate}</div>}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[#331E17] truncate max-w-[90px]" title={label}>{label}</div>
+                        {invNum && <div className="text-[#b0a090] text-[8px]">{invNum}</div>}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
                       <span className="font-black text-[#AA1B2A]">₹{Math.round(ord.grandTotal || 0)}</span>
                       <span title={ord.paymentMethod}>{pm}</span>
                     </div>
