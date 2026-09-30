@@ -36,7 +36,9 @@ export default function AdminInvoicesPage() {
   const fetchInvoices = async (selectedRange = range, start?: string, end?: string) => {
     try {
       setLoading(true);
-      let url = `/api/invoices?range=${selectedRange}`;
+      // ALL range → fetch up to 500, others up to 300
+      const limit = selectedRange === "ALL" ? 500 : 300;
+      let url = `/api/invoices?range=${selectedRange}&limit=${limit}`;
       if (selectedRange === "CUSTOM" && start) {
         url += `&startDate=${start}`;
         if (end) url += `&endDate=${end}`;
