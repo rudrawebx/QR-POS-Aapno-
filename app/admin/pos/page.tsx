@@ -262,6 +262,7 @@ export default function AdminPosPage() {
 
   // Discount applies proportionally to taxable food first
   const taxableAfterDiscount = Math.max(0, taxableFoodSubtotal - discountAmount);
+  const subtotalAfterDiscount = taxableAfterDiscount;
   const cgstAmount = +(taxableAfterDiscount * 0.025).toFixed(2);
   const sgstAmount = +(taxableAfterDiscount * 0.025).toFixed(2);
   const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
