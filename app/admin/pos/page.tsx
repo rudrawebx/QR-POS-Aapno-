@@ -321,9 +321,9 @@ export default function AdminPosPage() {
         orderNumber: newHeld.id,
         createdAt: now,
         stationName: 'Main Kitchen & Tandoor Station',
-        carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() ? `Table ${carNumber.trim()}` : 'Table Order') : null,
+        carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() ? `Table ${carNumber.trim()}` : 'Table Service') : null,
         customerName: customerName.trim() || (isQuickGuest ? 'Direct Guest' : 'Customer'),
-        orderType: orderType === 'CAR_SERVICE' ? '🍽️ TABLE ORDER (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        orderType: orderType === 'CAR_SERVICE' ? '🍽️ TABLE SERVICE (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
         specialInstructions: cookingInstructions.trim() || 'Hold Order - Fired to Kitchen',
       },
       items: cartItems.map((it) => ({
@@ -359,9 +359,9 @@ export default function AdminPosPage() {
         orderNumber: held.id,
         createdAt: held.createdAt || new Date(),
         stationName: 'Main Kitchen & Tandoor Station',
-        carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber ? `Table ${held.carNumber}` : 'Table Order') : null,
+        carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber ? `Table ${held.carNumber}` : 'Table Service') : null,
         customerName: held.customerName || (held.orderType === 'CAR_SERVICE' ? 'Table Guest' : 'Takeaway Guest'),
-        orderType: held.orderType === 'CAR_SERVICE' ? '🍽️ TABLE ORDER (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
+        orderType: held.orderType === 'CAR_SERVICE' ? '🍽️ TABLE SERVICE (HOLD)' : '🛍️ TAKEAWAY (HOLD ORDER)',
         specialInstructions: held.cookingInstructions || 'Hold Order - Fired to Kitchen',
       },
       items: held.cartItems.map((it) => ({
@@ -927,7 +927,7 @@ export default function AdminPosPage() {
 
           {/* QSR Order Type, Car Number & Guest Inputs */}
           <div className="p-3 border-b border-slate-100 bg-[#FEFBF5] space-y-2 text-xs">
-            {/* Main Order Types: Car Service & Takeaway */}
+            {/* Main Order Types: Table Service & Takeaway */}
             <div className="grid grid-cols-2 gap-1.5 bg-[#F7F2EA] p-1 rounded-2xl font-bold text-xs">
               <button
                 type="button"
@@ -938,7 +938,7 @@ export default function AdminPosPage() {
                     : 'text-[#745E55] hover:text-[#331E17]'
                 }`}
               >
-                <span>🍽️ Table Order</span>
+                <span>🍽️ Table Service</span>
               </button>
               <button
                 type="button"

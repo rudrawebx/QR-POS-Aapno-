@@ -129,7 +129,7 @@ export default function StickyCartDrawer({
   };
 
   const getHeadingText = () => {
-    if (orderType === 'CAR_SERVICE') return 'Customer & Vehicle Details';
+    if (orderType === 'CAR_SERVICE') return 'Table Service Details';
     if (orderType === 'TAKEAWAY') return 'Customer Details';
     return 'Dine-In Details';
   };
@@ -280,7 +280,7 @@ export default function StickyCartDrawer({
                     <button
                       type="button"
                       onClick={() => setOrderType('CAR_SERVICE')}
-                      aria-label="Select Car Service delivery"
+                      aria-label="Select Table Service delivery"
                       className={`p-2.5 rounded-2xl border-2 text-center transition-all cursor-pointer ${
                         orderType === 'CAR_SERVICE'
                           ? 'border-[#AA1B2A] bg-[#AA1B2A]/10 font-bold text-[#AA1B2A]'
@@ -288,7 +288,7 @@ export default function StickyCartDrawer({
                       }`}
                     >
                       <Utensils className="w-4 h-4 mx-auto mb-1 text-[#AA1B2A]" />
-                      <span className="text-[11px] block font-bold">Table Order</span>
+                      <span className="text-[11px] block font-bold">Table Service</span>
                     </button>
 
                     <button

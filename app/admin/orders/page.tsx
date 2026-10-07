@@ -20,6 +20,7 @@ import {
   Filter,
   Car,
   ShoppingBag,
+  Utensils,
   Check,
   Download,
   RotateCcw,
@@ -242,7 +243,7 @@ export default function AdminOrdersPage() {
               <div>
                 <h1 className="text-lg font-black text-[#331E17]">Live Order Operations</h1>
                 <p className="text-xs text-[#745E55]">
-                  Real-time Kitchen &amp; Car Service KOT pipeline with strict payment verification
+                  Real-time Kitchen &amp; Table Service KOT pipeline with strict payment verification
                 </p>
               </div>
             </div>
@@ -311,8 +312,8 @@ export default function AdminOrdersPage() {
                       : 'text-[#745E55]'
                   }`}
                 >
-                  <Car className="w-3 h-3" />
-                  <span>Car</span>
+                  <Utensils className="w-3 h-3" />
+                  <span>Table Service</span>
                 </button>
                 <button
                   onClick={() => setOrderTypeFilter('TAKEAWAY')}
@@ -373,7 +374,7 @@ export default function AdminOrdersPage() {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="font-black text-[#331E17] font-mono">{ord.humanOrderId}</span>
                               <span className="bg-[#AA1B2A] text-white font-black text-[9px] px-1.5 py-0.5 rounded uppercase">
-                                {ord.orderType?.replace('_', ' ')}
+                                {ord.orderType === 'CAR_SERVICE' ? 'Table Service' : ord.orderType?.replace('_', ' ')}
                               </span>
                               <span className="bg-slate-100 text-slate-800 font-bold text-[9px] px-1.5 py-0.5 rounded border border-slate-200">
                                 {ord.paymentMethod === 'PAY_AT_COUNTER' ? '🏪 Pay at Counter' : ord.paymentMethod === 'RAZORPAY' ? '⚡ Razorpay' : ord.paymentMethod === 'UPI_DIRECT' || ord.paymentMethod === 'UPI' ? '📱 UPI' : ord.paymentMethod === 'CASH' ? '💵 Cash' : ord.paymentMethod === 'CARD' ? '💳 Card' : ord.paymentMethod || 'Pay'}
@@ -398,12 +399,12 @@ export default function AdminOrdersPage() {
                           </div>
                         </div>
 
-                        {/* Vehicle Number Callout */}
+                        {/* Vehicle / Table Number Callout */}
                         {ord.carNumber && (
                           <div className="bg-amber-50 p-2 rounded-xl border border-amber-300 flex items-center justify-between text-[11px]">
                             <span className="font-bold text-amber-900 flex items-center gap-1">
-                              <Car className="w-3.5 h-3.5 text-[#AA1B2A]" />
-                              <span>CAR NO:</span>
+                              <Utensils className="w-3.5 h-3.5 text-[#AA1B2A]" />
+                              <span>TABLE NO:</span>
                             </span>
                             <span className="font-mono font-black text-slate-900 tracking-wider">
                               {ord.carNumber}

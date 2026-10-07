@@ -213,11 +213,11 @@ export default function AdminCustomersPage() {
                           </span>
                           {ord.carNumber && (
                             <span className="bg-slate-200 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                              🚗 {ord.carNumber}
+                              🍽️ Table {ord.carNumber.replace(/^Table\s*/i, '')}
                             </span>
                           )}
                           <span className="bg-slate-200 text-slate-700 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                            {ord.orderType || "CAR_SERVICE"}
+                            {ord.orderType === "CAR_SERVICE" || !ord.orderType ? "Table Service" : ord.orderType.replace("_", " ")}
                           </span>
                         </div>
 

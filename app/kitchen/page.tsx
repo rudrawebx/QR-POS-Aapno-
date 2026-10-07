@@ -193,7 +193,7 @@ export default function KitchenDisplayPage() {
           <div className="h-96 flex flex-col items-center justify-center text-center p-8 bg-slate-900/40 rounded-3xl border border-slate-800">
             <ChefHat className="w-16 h-16 text-slate-700 mb-3" />
             <h3 className="text-lg font-black text-slate-300">All Kitchen Orders Clear!</h3>
-            <p className="text-xs text-slate-500 mt-1">Waiting for new verified orders from QR &amp; Car Service...</p>
+            <p className="text-xs text-slate-500 mt-1">Waiting for new verified orders from QR &amp; Table Service...</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -219,7 +219,7 @@ export default function KitchenDisplayPage() {
                       <div className="flex items-center gap-1.5">
                         <span className="font-mono font-black text-base text-white">{kot.humanKotNumber}</span>
                         <span className="bg-[#7A0C16] text-[#D4AF37] text-[10px] font-black px-2 py-0.5 rounded uppercase">
-                          {kot.orderType?.replace('_', ' ')}
+                          {kot.orderType === 'CAR_SERVICE' ? 'TABLE SERVICE' : kot.orderType?.replace('_', ' ')}
                         </span>
                       </div>
                       <p className="text-[10px] text-slate-400 mt-0.5 font-bold uppercase">
@@ -242,12 +242,12 @@ export default function KitchenDisplayPage() {
                     </div>
                   </div>
 
-                  {/* Vehicle / Customer Callout */}
+                  {/* Vehicle / Table / Customer Callout */}
                   {(kot.carNumber || kot.customerName) && (
                     <div className="bg-amber-500/10 border-b border-amber-500/30 px-3.5 py-2 flex items-center justify-between text-xs">
                       <div className="flex items-center gap-1.5 font-bold text-amber-300">
-                        <Car className="w-4 h-4 text-amber-400" />
-                        <span>CAR NO: <b className="text-white font-mono">{kot.carNumber || 'PARK & DINE'}</b></span>
+                        <Utensils className="w-4 h-4 text-amber-400" />
+                        <span>TABLE NO: <b className="text-white font-mono">{kot.carNumber || 'TABLE SERVICE'}</b></span>
                       </div>
                       <span className="text-[10px] text-slate-400 font-medium truncate max-w-[100px]">
                         {kot.customerName}

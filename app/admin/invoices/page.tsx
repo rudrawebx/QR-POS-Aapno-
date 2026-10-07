@@ -352,7 +352,7 @@ export default function AdminInvoicesPage() {
                       </td>
                       <td className="py-3 px-3.5">
                         <span className="bg-slate-100 text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-md">
-                          {inv.orderType || "CAR_SERVICE"}
+                          {inv.orderType === "CAR_SERVICE" || !inv.orderType ? "Table Service" : inv.orderType.replace("_", " ")}
                         </span>
                       </td>
                       <td className="py-3 px-3.5">

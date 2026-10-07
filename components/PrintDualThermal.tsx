@@ -305,7 +305,7 @@ export default function PrintDualThermal({
               <div className="py-2 border-b border-dashed border-black space-y-1 text-[10px]">
                 <div className="flex justify-between font-black text-xs">
                   <span>ORDER: {billData.order.humanOrderId}</span>
-                  <span className="uppercase">{billData.order.orderType?.replace("_", " ")}</span>
+                  <span className="uppercase">{billData.order.orderType === "CAR_SERVICE" ? "TABLE SERVICE" : billData.order.orderType?.replace("_", " ")}</span>
                 </div>
 
                 {billData.order.carNumber && (
@@ -434,7 +434,7 @@ export default function PrintDualThermal({
                   </div>
                 ) : (
                   <div className="border-2 border-black bg-white text-black p-1 text-center font-bold uppercase rounded-sm">
-                    TYPE: {kotData.kot.orderType?.replace("_", " ")}
+                    TYPE: {kotData.kot.orderType === "CAR_SERVICE" ? "TABLE SERVICE" : kotData.kot.orderType?.replace("_", " ")}
                   </div>
                 )}
 

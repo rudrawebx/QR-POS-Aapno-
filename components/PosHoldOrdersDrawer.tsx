@@ -320,7 +320,7 @@ export default function PosHoldOrdersDrawer({
                           {held.orderType === 'CAR_SERVICE' ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-red-100 text-[#AA1B2A] font-black text-[10px] border border-red-200">
                               <Utensils className="w-3 h-3" />
-                              <span>{held.carNumber ? (held.carNumber.startsWith('Table') ? held.carNumber : `Table ${held.carNumber}`) : 'Table Order'}</span>
+                              <span>{held.carNumber ? (held.carNumber.startsWith('Table') ? held.carNumber : `Table ${held.carNumber}`) : 'Table Service'}</span>
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-blue-100 text-blue-800 font-bold text-[10px] border border-blue-200">

@@ -262,7 +262,7 @@ export default function CustomerQsrMenuPage() {
               href={`/r/${slug}`}
               className="w-full block bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white font-black py-3.5 px-6 rounded-2xl text-xs shadow-md hover:from-[#901622] hover:to-[#C0392F] transition-all"
             >
-              Browse General Menu (Car Service / Takeaway)
+              Browse General Menu (Table Service / Takeaway)
             </a>
 
             <a

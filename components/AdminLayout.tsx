@@ -211,7 +211,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {sessionUser?.restaurantName || 'आपणो खाणो'}
             </h2>
             <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1">
-              <span>QSR &amp; Car Service Platform</span>
+              <span>QSR &amp; Table Service Platform</span>
             </p>
           </div>
         </div>

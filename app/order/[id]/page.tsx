@@ -13,6 +13,7 @@ import {
   Printer,
   Star,
   ChevronRight,
+  Utensils,
   Phone,
   Sparkles,
   ArrowLeft,
@@ -180,7 +181,7 @@ export default function CustomerOrderTrackerPage() {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-[#7A0C16] text-[#D4AF37] flex items-center justify-center shadow-inner flex-shrink-0">
               {order.orderType === 'CAR_SERVICE' ? (
-                <Car className="w-6 h-6 animate-pulse" />
+                <Utensils className="w-6 h-6 animate-pulse" />
               ) : (
                 <ShoppingBag className="w-6 h-6" />
               )}
@@ -188,14 +189,14 @@ export default function CustomerOrderTrackerPage() {
             <div>
               <p className="text-[11px] font-bold text-slate-500 uppercase">
                 {order.orderType === 'CAR_SERVICE'
-                  ? '🚗 Car-Service Park & Dine'
+                  ? '🍽️ Table Service'
                   : order.orderType === 'TAKEAWAY'
                   ? '🛍️ Takeaway / Pickup'
                   : '🍽️ Quick Dine-In'}
               </p>
               {order.carNumber ? (
                 <h3 className="text-lg font-black text-[#7A0C16] tracking-wider font-mono">
-                  {order.carNumber}
+                  {order.carNumber.startsWith('Table') ? order.carNumber : `Table ${order.carNumber}`}
                 </h3>
               ) : (
                 <h3 className="text-base font-bold text-slate-900">{order.customerName}</h3>
@@ -274,9 +275,9 @@ export default function CustomerOrderTrackerPage() {
               </div>
               <div className="flex-1 pt-0.5">
                 <p className="text-xs font-bold text-slate-900">
-                  {order.orderType === 'CAR_SERVICE' ? 'Runner Delivering to Your Car' : 'Ready at Pickup Counter'}
+                  {order.orderType === 'CAR_SERVICE' ? 'Runner Delivering to Your Table' : 'Ready at Pickup Counter'}
                 </p>
-                <p className="text-[11px] text-slate-500">Hot food dispatched to your vehicle window</p>
+                <p className="text-[11px] text-slate-500">Hot food dispatched to your table</p>
               </div>
             </div>
 
