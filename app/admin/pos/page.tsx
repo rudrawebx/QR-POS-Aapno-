@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import PrintDualThermal from '@/components/PrintDualThermal';
 import PosHoldOrdersDrawer, { HeldOrder, getAmountColorTier } from '@/components/PosHoldOrdersDrawer';
@@ -35,7 +35,7 @@ import {
   Layers,
 } from 'lucide-react';
 
-const MAX_HELD_ORDERS = 20;
+const MAX_HELD_ORDERS = 50;
 
 export default function AdminPosPage() {
   const [categories, setCategories] = useState<any[]>(MASTER_AAPNO_KHANO_CATEGORIES);
@@ -54,6 +54,7 @@ export default function AdminPosPage() {
   const [paymentMethod, setPaymentMethod] = useState<'CASH' | 'UPI' | 'CARD' | 'SPLIT'>('UPI');
   const [discountAmount, setDiscountAmount] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const settleLockRef = useRef(false);
 
   // Held Orders (Parking Tickets) State & UI
   const [heldOrders, setHeldOrders] = useState<HeldOrder[]>([]);
@@ -437,10 +438,13 @@ export default function AdminPosPage() {
 
   // DIRECT SETTLE FROM HELD DRAWER
   const handleDirectSettleHeldOrder = async (held: HeldOrder) => {
+    if (isSubmitting || settleLockRef.current) return;
+    settleLockRef.current = true;
     setIsSubmitting(true);
     try {
+      const clientRequestId = `hold_req_${held.id}_${Date.now()}`;
       const guestDisplayName = held.customerName?.trim() || (isQuickGuest ? 'Walk-in Guest' : 'Direct Guest');
-      const guestPhone = held.customerPhone?.trim() ? held.customerPhone.trim().replace(/\D/g, '') : null;
+      const guestPhone = held.customerPhone?.trim() ? held.customerPhone.trim().replace(/\D/g, '') : "";
 
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -448,6 +452,7 @@ export default function AdminPosPage() {
         body: JSON.stringify({
           restaurantId: 'rest_aapno_khano',
           source: 'POS_TERMINAL',
+          clientRequestId,
           customerName: guestDisplayName,
           customerPhone: guestPhone,
           carNumber: held.orderType === 'CAR_SERVICE' ? (held.carNumber.trim() || null) : null,
@@ -492,6 +497,9 @@ export default function AdminPosPage() {
       alert('Error processing order. Please check server connection.');
     } finally {
       setIsSubmitting(false);
+      setTimeout(() => {
+        settleLockRef.current = false;
+      }, 2000);
     }
   };
 
@@ -604,16 +612,19 @@ export default function AdminPosPage() {
 
   // Direct POS Settlement (Cash, UPI QR, Card EDC, Split) & Bill Generation
   const handleSettleAndPrint = async (chosenMethod: 'CASH' | 'UPI' | 'CARD' | 'SPLIT' = paymentMethod) => {
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0 || isSubmitting || settleLockRef.current) return;
+    settleLockRef.current = true;
     setIsSubmitting(true);
     try {
       const guestDisplayName = customerName.trim() || (isQuickGuest ? "Walk-in Guest" : "Direct Guest");
-      const guestPhone = customerPhone.trim() ? customerPhone.trim().replace(/\D/g, "") : null;
+      const guestPhone = customerPhone.trim() ? customerPhone.trim().replace(/\D/g, "") : "";
+      const clientRequestId = `pos_req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
 
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          clientRequestId,
           restaurantId: "rest_aapno_khano",
           source: "POS_TERMINAL",
           customerName: guestDisplayName,
@@ -666,6 +677,9 @@ export default function AdminPosPage() {
       alert("Error processing order. Please check server connection and try again.");
     } finally {
       setIsSubmitting(false);
+      setTimeout(() => {
+        settleLockRef.current = false;
+      }, 1500);
     }
   };
 
@@ -692,7 +706,7 @@ export default function AdminPosPage() {
                 ? 'bg-[#FFF8E7] hover:bg-[#ffefc9] text-[#9A5B00] border-[#E09D3D] ring-2 ring-[#E09D3D]/30'
                 : 'bg-[#F7F2EA] hover:bg-slate-200 text-[#745E55] border-[#E8E1D6]'
             }`}
-            title="Open Held Orders Section (20 orders capacity)"
+            title="Open Held Orders Section (50 orders capacity)"
           >
             <PauseCircle className={`w-4 h-4 ${heldOrders.length > 0 ? 'text-[#E09D3D] animate-pulse' : 'text-[#745E55]'}`} />
             <span>⏸️ Held Orders ({heldOrders.length}/{MAX_HELD_ORDERS})</span>

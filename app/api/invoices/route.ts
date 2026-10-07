@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const customEnd = searchParams.get('endDate');
     const searchQuery = searchParams.get('q')?.toLowerCase();
     const limitParam = searchParams.get('limit');
-    const takeLimit = limitParam ? Math.min(Math.max(1, parseInt(limitParam, 10) || 200), 500) : 200;
+    const takeLimit = limitParam ? Math.min(Math.max(1, parseInt(limitParam, 10) || 200), 5000) : 5000;
 
     // Date range calculation
     const now = new Date();

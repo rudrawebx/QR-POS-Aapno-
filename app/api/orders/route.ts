@@ -5,6 +5,18 @@ import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastEvent } fro
 import { deductInventoryForOrder } from "@/lib/inventory";
 import { MASTER_AAPNO_KHANO_CATEGORIES } from "@/lib/menuData";
 
+// In-memory idempotency cache for duplicate request prevention (expiring after 15 seconds)
+const idempotentOrdersCache = new Map<string, { response: any; timestamp: number }>();
+
+function cleanExpiredIdempotencyKeys() {
+  const now = Date.now();
+  for (const [key, value] of idempotentOrdersCache.entries()) {
+    if (now - value.timestamp > 15000) {
+      idempotentOrdersCache.delete(key);
+    }
+  }
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -242,7 +254,18 @@ export async function POST(request: Request) {
       isStaffCashConfirmed = false,
       receivedAmount = 0,
       discountAmount = 0,
+      clientRequestId,
     } = data;
+
+    // 🔒 IDEMPOTENCY CHECK — If client sent same requestId within 15s, return identical response
+    if (clientRequestId) {
+      cleanExpiredIdempotencyKeys();
+      const cached = idempotentOrdersCache.get(clientRequestId);
+      if (cached) {
+        console.log(`[Idempotency] Returning cached response for duplicate request: ${clientRequestId}`);
+        return NextResponse.json(cached.response);
+      }
+    }
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "Order must contain at least one valid item" }, { status: 400 });
@@ -672,7 +695,7 @@ export async function POST(request: Request) {
       })),
     };
 
-    return NextResponse.json({
+    const finalResponse = {
       success: true,
       order: orderRecord,
       invoice: invoiceRecord,
@@ -680,7 +703,16 @@ export async function POST(request: Request) {
       humanOrderId,
       humanInvoiceNumber,
       printReceiptData,
-    });
+    };
+
+    if (clientRequestId) {
+      idempotentOrdersCache.set(clientRequestId, {
+        response: finalResponse,
+        timestamp: Date.now(),
+      });
+    }
+
+    return NextResponse.json(finalResponse);
   } catch (error: any) {
     console.error("Order creation error:", error);
     return NextResponse.json({ error: error?.message || "Failed to create order" }, { status: 500 });
