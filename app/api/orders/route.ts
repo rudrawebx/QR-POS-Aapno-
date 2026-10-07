@@ -695,7 +695,7 @@ export async function POST(request: Request) {
         paymentMethod: effectivePaymentMethod,
         paymentStatus: "PAID",
         transactionId,
-        subtotal: subtotalAfterDiscount,
+        subtotal: calculatedSubtotal,
         cgstAmount,
         sgstAmount,
         grandTotal,
