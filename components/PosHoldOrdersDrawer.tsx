@@ -113,18 +113,12 @@ export default function PosHoldOrdersDrawer({
   onPrintKot,
   maxHoldCapacity = 20,
 }: PosHoldOrdersDrawerProps) {
-  const [filterTier, setFilterTier] = useState<'ALL' | 'GREEN' | 'ORANGE' | 'RED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   if (!isOpen) return null;
 
-  // Filter logic
+  // Search filter logic
   const filteredOrders = heldOrders.filter((ord) => {
-    const tier = getAmountColorTier(ord.grandTotal).tier;
-    if (filterTier === 'GREEN' && tier !== 'GREEN') return false;
-    if (filterTier === 'ORANGE' && tier !== 'ORANGE') return false;
-    if (filterTier === 'RED' && tier !== 'RED') return false;
-
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchCar = (ord.carNumber || '').toLowerCase().includes(q);
@@ -137,9 +131,6 @@ export default function PosHoldOrdersDrawer({
     return true;
   });
 
-  const greenCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'GREEN').length;
-  const orangeCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'ORANGE').length;
-  const redCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'RED').length;
   const capacityPercent = Math.min(100, Math.round((heldOrders.length / maxHoldCapacity) * 100));
 
   return (
@@ -202,8 +193,8 @@ export default function PosHoldOrdersDrawer({
           </div>
         </div>
 
-        {/* Search & Color Zone Filter Pills */}
-        <div className="p-3 bg-white border-b border-[#E8E1D6] space-y-2.5 shadow-2xs">
+        {/* Search Bar */}
+        <div className="p-3 bg-white border-b border-[#E8E1D6] shadow-2xs">
           <div className="relative">
             <Search className="w-4 h-4 text-[#745E55] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
@@ -216,60 +207,6 @@ export default function PosHoldOrdersDrawer({
               }}
               className="w-full pl-9 pr-4 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs text-[#331E17] placeholder-[#745E55] focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
             />
-          </div>
-
-          {/* Color Zone Pills */}
-          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar pt-0.5">
-            <button
-              type="button"
-              onClick={() => setFilterTier('ALL')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                filterTier === 'ALL'
-                  ? 'bg-[#331E17] text-white shadow-2xs'
-                  : 'bg-[#F7F2EA] text-[#745E55] hover:bg-[#E8E1D6]'
-              }`}
-            >
-              All Held ({heldOrders.length})
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilterTier('GREEN')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                filterTier === 'GREEN'
-                  ? 'bg-emerald-600 text-white font-black shadow-2xs'
-                  : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>&lt; ₹100 Green ({greenCount})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilterTier('ORANGE')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                filterTier === 'ORANGE'
-                  ? 'bg-orange-600 text-white font-black shadow-2xs'
-                  : 'bg-orange-50 text-orange-800 border border-orange-200 hover:bg-orange-100'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-orange-500" />
-              <span>&gt; ₹1,000 Orange ({orangeCount})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setFilterTier('RED')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all cursor-pointer ${
-                filterTier === 'RED'
-                  ? 'bg-red-600 text-white font-black shadow-2xs'
-                  : 'bg-red-50 text-red-800 border border-red-200 hover:bg-red-100'
-              }`}
-            >
-              <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
-              <span>&gt; ₹2,000 Red Zone ({redCount})</span>
-            </button>
           </div>
         </div>
 
@@ -291,25 +228,20 @@ export default function PosHoldOrdersDrawer({
               <p className="text-xs font-bold text-slate-600">No matching held orders found</p>
               <button
                 type="button"
-                onClick={() => {
-                  setFilterTier('ALL');
-                  setSearchQuery('');
-                }}
+                onClick={() => setSearchQuery('')}
                 className="mt-2 text-xs text-[#AA1B2A] font-bold underline"
               >
-                Reset Filters
+                Clear Search
               </button>
             </div>
           ) : (
-            filteredOrders.map((held) => {
-              const tierInfo = getAmountColorTier(held.grandTotal);
-              return (
-                <div
-                  key={held.id}
-                  className={`p-3.5 rounded-2xl border transition-all ${tierInfo.cardClass} shadow-2xs hover:shadow-md`}
-                >
+            filteredOrders.map((held) => (
+              <div
+                key={held.id}
+                className="p-3.5 rounded-2xl border border-[#E8E1D6] bg-white hover:border-[#E09D3D] shadow-2xs hover:shadow-md transition-all"
+              >
                   {/* Card Header */}
-                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-slate-200/70">
+                  <div className="flex items-start justify-between gap-2 pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2">
                       <span className="w-7 h-7 rounded-xl bg-[#331E17] text-white flex items-center justify-center font-mono font-black text-xs">
                         #{held.holdNumber}
@@ -346,12 +278,12 @@ export default function PosHoldOrdersDrawer({
                       </div>
                     </div>
 
-                    {/* Amount Tier Badge */}
+                    {/* Total Amount */}
                     <div className="text-right">
-                      <span className={`px-2.5 py-1 rounded-xl text-[10px] font-black border ${tierInfo.badgeClass} inline-block`}>
-                        {tierInfo.label}
+                      <span className="text-[10px] uppercase font-bold text-[#745E55] block">
+                        Total Amount
                       </span>
-                      <div className={`text-base font-black ${tierInfo.textClass} mt-0.5`}>
+                      <div className="text-base font-black text-[#AA1B2A]">
                         ₹{held.grandTotal.toFixed(2)}
                       </div>
                     </div>
@@ -431,8 +363,7 @@ export default function PosHoldOrdersDrawer({
                     </button>
                   </div>
                 </div>
-              );
-            })
+              ))
           )}
         </div>
 

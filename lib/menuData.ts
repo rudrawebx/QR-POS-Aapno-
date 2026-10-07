@@ -1715,3 +1715,33 @@ export function getMergedCategories(inputCategories?: any[]) {
   return resultCategories;
 }
 
+// Check if a dish is a packaged beverage / MRP drink item (inbuilt GST)
+export function isDrinkBeverageItem(item: { name?: string; categoryName?: string; categoryId?: string }): boolean {
+  if (!item) return false;
+  const catName = (item.categoryName || '').toLowerCase().trim();
+  const catId = (item.categoryId || '').toLowerCase().trim();
+  const name = (item.name || '').toLowerCase().trim();
+
+  // Known drink category slugs or names
+  if (
+    catId === 'cat-soft-drinks' ||
+    catId === 'cat-water' ||
+    catId === 'cat-soda' ||
+    catId === 'cat-energy-drinks' ||
+    catName.includes('soft drink') ||
+    catName.includes('beverage') ||
+    catName.includes('mineral water') ||
+    catName.includes('energy drink') ||
+    catName.includes('packaged soda')
+  ) {
+    return true;
+  }
+
+  // Exact names of all MRP beverage bottles/cans in Aapno Khaano
+  const drinkNames = [
+    'coke', 'limca', 'sprite', 'diet coke', 'hell can', 'predator can',
+    'bisleri water', 'vedica water', 'kinley soda', 'bisleri soda'
+  ];
+
+  return drinkNames.some((d) => name.startsWith(d) || name.includes(d));
+}

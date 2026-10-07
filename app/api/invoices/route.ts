@@ -81,7 +81,8 @@ export async function GET(request: Request) {
       if (o.humanOrderId) liveOrdersMap.set(o.humanOrderId, o);
     });
 
-    const combinedInvoicesMap = new Map();
+    // Deduplicate strictly by humanInvoiceNumber, orderId or id
+    const getKey = (inv: any) => inv.humanInvoiceNumber || inv.orderId || inv.id;
 
     (liveMemInvoices || []).forEach((inv) => {
       const invDate = new Date(inv.createdAt);
@@ -92,7 +93,7 @@ export async function GET(request: Request) {
         if (!inv.carNumber && inv.order?.carNumber) {
           inv.carNumber = inv.order.carNumber;
         }
-        combinedInvoicesMap.set(inv.id || inv.humanInvoiceNumber, inv);
+        combinedInvoicesMap.set(getKey(inv), inv);
       }
     });
 
@@ -103,7 +104,8 @@ export async function GET(request: Request) {
       if (!inv.carNumber && inv.order?.carNumber) {
         inv.carNumber = inv.order.carNumber;
       }
-      combinedInvoicesMap.set(inv.id || inv.humanInvoiceNumber, inv);
+      // DB invoice always takes precedence over in-memory snapshot
+      combinedInvoicesMap.set(getKey(inv), inv);
     });
 
     let invoices = Array.from(combinedInvoicesMap.values()).sort(

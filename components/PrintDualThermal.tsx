@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { PrintReceiptData, PrintKotData } from '@/lib/types';
 import { Printer, Scissors, PlusCircle, FileText, ChefHat } from 'lucide-react';
+import { isDrinkBeverageItem } from '@/lib/menuData';
 
 interface PrintDualThermalProps {
   billData?: PrintReceiptData | null;
@@ -353,10 +354,37 @@ export default function PrintDualThermal({
 
               {/* Totals & Taxes */}
               <div className="py-2 border-b border-dashed border-black space-y-1 text-[10px]">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>₹{Number(billData.order.subtotal || 0).toFixed(2)}</span>
-                </div>
+                {(() => {
+                  const itemsList = billData.items || [];
+                  const drinksTotal = itemsList
+                    .filter((it) => isDrinkBeverageItem(it))
+                    .reduce((sum, it) => sum + (Number(it.totalPrice) || (Number(it.unitPrice || 0) * Number(it.quantity || 1))), 0);
+                  const foodTotal = itemsList
+                    .filter((it) => !isDrinkBeverageItem(it))
+                    .reduce((sum, it) => sum + (Number(it.totalPrice) || (Number(it.unitPrice || 0) * Number(it.quantity || 1))), 0);
+
+                  return (
+                    <>
+                      {drinksTotal > 0 ? (
+                        <>
+                          <div className="flex justify-between">
+                            <span>Food Subtotal:</span>
+                            <span>₹{foodTotal.toFixed(2)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Drinks/Water (MRP Incl.):</span>
+                            <span>₹{drinksTotal.toFixed(2)}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <div className="flex justify-between">
+                          <span>Subtotal:</span>
+                          <span>₹{Number(billData.order.subtotal || 0).toFixed(2)}</span>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
 
                 {billData.order.discountAmount ? (
                   <div className="flex justify-between text-emerald-800 font-bold">

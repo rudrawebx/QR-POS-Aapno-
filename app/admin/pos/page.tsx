@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import AdminLayout from '@/components/AdminLayout';
 import PrintDualThermal from '@/components/PrintDualThermal';
-import PosHoldOrdersDrawer, { HeldOrder, getAmountColorTier } from '@/components/PosHoldOrdersDrawer';
-import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
+import PosHoldOrdersDrawer, { HeldOrder } from '@/components/PosHoldOrdersDrawer';
+import { MASTER_AAPNO_KHANO_CATEGORIES, isDrinkBeverageItem } from '@/lib/menuData';
 import { CartItem } from '@/lib/types';
 import {
   CreditCard,
@@ -250,14 +250,22 @@ export default function AdminPosPage() {
   };
 
   const rawSubtotal = cartItems.reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
-  const subtotalAfterDiscount = Math.max(0, rawSubtotal - discountAmount);
-  const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
-  const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
-  const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
-  const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
 
-  // Dynamic color zone tier info for current active ticket
-  const activeTier = getAmountColorTier(grandTotal);
+  // Separate Food (GST Applicable) vs Drinks (MRP Inbuilt Tax)
+  const taxableFoodSubtotal = cartItems
+    .filter((it) => !isDrinkBeverageItem(it))
+    .reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+
+  const exemptDrinksSubtotal = cartItems
+    .filter((it) => isDrinkBeverageItem(it))
+    .reduce((acc, it) => acc + it.unitPrice * it.quantity, 0);
+
+  // Discount applies proportionally to taxable food first
+  const taxableAfterDiscount = Math.max(0, taxableFoodSubtotal - discountAmount);
+  const cgstAmount = +(taxableAfterDiscount * 0.025).toFixed(2);
+  const sgstAmount = +(taxableAfterDiscount * 0.025).toFixed(2);
+  const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
+  const grandTotal = +(taxableAfterDiscount + exemptDrinksSubtotal + taxAmount).toFixed(2);
 
   // HOLD ORDER FUNCTION (Up to 20 Capacity)
   const handleHoldOrder = () => {
@@ -687,11 +695,6 @@ export default function AdminPosPage() {
     return handleSettleAndPrint("CASH");
   };
 
-  // Count active tiers among held orders for quick display
-  const heldGreenCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'GREEN').length;
-  const heldOrangeCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'ORANGE').length;
-  const heldRedCount = heldOrders.filter((o) => getAmountColorTier(o.grandTotal).tier === 'RED').length;
-
   return (
     <AdminLayout>
       {/* Top Quick Actions Bar */}
@@ -710,20 +713,6 @@ export default function AdminPosPage() {
           >
             <PauseCircle className={`w-4 h-4 ${heldOrders.length > 0 ? 'text-[#E09D3D] animate-pulse' : 'text-[#745E55]'}`} />
             <span>⏸️ Held Orders ({heldOrders.length}/{MAX_HELD_ORDERS})</span>
-
-            {heldOrders.length > 0 && (
-              <div className="flex items-center gap-1 ml-0.5">
-                {heldRedCount > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" title={`${heldRedCount} Red Zone (>₹2000)`} />
-                )}
-                {heldOrangeCount > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-orange-500" title={`${heldOrangeCount} Orange Zone (>₹1000)`} />
-                )}
-                {heldGreenCount > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" title={`${heldGreenCount} Green Zone (<₹100)`} />
-                )}
-              </div>
-            )}
           </button>
 
           <button
@@ -1129,49 +1118,35 @@ export default function AdminPosPage() {
             {/* Calculations Breakdown */}
             <div className="space-y-1 text-[11px] text-[#745E55] border-b border-[#E8E1D6] pb-1.5">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span className="font-bold text-[#331E17]">₹{rawSubtotal.toFixed(2)}</span>
+                <span>Food Items:</span>
+                <span className="font-bold text-[#331E17]">₹{taxableFoodSubtotal.toFixed(2)}</span>
               </div>
+              {exemptDrinksSubtotal > 0 && (
+                <div className="flex justify-between text-sky-800">
+                  <span>Drinks &amp; Water (MRP Incl.):</span>
+                  <span className="font-bold">₹{exemptDrinksSubtotal.toFixed(2)}</span>
+                </div>
+              )}
+              {discountAmount > 0 && (
+                <div className="flex justify-between text-emerald-700">
+                  <span>Discount:</span>
+                  <span className="font-bold">-₹{discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between">
-                <span>GST (5% split 2.5% CGST + 2.5% SGST):</span>
+                <span>GST (5% on Food only):</span>
                 <span className="font-bold text-[#331E17]">₹{taxAmount.toFixed(2)}</span>
               </div>
             </div>
 
-            {/* DYNAMIC COLOR ZONE TOTAL BOX (Green < ₹100, Orange > ₹1000, Red > ₹2000) */}
-            <div
-              className={`p-2.5 rounded-2xl border transition-all duration-300 ${
-                cartItems.length > 0
-                  ? activeTier.tier === 'RED'
-                    ? 'border-l-4 border-l-red-600 border-red-300 bg-red-50/70 shadow-sm ring-1 ring-red-400'
-                    : activeTier.tier === 'ORANGE'
-                    ? 'border-l-4 border-l-orange-500 border-orange-300 bg-orange-50/60 shadow-2xs ring-1 ring-orange-300'
-                    : activeTier.tier === 'GREEN'
-                    ? 'border-l-4 border-l-emerald-500 border-emerald-300 bg-emerald-50/60 shadow-2xs'
-                    : 'border-[#E8E1D6] bg-white'
-                  : 'border-[#E8E1D6] bg-white'
-              }`}
-            >
+            {/* CLEAN GRAND TOTAL BOX */}
+            <div className="p-3 rounded-2xl border border-[#E8E1D6] bg-white shadow-2xs">
               <div className="flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-[#331E17]">
-                      Grand Total ({paymentMethod}):
-                    </span>
-                    {cartItems.length > 0 && (
-                      <span className={`px-2 py-0.5 rounded-lg text-[9px] font-black border ${activeTier.badgeClass}`}>
-                        {activeTier.label}
-                      </span>
-                    )}
-                  </div>
-                  {cartItems.length > 0 && activeTier.subtext && (
-                    <span className="text-[10px] text-[#745E55] block font-medium">
-                      {activeTier.subtext}
-                    </span>
-                  )}
-                </div>
+                <span className="text-xs font-black text-[#331E17]">
+                  Grand Total ({paymentMethod}):
+                </span>
 
-                <span className={`text-base font-black ${cartItems.length > 0 ? activeTier.textClass : 'text-[#AA1B2A]'}`}>
+                <span className="text-lg font-black text-[#AA1B2A]">
                   ₹{grandTotal.toFixed(2)}
                 </span>
               </div>

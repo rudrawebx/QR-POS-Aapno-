@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { getCurrentSession } from "@/lib/auth";
 import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastEvent } from "@/lib/events";
 import { deductInventoryForOrder } from "@/lib/inventory";
-import { MASTER_AAPNO_KHANO_CATEGORIES } from "@/lib/menuData";
+import { MASTER_AAPNO_KHANO_CATEGORIES, isDrinkBeverageItem } from "@/lib/menuData";
 
 // In-memory idempotency cache for duplicate request prevention (expiring after 15 seconds)
 const idempotentOrdersCache = new Map<string, { response: any; timestamp: number }>();
@@ -321,11 +321,18 @@ export async function POST(request: Request) {
       const lineTotal = itemPrice * qty;
       calculatedSubtotal += lineTotal;
 
+      const isDrink = isDrinkBeverageItem({
+        name: product.name,
+        categoryId: product.categoryId || null,
+        categoryName: product.category?.name || null,
+      });
+
       validatedItems.push({
         productId: product.id,
         productName: product.name,
         selectedVariation: it.selectedVariation || null,
         isVeg: Boolean(product.isVeg),
+        isDrink,
         quantity: qty,
         unitPrice: itemPrice,
         totalPrice: lineTotal,
@@ -333,12 +340,21 @@ export async function POST(request: Request) {
       });
     }
 
+    // Separate taxable food items vs exempt drinks (MRP tax inbuilt)
+    const taxableFoodTotal = validatedItems
+      .filter((it) => !it.isDrink)
+      .reduce((sum, it) => sum + it.totalPrice, 0);
+
+    const exemptDrinksTotal = validatedItems
+      .filter((it) => it.isDrink)
+      .reduce((sum, it) => sum + it.totalPrice, 0);
+
     const discountVal = parseFloat(discountAmount) || 0;
-    const subtotalAfterDiscount = Math.max(0, calculatedSubtotal - discountVal);
-    const cgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
-    const sgstAmount = +(subtotalAfterDiscount * 0.025).toFixed(2);
+    const taxableFoodAfterDiscount = Math.max(0, taxableFoodTotal - discountVal);
+    const cgstAmount = +(taxableFoodAfterDiscount * 0.025).toFixed(2);
+    const sgstAmount = +(taxableFoodAfterDiscount * 0.025).toFixed(2);
     const taxAmount = +(cgstAmount + sgstAmount).toFixed(2);
-    const grandTotal = +(subtotalAfterDiscount + taxAmount).toFixed(2);
+    const grandTotal = +(taxableFoodAfterDiscount + exemptDrinksTotal + taxAmount).toFixed(2);
     const roundedTotal = Math.round(grandTotal);
 
     let candidateNum = Math.floor(1000 + (Date.now() % 900000));
