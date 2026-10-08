@@ -83,6 +83,7 @@ export async function GET(request: Request) {
 
     // Deduplicate strictly by humanInvoiceNumber, orderId or id
     const getKey = (inv: any) => inv.humanInvoiceNumber || inv.orderId || inv.id;
+    const combinedInvoicesMap = new Map();
 
     (liveMemInvoices || []).forEach((inv) => {
       const invDate = new Date(inv.createdAt);
