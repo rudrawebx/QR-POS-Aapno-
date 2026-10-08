@@ -105,7 +105,7 @@ export default function AdminPosPage() {
         const res = await fetch('/api/pos/hold?restaurantId=rest_aapno_khano');
         if (res.ok) {
           const data = await res.json();
-          if (data.success && Array.isArray(data.heldOrders) && data.heldOrders.length > 0) {
+          if (data.success && Array.isArray(data.heldOrders)) {
             setHeldOrders(data.heldOrders);
             localStorage.setItem('AAPNO_POS_HELD_ORDERS_V1', JSON.stringify(data.heldOrders));
           }

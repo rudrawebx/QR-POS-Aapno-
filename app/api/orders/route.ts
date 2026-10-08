@@ -5,6 +5,9 @@ import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastEvent } fro
 import { deductInventoryForOrder } from "@/lib/inventory";
 import { MASTER_AAPNO_KHANO_CATEGORIES, isDrinkBeverageItem } from "@/lib/menuData";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 // In-memory idempotency cache for duplicate request prevention (expiring after 120 seconds)
 const idempotentOrdersCache = new Map<string, { response: any; timestamp: number }>();
 
