@@ -17,6 +17,7 @@ import {
   ArrowRight,
   Car,
   ShoppingBag,
+  Utensils,
 } from 'lucide-react';
 
 import { playKitchenAlert, unlockAudioContext } from '@/lib/sound';
@@ -91,11 +92,11 @@ export default function KitchenDisplayPage() {
         orderType: kot.orderType || kot.order?.orderType || 'CAR_SERVICE',
         specialInstructions: kot.specialInstructions || kot.order?.cookingInstructions,
       },
-      items: kot.kotItems.map((ki: any) => ({
-        productName: ki.productName,
+      items: (kot.kotItems || kot.items || []).map((ki: any) => ({
+        productName: ki.productName || ki.name,
         selectedVariation: ki.selectedVariation,
-        quantity: ki.quantity,
-        isVeg: ki.isVeg,
+        quantity: ki.quantity || 1,
+        isVeg: ki.isVeg ?? true,
         modifierSummary: ki.modifierSummary,
         itemNotes: ki.itemNotes,
       })),
@@ -257,9 +258,9 @@ export default function KitchenDisplayPage() {
 
                   {/* KOT Items List */}
                   <div className="p-3.5 space-y-2.5 flex-1 overflow-y-auto max-h-64">
-                    {kot.kotItems.map((ki: any) => (
+                    {(kot.kotItems || kot.items || []).map((ki: any) => (
                       <div
-                        key={ki.id}
+                        key={ki.id || Math.random()}
                         className="bg-slate-950 p-2.5 rounded-2xl border border-slate-800 flex items-start justify-between gap-2"
                       >
                         <div className="flex-1 min-w-0">
