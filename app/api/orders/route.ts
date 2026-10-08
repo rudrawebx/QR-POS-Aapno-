@@ -5,13 +5,13 @@ import { recordLiveOrder, getLiveOrders, recordLiveInvoice, broadcastEvent } fro
 import { deductInventoryForOrder } from "@/lib/inventory";
 import { MASTER_AAPNO_KHANO_CATEGORIES, isDrinkBeverageItem } from "@/lib/menuData";
 
-// In-memory idempotency cache for duplicate request prevention (expiring after 15 seconds)
+// In-memory idempotency cache for duplicate request prevention (expiring after 120 seconds)
 const idempotentOrdersCache = new Map<string, { response: any; timestamp: number }>();
 
 function cleanExpiredIdempotencyKeys() {
   const now = Date.now();
   for (const [key, value] of idempotentOrdersCache.entries()) {
-    if (now - value.timestamp > 15000) {
+    if (now - value.timestamp > 120000) {
       idempotentOrdersCache.delete(key);
     }
   }
@@ -382,6 +382,26 @@ export async function POST(request: Request) {
       }
     }
 
+    // 🛡️ ZERO-DUPLICATE GUARD (ANTI-REPLAY LAYER 1):
+    // Calculate unique Cart Signature (Restaurant + Car/Walkin + OrderType + Items + GrandTotal)
+    const cleanCar = carNumber ? carNumber.trim().toUpperCase() : "";
+    const itemsFingerprint = validatedItems
+      .map((vi) => `${vi.productId || vi.productName}:${vi.quantity}:${vi.selectedVariation || ""}`)
+      .sort()
+      .join("|");
+    const cartIdempotencyKey = `fp_${restaurantId}_${cleanCar || "WALKIN"}_${orderType}_${grandTotal}_${itemsFingerprint}`;
+
+    cleanExpiredIdempotencyKeys();
+    const cachedByFingerprint = idempotentOrdersCache.get(cartIdempotencyKey);
+    if (cachedByFingerprint) {
+      console.log(`[Anti-Duplicate Shield] Blocked duplicate order via in-memory cart fingerprint: ${cartIdempotencyKey}`);
+      return NextResponse.json({
+        ...cachedByFingerprint.response,
+        isDuplicatePrevented: true,
+        notice: "Duplicate order prevented. Returned original invoice.",
+      });
+    }
+
     // 2. CHECK AUTHORIZATION FOR MANUAL / POS SETTLEMENT
     const isStaff = Boolean(session?.userId && ["SUPER_ADMIN", "OWNER", "MANAGER", "CASHIER", "WAITER"].includes(session.role));
     const validCounterMethods = ["CASH", "UPI", "CARD", "SPLIT", "UPI_DIRECT", "DIRECT_QR", "PAY_AT_COUNTER"];
@@ -389,6 +409,110 @@ export async function POST(request: Request) {
                                   (isStaff && validCounterMethods.includes(paymentMethod)) ||
                                   (data.source === "POS_TERMINAL" && isStaffCashConfirmed && validCounterMethods.includes(paymentMethod));
     const effectivePaymentMethod = validCounterMethods.includes(paymentMethod) ? paymentMethod : "CASH";
+
+    // 🛡️ ZERO-DUPLICATE DATABASE SHIELD:
+    // If cashier or client tries to settle the exact same order for the same vehicle/table within 120s,
+    // intercept it before DB write and return the already generated bill!
+    if (isConfirmedStaffOrder && prisma) {
+      try {
+        const recentCutoff = new Date(Date.now() - 120 * 1000); // 120 seconds
+        const candidateDuplicates = await prisma.order.findMany({
+          where: {
+            restaurantId,
+            orderType: orderType || "CAR_SERVICE",
+            carNumber: cleanCar || null,
+            createdAt: { gte: recentCutoff },
+            status: "CONFIRMED",
+          },
+          include: {
+            items: true,
+            invoices: true,
+            kots: { include: { kotItems: true } },
+          },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+        });
+
+        for (const prevOrder of candidateDuplicates) {
+          const prevFingerprint = (prevOrder.items || [])
+            .map((pi: any) => `${pi.productId || pi.productName}:${pi.quantity}:${pi.selectedVariation || ""}`)
+            .sort()
+            .join("|");
+
+          const isSameItems = itemsFingerprint === prevFingerprint;
+          const isSameAmount = Math.abs(prevOrder.grandTotal - grandTotal) < 0.5;
+
+          if (isSameItems && isSameAmount) {
+            console.warn(
+              `[ZERO-DUPLICATE SHIELD] ⚠️ Intercepted duplicate order for car ${cleanCar || "Counter"}! Reusing ${prevOrder.humanOrderId}`
+            );
+
+            const existingInv = prevOrder.invoices?.[0];
+            const existingKot = prevOrder.kots?.[0];
+
+            const printReceiptData = {
+              restaurant: {
+                name: "आपणो खाणो (Aapno Khaano)",
+                address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
+                city: "Fatehabad",
+                phone: "+91 70820 40809, +91 70820 40892",
+                gstin: "08AABCU9603R1ZM",
+                fssaiNumber: "12224026000189",
+                currencySymbol: "₹",
+                defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
+              },
+              order: {
+                humanOrderId: prevOrder.humanOrderId,
+                createdAt: prevOrder.createdAt,
+                customerName: prevOrder.customerName,
+                customerPhone: prevOrder.customerPhone,
+                carNumber: prevOrder.carNumber,
+                orderType: prevOrder.orderType,
+                cookingInstructions: prevOrder.cookingInstructions,
+                paymentMethod: prevOrder.paymentMethod,
+                paymentStatus: prevOrder.paymentStatus,
+                transactionId: prevOrder.transactionId,
+                subtotal: prevOrder.subtotal,
+                cgstAmount: +(prevOrder.taxAmount / 2).toFixed(2),
+                sgstAmount: +(prevOrder.taxAmount / 2).toFixed(2),
+                grandTotal: prevOrder.grandTotal,
+                discountAmount: prevOrder.discountAmount,
+              },
+              items: (prevOrder.items || []).map((it: any) => ({
+                name: it.productName || it.name,
+                selectedVariation: it.selectedVariation,
+                quantity: it.quantity,
+                unitPrice: it.unitPrice,
+                totalPrice: it.totalPrice,
+                isVeg: it.isVeg,
+              })),
+            };
+
+            const dupResponse = {
+              success: true,
+              isDuplicatePrevented: true,
+              duplicatePreventedMessage: `Notice: Identical order already processed ${Math.round((Date.now() - new Date(prevOrder.createdAt).getTime()) / 1000)}s ago. Re-printed original bill ${existingInv?.humanInvoiceNumber || prevOrder.humanOrderId}.`,
+              order: prevOrder,
+              invoice: existingInv,
+              kot: existingKot,
+              humanOrderId: prevOrder.humanOrderId,
+              humanInvoiceNumber: existingInv?.humanInvoiceNumber,
+              printReceiptData,
+            };
+
+            // Store in cache for subsequent sub-second clicks
+            idempotentOrdersCache.set(cartIdempotencyKey, {
+              response: dupResponse,
+              timestamp: Date.now(),
+            });
+
+            return NextResponse.json(dupResponse);
+          }
+        }
+      } catch (dupErr) {
+        console.warn("Zero-duplicate DB guard warning:", dupErr);
+      }
+    }
 
     // CASE A: UNPAID / PENDING ORDER -> Strictly NO Invoice, NO KOT, NO Stock Deduction
     if (!isConfirmedStaffOrder) {
@@ -723,6 +847,13 @@ export async function POST(request: Request) {
 
     if (clientRequestId) {
       idempotentOrdersCache.set(clientRequestId, {
+        response: finalResponse,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (cartIdempotencyKey) {
+      idempotentOrdersCache.set(cartIdempotencyKey, {
         response: finalResponse,
         timestamp: Date.now(),
       });

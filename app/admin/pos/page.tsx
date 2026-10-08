@@ -66,7 +66,24 @@ export default function AdminPosPage() {
   const [dualPrintData, setDualPrintData] = useState<{ billData: any; kotData: any } | null>(null);
   const [lastBillData, setLastBillData] = useState<any | null>(null);
 
+  // 🛡️ Zero-Duplicate Protection States
+  const [duplicateWarning, setDuplicateWarning] = useState<{
+    carNumber: string;
+    humanInvoiceNumber: string;
+    grandTotal: number;
+    timeAgoText: string;
+    printReceiptData: any;
+    onForceProceed: () => void;
+  } | null>(null);
 
+  const [recentBilledOrders, setRecentBilledOrders] = useState<Array<{
+    carNumber: string;
+    humanInvoiceNumber: string;
+    grandTotal: number;
+    timestamp: number;
+    itemsFingerprint: string;
+    printReceiptData: any;
+  }>>([]);
 
   // Customization Modal for Portion Variations
   const [customizingProduct, setCustomizingProduct] = useState<any | null>(null);
@@ -451,7 +468,7 @@ export default function AdminPosPage() {
     settleLockRef.current = true;
     setIsSubmitting(true);
     try {
-      const clientRequestId = `hold_req_${held.id}_${Date.now()}`;
+      const clientRequestId = `hold_req_${held.id}`;
       const guestDisplayName = held.customerName?.trim() || (isQuickGuest ? 'Walk-in Guest' : 'Direct Guest');
       const guestPhone = held.customerPhone?.trim() ? held.customerPhone.trim().replace(/\D/g, '') : "";
 
@@ -494,6 +511,22 @@ export default function AdminPosPage() {
             items: data.kot.kotItems || held.cartItems.map(c => ({ productName: c.name, quantity: c.quantity, isVeg: c.isVeg, selectedVariation: c.selectedVariation })),
           } : null,
         });
+
+        // Record to recent billed orders for Zero-Duplicate shield
+        const cleanCar = held.carNumber?.trim().toUpperCase();
+        if (cleanCar) {
+          setRecentBilledOrders((prev) => [
+            {
+              carNumber: cleanCar,
+              humanInvoiceNumber: data.humanInvoiceNumber || 'INV',
+              grandTotal: held.grandTotal,
+              timestamp: Date.now(),
+              itemsFingerprint: held.cartItems.map(c => `${c.productId || c.name}_${c.quantity}`).sort().join('|'),
+              printReceiptData: data.printReceiptData,
+            },
+            ...prev.slice(0, 30),
+          ]);
+        }
 
         // Remove settled order from held list
         handleDeleteHeldOrder(held.id);
@@ -620,14 +653,51 @@ export default function AdminPosPage() {
   };
 
   // Direct POS Settlement (Cash, UPI QR, Card EDC, Split) & Bill Generation
-  const handleSettleAndPrint = async (chosenMethod: 'CASH' | 'UPI' | 'CARD' | 'SPLIT' = paymentMethod) => {
+  const handleSettleAndPrint = async (
+    chosenMethod: 'CASH' | 'UPI' | 'CARD' | 'SPLIT' = paymentMethod,
+    bypassDuplicateCheck: boolean = false
+  ) => {
     if (cartItems.length === 0 || isSubmitting || settleLockRef.current) return;
+
+    const cleanCar = carNumber.trim().toUpperCase();
+    const itemsSig = cartItems
+      .map((it) => `${it.productId || it.name}_${it.quantity}_${it.selectedVariation || ''}`)
+      .sort()
+      .join('|');
+
+    // 🛡️ FRONTEND ZERO-DUPLICATE SHIELD: Check if same vehicle was billed in last 5 minutes (300s)
+    if (!bypassDuplicateCheck && cleanCar) {
+      const existingRecent = recentBilledOrders.find(
+        (ro) => ro.carNumber === cleanCar && Date.now() - ro.timestamp < 300000
+      );
+
+      if (existingRecent) {
+        const secsAgo = Math.round((Date.now() - existingRecent.timestamp) / 1000);
+        const minsAgo = Math.floor(secsAgo / 60);
+        const timeAgoText = minsAgo > 0 ? `${minsAgo} min ${secsAgo % 60}s` : `${secsAgo}s`;
+
+        setDuplicateWarning({
+          carNumber: cleanCar,
+          humanInvoiceNumber: existingRecent.humanInvoiceNumber,
+          grandTotal: existingRecent.grandTotal,
+          timeAgoText,
+          printReceiptData: existingRecent.printReceiptData,
+          onForceProceed: () => {
+            setDuplicateWarning(null);
+            handleSettleAndPrint(chosenMethod, true);
+          },
+        });
+        return;
+      }
+    }
+
     settleLockRef.current = true;
     setIsSubmitting(true);
     try {
       const guestDisplayName = customerName.trim() || (isQuickGuest ? "Walk-in Guest" : "Direct Guest");
       const guestPhone = customerPhone.trim() ? customerPhone.trim().replace(/\D/g, "") : "";
-      const clientRequestId = `pos_req_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      // Deterministic request ID: repeated clicks for same cart/car/total generate identical ID
+      const clientRequestId = `pos_${orderType}_${cleanCar || 'WALKIN'}_${itemsSig}_${Math.round(grandTotal)}`;
 
       const res = await fetch("/api/orders", {
         method: "POST",
@@ -638,7 +708,7 @@ export default function AdminPosPage() {
           source: "POS_TERMINAL",
           customerName: guestDisplayName,
           customerPhone: guestPhone,
-          carNumber: orderType === 'CAR_SERVICE' ? (carNumber.trim() || null) : null,
+          carNumber: orderType === 'CAR_SERVICE' ? (cleanCar || null) : null,
           orderType,
           cookingInstructions,
           paymentMethod: chosenMethod,
@@ -669,6 +739,22 @@ export default function AdminPosPage() {
             items: data.kot.kotItems || cartItems.map(c => ({ productName: c.name, quantity: c.quantity, isVeg: c.isVeg, selectedVariation: c.selectedVariation })),
           } : null,
         });
+
+        // Record in recent billed orders for duplicate warning shield
+        if (cleanCar) {
+          setRecentBilledOrders((prev) => [
+            {
+              carNumber: cleanCar,
+              humanInvoiceNumber: data.humanInvoiceNumber || 'INV',
+              grandTotal,
+              timestamp: Date.now(),
+              itemsFingerprint: itemsSig,
+              printReceiptData: data.printReceiptData,
+            },
+            ...prev.slice(0, 30),
+          ]);
+        }
+
         setShowCashModal(false);
         setCartItems([]);
         setCookingInstructions("");
@@ -1448,6 +1534,101 @@ export default function AdminPosPage() {
                 <Check className="w-4 h-4" />
                 <span>{isSubmitting ? "Generating Bill..." : "✓ Confirm & Print Bill"}</span>
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🛡️ Duplicate Vehicle Warning Modal */}
+      {duplicateWarning && (
+        <div className="fixed inset-0 z-99999 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border-2 border-[#AA1B2A] animate-in fade-in zoom-in-95">
+            <div className="flex items-center gap-3 text-[#AA1B2A] mb-3">
+              <div className="p-3 bg-red-100 rounded-2xl">
+                <AlertTriangle className="w-8 h-8 text-[#AA1B2A]" />
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-[#331E17]">चेतावनी: बिल पहले ही कट चुका है!</h3>
+                <p className="text-xs text-red-600 font-bold">Duplicate Bill Prevention Shield</p>
+              </div>
+            </div>
+
+            <div className="bg-[#FFF8E7] p-4 rounded-2xl border border-[#E09D3D]/40 text-xs text-[#331E17] space-y-2 mb-4">
+              <div className="flex justify-between font-bold">
+                <span>गाड़ी नंबर / Car:</span>
+                <span className="font-mono text-sm font-black text-[#AA1B2A]">{duplicateWarning.carNumber}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>पिछला बिल नंबर:</span>
+                <span className="font-mono font-bold">{duplicateWarning.humanInvoiceNumber}</span>
+              </div>
+              <div className="flex justify-between font-bold">
+                <span>बिल अमाउंट:</span>
+                <span className="text-sm font-black text-emerald-700">₹{duplicateWarning.grandTotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-slate-600">
+                <span>समय:</span>
+                <span>{duplicateWarning.timeAgoText} पहले</span>
+              </div>
+            </div>
+
+            <p className="text-xs text-slate-600 font-medium mb-5 text-center">
+              क्या आप सिर्फ <strong>पुरानी पर्ची रीप्रिंट</strong> करना चाहते हैं? दोबारा बिल काटने से सेल में डबल अमाउंट जुड़ जाएगा।
+            </p>
+
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setDualPrintData({
+                    billData: duplicateWarning.printReceiptData,
+                    kotData: null,
+                  });
+                  setDuplicateWarning(null);
+                  setCartItems([]);
+                  setCarNumber('');
+                }}
+                className="w-full py-3 bg-[#AA1B2A] hover:bg-[#881521] text-white font-black rounded-2xl text-xs flex items-center justify-center gap-2 shadow-md cursor-pointer transition-transform active:scale-95"
+              >
+                <Printer className="w-4 h-4 text-[#E09D3D]" />
+                <span>🖨️ पुरानी पर्ची रीप्रिंट करें (Duplicate नहीं बनेगा)</span>
+              </button>
+
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setDuplicateWarning(null)}
+                  className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#331E17] font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  रद्द करें (Cancel)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => duplicateWarning.onForceProceed()}
+                  className="flex-1 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold rounded-xl text-xs cursor-pointer"
+                >
+                  नया अतिरिक्त आर्डर है
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 🔒 Full-Screen Click Blocker Overlay during Billing */}
+      {isSubmitting && (
+        <div className="fixed inset-0 z-999999 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-[#1C1614] border border-[#AA1B2A]/50 rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl flex flex-col items-center animate-in fade-in zoom-in-95">
+            <div className="w-16 h-16 rounded-full bg-[#AA1B2A]/20 border-2 border-[#E09D3D] flex items-center justify-center mb-4 animate-spin">
+              <Printer className="w-8 h-8 text-[#E09D3D]" />
+            </div>
+            <h3 className="text-lg font-black text-amber-100 mb-1">बिल प्रोसेस हो रहा है...</h3>
+            <p className="text-xs text-slate-300 font-medium mb-3">
+              कृपया दोबारा क्लिक न करें। प्रिंटर और डेटाबेस सुरक्षित प्रोसेस हो रहा है।
+            </p>
+            <div className="flex items-center gap-2 text-[11px] font-bold bg-[#2A1E1A] text-amber-400 px-3 py-1.5 rounded-xl border border-amber-500/20">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              <span>Zero-Duplicate Shield Active</span>
             </div>
           </div>
         </div>
