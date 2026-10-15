@@ -14,7 +14,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       {
         "id": "p-1",
         "name": "Sweet Corn Chaat",
-        "basePrice": 69.0,
+        "basePrice": 79.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
@@ -22,6 +22,18 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-1-sweet-corn-chaat.png",
         "description": "Freshly prepared Sweet Corn Chaat made to order with authentic spices."
+      },
+      {
+        "id": "p-121",
+        "name": "Peanut Chaat",
+        "basePrice": 109.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-1-sweet-corn-chaat.png",
+        "description": "Crunchy roasted peanuts tossed with tangy spices, onion, tomato, and fresh lemon juice."
       },
       {
         "id": "p-2",
@@ -71,18 +83,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "imageUrl": "/images/menu/p-5-pineapple-chaat.png",
         "description": "Freshly prepared Pineapple Chaat made to order with authentic spices."
       },
-      {
-        "id": "p-6",
-        "name": "Onion Rings",
-        "basePrice": 29.0,
-        "priceSmallHalf": null,
-        "priceLargeFull": null,
-        "hasVariations": false,
-        "isVeg": true,
-        "isBestseller": false,
-        "imageUrl": "/images/menu/p-6-onion-rings.png",
-        "description": "Freshly prepared crunchy Onion Rings made to order with authentic spices."
-      },
+
       {
         "id": "p-120",
         "name": "Green Chutney",
@@ -239,7 +240,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       {
         "id": "p-16",
         "name": "Butter Sweet Corn",
-        "basePrice": 99.0,
+        "basePrice": 89.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
@@ -247,6 +248,18 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-16-malai-sweet-corn.png",
         "description": "Fresh sweet corn tossed in rich butter and savory seasonings."
+      },
+      {
+        "id": "p-123",
+        "name": "Malai Sweet Corn",
+        "basePrice": 99.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": true,
+        "imageUrl": "/images/menu/p-16-malai-sweet-corn.png",
+        "description": "Juicy golden sweet corn prepared in rich creamy malai and butter sauce."
       },
       {
         "id": "p-17",
@@ -262,15 +275,15 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       },
       {
         "id": "p-18",
-        "name": "Roasted Mix Nuts",
-        "basePrice": 109.0,
+        "name": "Roasted Mix Nut",
+        "basePrice": 119.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
         "hasVariations": false,
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-18-roasted-mix-nuts.png",
-        "description": "Freshly prepared Roasted Mix Nuts made to order with authentic spices."
+        "description": "Freshly prepared Roasted Mix Nut made to order with authentic spices."
       },
       {
         "id": "p-19",
@@ -703,7 +716,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       },
       {
         "id": "p-52",
-        "name": "Simple Pyaj Roti",
+        "name": "Simple Onion Roti",
         "basePrice": 35.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
@@ -711,7 +724,7 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isVeg": true,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-50-simple-roti.png",
-        "description": "Freshly prepared Simple Pyaj Roti made to order with authentic spices."
+        "description": "Freshly prepared Simple Onion Roti made to order with authentic spices."
       },
       {
         "id": "p-53",
@@ -880,6 +893,30 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-119-coffee.jpg",
         "description": "Rich and creamy freshly brewed hot coffee with frothy texture."
+      },
+      {
+        "id": "p-122",
+        "name": "Apno Special Twa Bathua",
+        "basePrice": 99.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-50-simple-roti.png",
+        "description": "Special Aapno style tawa bathua roti prepared fresh with authentic ingredients."
+      },
+      {
+        "id": "p-125",
+        "name": "Empty Handi",
+        "basePrice": 100.0,
+        "priceSmallHalf": 100.0,
+        "priceLargeFull": 150.0,
+        "hasVariations": true,
+        "isVeg": true,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-50-simple-roti.png",
+        "description": "Authentic clay handi available in Small (₹100) and Big (₹150)."
       }
     ]
   },
@@ -978,19 +1015,19 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       },
       {
         "id": "p-71",
-        "name": "Golden Leg/Chest",
-        "basePrice": 279.0,
-        "priceSmallHalf": 279.0,
-        "priceLargeFull": 529.0,
+        "name": "Golden Leg Chaat",
+        "basePrice": 299.0,
+        "priceSmallHalf": 299.0,
+        "priceLargeFull": 549.0,
         "hasVariations": true,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-71-golden-leg-chest.png",
-        "description": "Authentic chef prepared specialty available in Half (\u20b9279) and Full (\u20b9529) portions."
+        "description": "Authentic chef prepared specialty available in Half (\u20b9299) and Full (\u20b9549) portions."
       },
       {
         "id": "p-115",
-        "name": "Veg Sandwich",
+        "name": "Veg Grilled Sandwich",
         "basePrice": 129.0,
         "priceSmallHalf": null,
         "priceLargeFull": null,
@@ -1074,38 +1111,50 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
       {
         "id": "p-76",
         "name": "Chicken Tikka",
-        "basePrice": 299.0,
-        "priceSmallHalf": 299.0,
-        "priceLargeFull": 549.0,
-        "hasVariations": true,
+        "basePrice": 359.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-76-chicken-tikka.png",
-        "description": "Authentic chef prepared specialty available in Half (\u20b9299) and Full (\u20b9549) portions."
+        "description": "Freshly prepared Chicken Tikka made to order with authentic spices."
       },
       {
         "id": "p-77",
         "name": "Chicken Malai Tikka",
-        "basePrice": 319.0,
-        "priceSmallHalf": 319.0,
-        "priceLargeFull": 569.0,
-        "hasVariations": true,
+        "basePrice": 379.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-77-chicken-malai-tikka.png",
-        "description": "Authentic chef prepared specialty available in Half (\u20b9319) and Full (\u20b9569) portions."
+        "description": "Freshly prepared Chicken Malai Tikka made to order with authentic spices."
       },
       {
         "id": "p-78",
         "name": "Tandoori Stuffed Leg",
-        "basePrice": 349.0,
-        "priceSmallHalf": 349.0,
-        "priceLargeFull": 599.0,
-        "hasVariations": true,
+        "basePrice": 379.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-78-tandoori-stuffed-leg.png",
-        "description": "Authentic chef prepared specialty available in Half (\u20b9349) and Full (\u20b9599) portions."
+        "description": "Freshly prepared Tandoori Stuffed Leg made to order with authentic spices."
+      },
+      {
+        "id": "p-124",
+        "name": "Tandoori Leg",
+        "basePrice": 349.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-78-tandoori-stuffed-leg.png",
+        "description": "Juicy, spiced chicken leg roasted to perfection in clay tandoor."
       },
       {
         "id": "p-79",
