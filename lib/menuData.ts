@@ -1136,25 +1136,25 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "id": "p-78",
         "name": "Tandoori Stuffed Leg",
         "basePrice": 379.0,
-        "priceSmallHalf": null,
-        "priceLargeFull": null,
-        "hasVariations": false,
+        "priceSmallHalf": 379.0,
+        "priceLargeFull": 649.0,
+        "hasVariations": true,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-78-tandoori-stuffed-leg.png",
-        "description": "Freshly prepared Tandoori Stuffed Leg made to order with authentic spices."
+        "description": "Authentic chef prepared specialty available in Half (₹379) and Full (₹649) portions."
       },
       {
         "id": "p-124",
         "name": "Tandoori Leg",
         "basePrice": 349.0,
-        "priceSmallHalf": null,
-        "priceLargeFull": null,
-        "hasVariations": false,
+        "priceSmallHalf": 349.0,
+        "priceLargeFull": 599.0,
+        "hasVariations": true,
         "isVeg": false,
         "isBestseller": false,
         "imageUrl": "/images/menu/p-78-tandoori-stuffed-leg.png",
-        "description": "Juicy, spiced chicken leg roasted to perfection in clay tandoor."
+        "description": "Authentic chef prepared specialty available in Half (₹349) and Full (₹599) portions."
       },
       {
         "id": "p-79",
