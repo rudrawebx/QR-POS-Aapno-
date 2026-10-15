@@ -122,8 +122,8 @@ export default function AdminInvoicesPage() {
         address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
         city: "Fatehabad",
         phone: "+91 70820 40809, +91 70820 40892",
-        gstin: "08AABCU9603R1ZM",
-        fssaiNumber: "12224026000189",
+        gstin: "06ACOFA4890L1ZT",
+        fssaiNumber: "20826004003060",
         currencySymbol: "₹",
         defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
       },
@@ -179,7 +179,7 @@ export default function AdminInvoicesPage() {
       .map((it: any) => `• ${it.quantity}x ${it.productName || it.name}${it.selectedVariation ? " [" + it.selectedVariation + "]" : ""} - ₹${(it.totalPrice || (it.unitPrice * it.quantity)).toFixed(2)}`)
       .join("\n");
 
-    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 08AABCU9603R1ZM\nFSSAI: 12224026000189\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${carPlate ? "🍽️ *TABLE NO:* " + carPlate + "\n" : ""}👤 *Customer:* ${inv.customerName || orderDetails?.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
+    const message = `👑 *आपणो खाणो (Aapno Khaano)* 👑\n📍 Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053\n📞 Tel: +91 70820 40809 / +91 70820 40892\nGSTIN: 06ACOFA4890L1ZT\nFSSAI: 20826004003060\n----------------------------------------\n🧾 *GST TAX INVOICE:* ${inv.humanInvoiceNumber}\n${carPlate ? "🍽️ *TABLE NO:* " + carPlate + "\n" : ""}👤 *Customer:* ${inv.customerName || orderDetails?.customerName || "Direct Guest"}\n📅 *Date:* ${new Date(inv.createdAt).toLocaleDateString("en-IN")} | *Time:* ${new Date(inv.createdAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" })}\n----------------------------------------\n*ITEMS ORDERED:*\n${itemsText || "• Food Items Ordered"}\n----------------------------------------\n💵 Subtotal: ₹${inv.subtotal?.toFixed(2)}\n🏛️ GST Tax (5%): ₹${((inv.cgstAmount || 0) + (inv.sgstAmount || 0)).toFixed(2)}\n${inv.discountAmount ? "🎉 Discount: -₹" + inv.discountAmount.toFixed(2) + "\n" : ""}💰 *GRAND TOTAL: ₹${inv.grandTotal?.toFixed(2)}*\n✅ *Payment:* ${inv.paymentMethod} (PAID)\n----------------------------------------\n🙏 _Padharo Mhare Desh! Thank you for visiting Aapno Khaano._`;
 
     const whatsappUrl = cleanPhone
       ? `https://api.whatsapp.com/send?phone=${cleanPhone}&text=${encodeURIComponent(message)}`

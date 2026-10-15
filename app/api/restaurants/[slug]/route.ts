@@ -57,8 +57,8 @@ export async function GET(
           currency: 'INR',
           currencySymbol: '₹',
           timezone: 'Asia/Kolkata',
-          gstin: '08AABCU9603R1ZM',
-          fssaiNumber: '12224026000189',
+          gstin: '06ACOFA4890L1ZT',
+          fssaiNumber: '20826004003060',
           settings: {
             create: {
               upiId: '9996213962@hdfc',
@@ -110,8 +110,8 @@ export async function GET(
         city: 'Fatehabad',
         state: 'Haryana',
         postalCode: '125053',
-        gstin: '08AABCU9603R1ZM',
-        fssaiNumber: '12224026000189',
+        gstin: '06ACOFA4890L1ZT',
+        fssaiNumber: '20826004003060',
         currencySymbol: '₹',
         isOpen: true,
         settings: {

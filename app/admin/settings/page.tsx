@@ -35,8 +35,8 @@ export default function AdminSettingsPage() {
   const [phone, setPhone] = useState('+91 70820 40809, +91 70820 40892');
   const [email, setEmail] = useState('contact@aapnokhano.com');
   const [address, setAddress] = useState('Main Highway Plaza, Car-Service & QSR Drive-In');
-  const [gstin, setGstin] = useState('08AABCU9603R1ZM');
-  const [fssai, setFssai] = useState('12224026000189');
+  const [gstin, setGstin] = useState('06ACOFA4890L1ZT');
+  const [fssai, setFssai] = useState('20826004003060');
 
   // Store Controls
   const [isRestaurantOpen, setIsRestaurantOpen] = useState(true);
@@ -73,8 +73,8 @@ export default function AdminSettingsPage() {
           setPhone(data.restaurant.phone);
           setEmail(data.restaurant.email || '');
           setAddress(data.restaurant.address || '');
-          setGstin(data.restaurant.gstin || '08AABCU9603R1ZM');
-          setFssai(data.restaurant.fssaiNumber || '12224026000189');
+          setGstin(data.restaurant.gstin || '06ACOFA4890L1ZT');
+          setFssai(data.restaurant.fssaiNumber || '20826004003060');
 
           const s = data.restaurant.settings;
           if (s) {
@@ -147,10 +147,10 @@ export default function AdminSettingsPage() {
       restaurant: {
         name: 'आपणो खाणो (Aapno Khaano)',
         address: 'Main Highway Plaza, QSR Drive-In',
-        city: 'Jaipur',
+        city: 'Fatehabad',
         phone: '+91 70820 40809, +91 70820 40892',
-        gstin: gstin || '08AABCU9603R1ZM',
-        fssaiNumber: fssai || '12224026000189',
+        gstin: gstin || '06ACOFA4890L1ZT',
+        fssaiNumber: fssai || '20826004003060',
         currencySymbol: '₹',
         defaultReceiptFooter: receiptFooter,
       },
