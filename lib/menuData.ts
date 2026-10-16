@@ -83,7 +83,18 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "imageUrl": "/images/menu/p-5-pineapple-chaat.png",
         "description": "Freshly prepared Pineapple Chaat made to order with authentic spices."
       },
-
+      {
+        "id": "p-6",
+        "name": "Onion Rings",
+        "basePrice": 29.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": true,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-6-onion-rings.png",
+        "description": "Freshly prepared crunchy Onion Rings made to order with authentic spices."
+      },
       {
         "id": "p-120",
         "name": "Green Chutney",
