@@ -1059,6 +1059,30 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-116-cheese-sandwich.png",
         "description": "Delicious grilled sandwich loaded with fresh veggies and melted cheese."
+      },
+      {
+        "id": "p-126",
+        "name": "Fish Fry",
+        "basePrice": 399.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-70-chicken-nuggets.png",
+        "description": "Crispy golden fried fish seasoned with signature spices."
+      },
+      {
+        "id": "p-127",
+        "name": "Amritsari Fish Fry",
+        "basePrice": 419.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-70-chicken-nuggets.png",
+        "description": "Authentic Amritsari style battered fish fry spiced with ajwain and herbs."
       }
     ]
   },
@@ -1178,6 +1202,54 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": true,
         "imageUrl": "/images/menu/p-79-non-veg-platter.png",
         "description": "Chicken Tikka, Tandoori Leg, Afghani Kali Mirch Chest, Seekh Kabab, Tandoori Stuffed Leg"
+      },
+      {
+        "id": "p-128",
+        "name": "Fish Tikka",
+        "basePrice": 399.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-76-chicken-tikka.png",
+        "description": "Succulent fish chunks marinated in tandoori spices and charred in clay oven."
+      },
+      {
+        "id": "p-129",
+        "name": "Achari Fish Tikka",
+        "basePrice": 429.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-76-chicken-tikka.png",
+        "description": "Tender fish pieces infused with tangy pickle spices and tandoori grilled."
+      },
+      {
+        "id": "p-130",
+        "name": "Fish Lemon Tikka",
+        "basePrice": 459.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-73-tandoori-lemon-leg-chest.png",
+        "description": "Fish marinated with zesty lemon, aromatic spices and roasted to perfection."
+      },
+      {
+        "id": "p-131",
+        "name": "Fish Malai Tikka",
+        "basePrice": 469.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-77-chicken-malai-tikka.png",
+        "description": "Delicate fish cubes coated in rich creamy malai marinade with gentle herbs."
       }
     ]
   },
@@ -1309,6 +1381,42 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-89-chicken-biryani-handi.png",
         "description": "Freshly prepared Chicken Biryani Handi made to order with authentic spices."
+      },
+      {
+        "id": "p-132",
+        "name": "Fish Curry",
+        "basePrice": 449.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-85-home-style-chicken-handi.png",
+        "description": "Traditional home-style fish curry simmered in rich aromatic gravy."
+      },
+      {
+        "id": "p-133",
+        "name": "Tawa Fish",
+        "basePrice": 449.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-80-kadhai-chicken.png",
+        "description": "Fresh fish fillets pan-tossed on tawa with coarse ground masala and peppers."
+      },
+      {
+        "id": "p-134",
+        "name": "Chilly Fish",
+        "basePrice": 439.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-83-chilly-chicken.png",
+        "description": "Wok tossed crispy fish with bell peppers, onions and spicy oriental sauces."
       }
     ]
   },
