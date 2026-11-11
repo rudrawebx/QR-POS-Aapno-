@@ -1083,6 +1083,30 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-70-chicken-nuggets.png",
         "description": "Authentic Amritsari style battered fish fry spiced with ajwain and herbs."
+      },
+      {
+        "id": "p-135",
+        "name": "Sole Fish Fry",
+        "basePrice": 659.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-70-chicken-nuggets.png",
+        "description": "Crispy golden fried Sole fish fillets seasoned with signature spices."
+      },
+      {
+        "id": "p-136",
+        "name": "Sole Amritsari Fish Fry",
+        "basePrice": 679.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-70-chicken-nuggets.png",
+        "description": "Authentic Amritsari style battered Sole fish fry spiced with ajwain and herbs."
       }
     ]
   },
@@ -1250,6 +1274,78 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-77-chicken-malai-tikka.png",
         "description": "Delicate fish cubes coated in rich creamy malai marinade with gentle herbs."
+      },
+      {
+        "id": "p-137",
+        "name": "Sole Fish Tikka",
+        "basePrice": 659.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-76-chicken-tikka.png",
+        "description": "Succulent Sole fish chunks marinated in tandoori spices and charred in clay oven."
+      },
+      {
+        "id": "p-138",
+        "name": "Sole Achari Fish Tikka",
+        "basePrice": 679.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-76-chicken-tikka.png",
+        "description": "Tender Sole fish pieces infused with tangy pickle spices and tandoori grilled."
+      },
+      {
+        "id": "p-139",
+        "name": "Sole Fish Lemon Tikka",
+        "basePrice": 689.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-73-tandoori-lemon-leg-chest.png",
+        "description": "Sole fish marinated with zesty lemon, aromatic spices and roasted to perfection."
+      },
+      {
+        "id": "p-140",
+        "name": "Sole Fish Malai Tikka",
+        "basePrice": 699.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-77-chicken-malai-tikka.png",
+        "description": "Delicate Sole fish cubes coated in rich creamy malai marinade with gentle herbs."
+      },
+      {
+        "id": "p-144",
+        "name": "Extra Tandoori Leg",
+        "basePrice": 129.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-72-tandoori-leg-chest.png",
+        "description": "Single extra piece of smoky charcoal-roasted tandoori chicken leg."
+      },
+      {
+        "id": "p-145",
+        "name": "Extra Tandoori Stuffed Leg",
+        "basePrice": 149.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-78-tandoori-stuffed-leg.png",
+        "description": "Single extra piece of rich chef-special stuffed tandoori chicken leg."
       }
     ]
   },
@@ -1417,6 +1513,68 @@ export const MASTER_AAPNO_KHANO_CATEGORIES = [
         "isBestseller": false,
         "imageUrl": "/images/menu/p-83-chilly-chicken.png",
         "description": "Wok tossed crispy fish with bell peppers, onions and spicy oriental sauces."
+      },
+      {
+        "id": "p-141",
+        "name": "Sole Tawa Fish",
+        "basePrice": 719.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-80-kadhai-chicken.png",
+        "description": "Fresh Sole fish fillets pan-tossed on tawa with coarse ground masala and peppers."
+      },
+      {
+        "id": "p-142",
+        "name": "Sole Chilly Fish",
+        "basePrice": 729.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-83-chilly-chicken.png",
+        "description": "Wok tossed crispy Sole fish with bell peppers, onions and spicy oriental sauces."
+      },
+      {
+        "id": "p-143",
+        "name": "Sole Fish Curry",
+        "basePrice": 729.0,
+        "priceSmallHalf": null,
+        "priceLargeFull": null,
+        "hasVariations": false,
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-85-home-style-chicken-handi.png",
+        "description": "Traditional home-style Sole fish curry simmered in rich aromatic gravy."
+      },
+      {
+        "id": "p-146",
+        "name": "Kadhai Chicken Boneless",
+        "basePrice": 369.0,
+        "priceSmallHalf": 369.0,
+        "priceLargeFull": 669.0,
+        "hasVariations": true,
+        "variationType": "SMALL_LARGE",
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-80-kadhai-chicken.jpeg",
+        "description": "Tender boneless chicken tossed in wok with freshly ground kadhai spices, available in Small (₹369) and Large (₹669) portions."
+      },
+      {
+        "id": "p-147",
+        "name": "Home Style Chicken Handi Boneless",
+        "basePrice": 409.0,
+        "priceSmallHalf": 409.0,
+        "priceLargeFull": 739.0,
+        "hasVariations": true,
+        "variationType": "SMALL_LARGE",
+        "isVeg": false,
+        "isBestseller": false,
+        "imageUrl": "/images/menu/p-85-home-style-chicken-handi.png",
+        "description": "Slow-cooked home-style boneless chicken curry prepared in clay handi, available in Small (₹409) and Large (₹739) portions."
       }
     ]
   },
