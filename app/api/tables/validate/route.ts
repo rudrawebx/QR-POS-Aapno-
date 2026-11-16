@@ -37,9 +37,12 @@ export async function GET(request: Request) {
             OR: [
               { qrCodeToken: tableToken },
               { qrCodeToken: `table-${cleanTable.padStart(2, '0')}` },
+              { qrCodeToken: `${slug}-table-${cleanTable.padStart(2, '0')}` },
+              { qrCodeToken: `mb-table-${cleanTable.padStart(2, '0')}` },
               { tableNumber: cleanTable },
               { tableNumber: cleanTable.padStart(2, '0') },
               { id: `table-aapno-${cleanTable.padStart(2, '0')}` },
+              { id: `table_mb_${cleanTable.padStart(2, '0')}` },
               { id: tableParam },
             ],
           },

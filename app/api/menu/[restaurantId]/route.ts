@@ -26,22 +26,21 @@ export async function GET(
 
     // Resolve restaurant by ID or slug
     let restId = restaurantId;
-    if (restaurantId === 'aapno-khano' || restaurantId === 'skdahiya1007' || restaurantId === 'default') {
-      try {
-        const foundRest = await prisma.restaurant.findFirst({
-          where: {
-            OR: [
-              { slug: 'aapno-khano' },
-              { uniqueUsername: 'skdahiya1007' },
-            ],
-          },
-        });
-        if (foundRest) {
-          restId = foundRest.id;
-        }
-      } catch (err) {
-        console.warn('DB lookup failed, will use fallback menu:', err);
+    try {
+      const foundRest = await prisma.restaurant.findFirst({
+        where: {
+          OR: [
+            { id: restaurantId },
+            { slug: restaurantId.toLowerCase() },
+            { uniqueUsername: restaurantId.toLowerCase() },
+          ],
+        },
+      });
+      if (foundRest) {
+        restId = foundRest.id;
       }
+    } catch (err) {
+      console.warn('DB restaurant lookup failed:', err);
     }
 
     const includeConfig = {
@@ -78,8 +77,9 @@ export async function GET(
         include: includeConfig,
       });
 
-      // If restaurant has no categories yet, try fetching all active categories
-      if (!categories || categories.length === 0) {
+      // If restaurant has no categories yet and is master, try fetching all active categories
+      const isMasterTenant = restId === 'rest_aapno_khano' || restId === 'aapno-khano' || restId === 'default';
+      if ((!categories || categories.length === 0) && isMasterTenant) {
         categories = await prisma.category.findMany({
           where: {
             isActive: true,
@@ -94,12 +94,14 @@ export async function GET(
       categories = [];
     }
 
-    // GUARANTEE: NEVER return an empty menu — always fallback to MASTER_AAPNO_KHANO_CATEGORIES
-    if (!categories || categories.length === 0) {
+    const isMasterTenant = restId === 'rest_aapno_khano' || restId === 'aapno-khano' || restId === 'default';
+
+    // GUARANTEE: NEVER return an empty menu for master tenant — always fallback to MASTER_AAPNO_KHANO_CATEGORIES
+    if ((!categories || categories.length === 0) && isMasterTenant) {
       categories = MASTER_AAPNO_KHANO_CATEGORIES;
     }
 
-    const merged = getMergedCategories(categories);
+    const merged = getMergedCategories(categories, !isMasterTenant);
     // Cache for 5 minutes
     memoryCache.set(cacheKey, merged, 300);
 

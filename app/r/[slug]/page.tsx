@@ -31,36 +31,54 @@ export default function CustomerQsrMenuPage() {
   // Extract clean table number if present e.g. "table-04" -> "04"
   const lockedTableNumber = tableParam ? tableParam.replace(/^table-?/i, '') : null;
 
-  const [restaurant, setRestaurant] = useState<any>({
-    id: 'rest_aapno_khano',
-    name: 'आपणो खाणो (Aapno Khaano)',
-    slug: 'aapno-khano',
-    logoUrl: '/images/aapno-khano-logo.png',
-    phone: '+91 70820 40809, +91 70820 40892',
-    address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
-    city: 'Fatehabad',
-    state: 'Haryana',
-    postalCode: '125053',
-    gstin: '06ACOFA4890L1ZT',
-    fssaiNumber: '20826004003060',
-    currencySymbol: '₹',
-    isOpen: true,
-    settings: {
-      isRestaurantOpen: true,
-      openingHoursText: '11:00 AM - 11:30 PM',
-      closureMessage: 'We are currently closed for orders. Please visit during regular hours.',
-      upiId: '9996213962@hdfc',
-      upiMerchantName: 'AAPNO KHANO',
-      upiQrImageUrl: '/images/pnb-upi-qr.png',
-      taxRateGst: 5.0,
-      supportWhatsappNumber: '+917082040809',
-      themePrimaryColor: '#AA1B2A',
-      themeGoldColor: '#E09D3D',
-    },
+  const [restaurant, setRestaurant] = useState<any>(() => {
+    if (slug !== 'aapno-khano') {
+      return {
+        id: slug,
+        name: slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+        slug,
+        logoUrl: '/images/mr-bagri-logo.jpg',
+        address: '',
+        currencySymbol: '₹',
+        isOpen: true,
+        settings: {
+          isRestaurantOpen: true,
+          themePrimaryColor: '#AA1B2A',
+          themeGoldColor: '#E09D3D',
+        },
+      };
+    }
+    return {
+      id: 'rest_aapno_khano',
+      name: 'आपणो खाणो (Aapno Khaano)',
+      slug: 'aapno-khano',
+      logoUrl: '/images/aapno-khano-logo.png',
+      phone: '+91 70820 40809, +91 70820 40892',
+      address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
+      city: 'Fatehabad',
+      state: 'Haryana',
+      postalCode: '125053',
+      gstin: '06ACOFA4890L1ZT',
+      fssaiNumber: '20826004003060',
+      currencySymbol: '₹',
+      isOpen: true,
+      settings: {
+        isRestaurantOpen: true,
+        openingHoursText: '11:00 AM - 11:30 PM',
+        closureMessage: 'We are currently closed for orders. Please visit during regular hours.',
+        upiId: '9996213962@hdfc',
+        upiMerchantName: 'AAPNO KHANO',
+        upiQrImageUrl: '/images/pnb-upi-qr.png',
+        taxRateGst: 5.0,
+        supportWhatsappNumber: '+917082040809',
+        themePrimaryColor: '#AA1B2A',
+        themeGoldColor: '#E09D3D',
+      },
+    };
   });
 
-  // Pre-load all 60+ authentic dishes so menu is NEVER empty
-  const [categories, setCategories] = useState<any[]>(MASTER_AAPNO_KHANO_CATEGORIES);
+  // Pre-load dishes for current slug
+  const [categories, setCategories] = useState<any[]>(() => slug === 'aapno-khano' ? MASTER_AAPNO_KHANO_CATEGORIES : []);
   const [loading, setLoading] = useState(false);
 
   // Filter & Search State

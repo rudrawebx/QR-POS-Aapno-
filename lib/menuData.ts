@@ -1975,7 +1975,18 @@ export function getProductById(productId: string) {
   return null;
 }
 
-export function getMergedCategories(inputCategories?: any[]) {
+export function getMergedCategories(inputCategories?: any[], isNonMasterTenant: boolean = false) {
+  // If this is a dedicated tenant with its own menu (e.g. Mr. Bagri), do not mix Aapno Khaano master menu
+  if (isNonMasterTenant && Array.isArray(inputCategories) && inputCategories.length > 0) {
+    return inputCategories.map((cat) => ({
+      ...cat,
+      products: (cat.products || []).map((p: any) => {
+        const override = menuProductOverrides.get(p.id);
+        return override ? { ...p, ...override } : p;
+      }),
+    }));
+  }
+
   // Build lookup of DB products and categories if provided
   const dbProductMap = new Map<string, any>();
   const dbCategoryMap = new Map<string, any>();
