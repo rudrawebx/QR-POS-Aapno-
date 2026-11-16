@@ -30,13 +30,15 @@ export default function CustomerHeader({
       <div className="bg-[#80101C] px-4 py-1.5 border-b border-[#E09D3D]/30 flex items-center justify-between text-[11px] font-medium text-[#FEFBF5]">
         <div className="flex items-center gap-1.5">
           <Car className="w-3.5 h-3.5 text-[#E09D3D] animate-pulse" />
-          <span className="font-bold text-[#E09D3D]">Car-Service &amp; QSR Drive-In Available</span>
+          <span className="font-bold text-[#E09D3D]">Dine-In, Car-Service &amp; QSR Available</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <a href="tel:+917082040809" className="flex items-center gap-1 hover:text-white transition-colors">
-            <Phone className="w-3 h-3 text-[#E09D3D]" />
-            <span className="hidden sm:inline">+91 70820 40809 / +91 70820 40892</span>
-          </a>
+          {restaurant?.phone && (
+            <a href={`tel:${restaurant.phone.split(',')[0].trim()}`} className="flex items-center gap-1 hover:text-white transition-colors">
+              <Phone className="w-3 h-3 text-[#E09D3D]" />
+              <span className="hidden sm:inline">{restaurant.phone}</span>
+            </a>
+          )}
         </div>
       </div>
 
@@ -44,24 +46,26 @@ export default function CustomerHeader({
       <div className="max-w-4xl mx-auto px-4 pt-3 pb-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <img
-            src="/images/aapno-khano-logo.png"
-            alt="आपणो खाणो"
-            className="h-16 sm:h-20 w-auto object-contain drop-shadow-xl flex-shrink-0 hover:scale-105 transition-transform duration-200"
+            src={restaurant?.logoUrl || '/images/aapno-khano-logo.png'}
+            alt={restaurant?.name || 'Restaurant Logo'}
+            className="h-16 sm:h-20 w-auto max-w-[120px] object-contain drop-shadow-xl flex-shrink-0 hover:scale-105 transition-transform duration-200 rounded-xl"
           />
           <div>
             <h1 className="text-base sm:text-xl font-black tracking-tight text-white flex items-center gap-1.5">
-              <span>आपणो खाणो</span>
-              <span className="text-xs font-normal text-[#E09D3D] hidden sm:inline">(Aapno Khaano)</span>
+              <span>{restaurant?.name || 'आपणो खाणो'}</span>
+              {restaurant?.slug === 'aapno-khano' && (
+                <span className="text-xs font-normal text-[#E09D3D] hidden sm:inline">(Aapno Khaano)</span>
+              )}
             </h1>
-            <p className="text-[11px] text-[#FEFBF5]/90 font-medium">
-              Royal Rajasthani Handi, Tandoor &amp; QSR Ordering
+            <p className="text-[11px] text-[#FEFBF5]/90 font-medium line-clamp-2">
+              {restaurant?.description || restaurant?.cuisine || 'Authentic Food & QSR Ordering'}
             </p>
           </div>
         </div>
 
         <div className="hidden sm:flex items-center gap-1.5 bg-[#80101C]/80 border border-[#E09D3D]/40 px-3 py-1.5 rounded-2xl text-xs text-[#E09D3D] font-bold">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Pure Desi Ghee &amp; Authentic Spices</span>
+          <span>Pure Desi Ghee &amp; Authentic Taste</span>
         </div>
       </div>
 

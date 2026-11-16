@@ -147,6 +147,9 @@ export default function CustomerQsrMenuPage() {
 
         if (restData.restaurant) {
           setRestaurant(restData.restaurant);
+          if (typeof document !== 'undefined') {
+            document.title = `${restData.restaurant.name} | Digital Menu & QR Ordering`;
+          }
         }
         if (menuData.categories && menuData.categories.length > 0) {
           setCategories(menuData.categories);
