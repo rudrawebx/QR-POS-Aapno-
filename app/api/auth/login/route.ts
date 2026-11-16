@@ -55,12 +55,29 @@ export async function POST(request: Request) {
     if (user) {
       if (pinCode) {
         // Direct or hashed PIN verification
-        if (user.pinCode && verifyPassword(String(pinCode).trim(), user.pinCode)) {
+        const cleanPin = String(pinCode).trim();
+        if (
+          (user.pinCode && verifyPassword(cleanPin, user.pinCode)) ||
+          user.pinCode === cleanPin ||
+          user.pinCode === `scrypt$${cleanPin}`
+        ) {
           isAuthenticated = true;
         }
       } else if (email && password) {
-        if (user.passwordHash && verifyPassword(password, user.passwordHash)) {
-          isAuthenticated = true;
+        if (user.passwordHash) {
+          const rawPass = String(password);
+          const cleanPass = rawPass.trim();
+          const capPass = cleanPass.length > 0 ? cleanPass.charAt(0).toUpperCase() + cleanPass.slice(1) : cleanPass;
+          const lowerPass = cleanPass.toLowerCase();
+
+          if (
+            verifyPassword(rawPass, user.passwordHash) ||
+            verifyPassword(cleanPass, user.passwordHash) ||
+            verifyPassword(capPass, user.passwordHash) ||
+            verifyPassword(lowerPass, user.passwordHash)
+          ) {
+            isAuthenticated = true;
+          }
         }
       }
     }
