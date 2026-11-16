@@ -32,7 +32,7 @@ import {
 } from 'lucide-react';
 
 export default function SuperAdminPage() {
-  const [activeTab, setActiveTab] = useState<'RESTAURANTS' | 'USERS' | 'PLANS' | 'MENU' | 'POS_CONFIG'>('RESTAURANTS');
+  const [activeTab, setActiveTab] = useState<'RESTAURANTS' | 'USERS' | 'PLANS' | 'AUDIT_LOGS' | 'POS_CONFIG'>('RESTAURANTS');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -55,23 +55,6 @@ export default function SuperAdminPage() {
   const [userPhone, setUserPhone] = useState('');
   const [userRole, setUserRole] = useState('MANAGER');
   const [userPassword, setUserPassword] = useState('staff123');
-
-  // Master Dish CRUD state for Super Admin
-  const [isDishModalOpen, setIsDishModalOpen] = useState(false);
-  const [editingDishId, setEditingDishId] = useState<string | null>(null);
-  const [dishFormData, setDishFormData] = useState({
-    name: '',
-    localName: '',
-    categoryId: '',
-    basePrice: '',
-    imageUrl: '',
-    isVeg: true,
-    description: '',
-    hasVariations: false,
-    priceSmallHalf: '',
-    priceLargeFull: '',
-    isAvailable: true,
-  });
 
   const fetchSuperadminData = async () => {
     try {
@@ -222,84 +205,20 @@ export default function SuperAdminPage() {
     }
   };
 
-  // Open Dish Modal for Add
-  const handleOpenAddDish = () => {
-    setEditingDishId(null);
-    setDishFormData({
-      name: '',
-      localName: '',
-      categoryId: data?.categories?.[0]?.id || '',
-      basePrice: '',
-      imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600',
-      isVeg: true,
-      description: 'Authentic preparation with rich whole spices.',
-      hasVariations: false,
-      priceSmallHalf: '',
-      priceLargeFull: '',
-      isAvailable: true,
-    });
-    setIsDishModalOpen(true);
-  };
-
-  // Open Dish Modal for Edit
-  const handleOpenEditDish = (dish: any) => {
-    setEditingDishId(dish.id);
-    setDishFormData({
-      name: dish.name,
-      localName: dish.localName || dish.name,
-      categoryId: dish.categoryId || dish.category?.id || (data?.categories?.[0]?.id || ''),
-      basePrice: String(dish.basePrice || ''),
-      imageUrl: dish.imageUrl || '',
-      isVeg: dish.isVeg ?? true,
-      description: dish.description || '',
-      hasVariations: Boolean(dish.hasVariations),
-      priceSmallHalf: String(dish.priceSmallHalf || ''),
-      priceLargeFull: String(dish.priceLargeFull || ''),
-      isAvailable: dish.isAvailable ?? true,
-    });
-    setIsDishModalOpen(true);
-  };
-
-  // Save Dish (Add or Update)
-  const handleSaveDish = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Switch Restaurant context for Super Admin
+  const handleSwitchRestaurant = async (restaurantId: string) => {
     try {
       const res = await fetch('/api/superadmin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: editingDishId ? 'UPDATE_PRODUCT' : 'CREATE_PRODUCT',
-          productId: editingDishId,
-          ...dishFormData,
-        }),
-      });
-
-      if (res.ok) {
-        setIsDishModalOpen(false);
-        fetchSuperadminData();
-      }
-    } catch (err) {
-      console.error('Error saving dish:', err);
-    }
-  };
-
-  // Delete Dish
-  const handleDeleteDish = async (dishId: string) => {
-    if (!confirm('Are you sure you want to remove this dish from the master catalog?')) return;
-    try {
-      const res = await fetch('/api/superadmin', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'DELETE_PRODUCT',
-          productId: dishId,
-        }),
+        body: JSON.stringify({ action: 'SWITCH_RESTAURANT', restaurantId }),
       });
       if (res.ok) {
-        fetchSuperadminData();
+        window.location.href = '/admin/orders';
       }
     } catch (err) {
-      console.error('Error deleting dish:', err);
+      console.error('Error switching restaurant:', err);
+      window.location.href = '/admin/orders';
     }
   };
 
@@ -324,15 +243,6 @@ export default function SuperAdminPage() {
     );
   });
 
-  const filteredProducts = (data?.products || []).filter((p: any) => {
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    return (
-      p.name.toLowerCase().includes(q) ||
-      (p.localName || '').toLowerCase().includes(q) ||
-      (p.category?.name || '').toLowerCase().includes(q)
-    );
-  });
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-[#FEFBF5] text-[#331E17] flex flex-col font-sans">
@@ -349,7 +259,7 @@ export default function SuperAdminPage() {
                 Root Access
               </span>
             </h1>
-            <p className="text-[11px] text-[#E09D3D] font-bold">Multi-tenant restaurant control &amp; Master Menu CRUD</p>
+            <p className="text-[11px] text-[#E09D3D] font-bold">Multi-tenant restaurant control &amp; Platform SaaS Center</p>
           </div>
         </div>
 
@@ -395,11 +305,11 @@ export default function SuperAdminPage() {
           </div>
 
           <div className="bg-white p-5 rounded-3xl border border-[#E8E1D6] shadow-xs">
-            <p className="text-[10px] uppercase font-black text-[#745E55]">Master Dishes Catalog</p>
+            <p className="text-[10px] uppercase font-black text-[#745E55]">Platform Health &amp; Security</p>
             <h3 className="text-2xl font-black text-emerald-700 mt-1">
-              {data?.products?.length || 60}+ Dishes
+              100% Operational
             </h3>
-            <p className="text-[11px] text-[#745E55] mt-0.5">CRUD &amp; Image Editor Active</p>
+            <p className="text-[11px] text-[#745E55] mt-0.5">Isolated MySQL Multi-Tenant</p>
           </div>
         </div>
 
@@ -417,14 +327,14 @@ export default function SuperAdminPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('MENU')}
+            onClick={() => setActiveTab('AUDIT_LOGS')}
             className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
-              activeTab === 'MENU'
+              activeTab === 'AUDIT_LOGS'
                 ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-md'
                 : 'bg-white text-[#745E55] hover:text-[#331E17] border border-[#E8E1D6]'
             }`}
           >
-            🥘 Master Food Catalog &amp; Image Editor ({data?.products?.length || 60})
+            🛡️ Security &amp; Audit Logs ({data?.auditLogs?.length || 0})
           </button>
 
           <button
@@ -461,112 +371,68 @@ export default function SuperAdminPage() {
           </button>
         </div>
 
-        {/* 1. MASTER FOOD MENU & IMAGE EDITOR TAB */}
-        {activeTab === 'MENU' && (
+        {/* 1. PLATFORM SECURITY & AUDIT LOGS TAB */}
+        {activeTab === 'AUDIT_LOGS' && (
           <div className="bg-white rounded-3xl border border-[#E8E1D6] shadow-xs overflow-hidden space-y-4 p-5">
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
               <div>
                 <h3 className="text-sm font-black text-[#331E17] flex items-center gap-2">
-                  <UtensilsCrossed className="w-4 h-4 text-[#AA1B2A]" />
-                  <span>Master Food Dishes Catalog &amp; Image Management</span>
+                  <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                  <span>Platform Security &amp; Activity Audit Log</span>
                 </h3>
                 <p className="text-xs text-[#745E55] mt-0.5">
-                  Super Admin exclusive: Add new dishes, edit food photos/URLs, manage pricing, and remove items.
+                  Real-time security trail: Logins, tenant creations, credential verification, and system events.
                 </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <div className="relative w-64">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <input
-                    type="text"
-                    placeholder="Search dish or category..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
-                  />
-                </div>
-
-                <button
-                  onClick={handleOpenAddDish}
-                  className="bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white px-3.5 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-md cursor-pointer border border-[#E09D3D]/50"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add New Dish</span>
-                </button>
               </div>
             </div>
 
-            {/* Grid of Dishes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {filteredProducts.map((p: any) => (
-                <div
-                  key={p.id}
-                  className="bg-[#FEFBF5] rounded-2xl border border-[#E8E1D6] p-3 flex flex-col justify-between hover:border-[#E09D3D] hover:shadow-md transition-all group"
-                >
-                  <div className="space-y-2">
-                    {/* Dish Image Thumbnail */}
-                    <div className="relative w-full h-32 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
-                      <img
-                        src={p.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600'}
-                        alt={p.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
-                        }}
-                      />
-                      <span
-                        className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase text-white shadow-xs ${
-                          p.isVeg ? 'bg-emerald-600' : 'bg-red-600'
-                        }`}
-                      >
-                        {p.isVeg ? '🟢 Veg' : '🔴 Non-Veg'}
-                      </span>
-                    </div>
-
-                    <div>
-                      <h4 className="font-bold text-xs text-[#331E17] leading-tight line-clamp-1">{p.name}</h4>
-                      <p className="text-[10px] text-[#745E55] truncate font-serif">{p.localName || p.name}</p>
-                      <p className="text-[10px] text-[#AA1B2A] font-bold mt-1">
-                        {p.category?.name || 'Category'}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between pt-1 border-t border-[#E8E1D6]/60">
-                      <div>
-                        <span className="text-xs font-black text-[#331E17]">₹{p.basePrice}</span>
-                        {p.hasVariations && (
-                          <span className="text-[9px] text-[#745E55] block">
-                            H: ₹{p.priceSmallHalf} / F: ₹{p.priceLargeFull}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#331E17]">
+                <thead className="bg-[#F7F2EA] border-b border-[#E8E1D6] text-[#745E55] font-black uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="py-3 px-4">Event / Action</th>
+                    <th className="py-3 px-4">Entity &amp; Target</th>
+                    <th className="py-3 px-4">IP Address</th>
+                    <th className="py-3 px-4">Timestamp</th>
+                    <th className="py-3 px-4">Notes</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E8E1D6]/60">
+                  {(!data?.auditLogs || data.auditLogs.length === 0) ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-[#745E55]">
+                        No audit events recorded yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.auditLogs.map((log: any) => (
+                      <tr key={log.id} className="hover:bg-[#FEFBF5] transition-colors">
+                        <td className="py-3 px-4 font-bold">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-black ${
+                            log.action?.includes('SUCCESS') ? 'bg-emerald-100 text-emerald-800' :
+                            log.action?.includes('FAILED') ? 'bg-red-100 text-red-800' :
+                            'bg-amber-100 text-amber-800'
+                          }`}>
+                            {log.action}
                           </span>
-                        )}
-                      </div>
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${p.isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
-                        {p.isAvailable ? 'In Stock' : 'Sold Out'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex items-center gap-1.5 pt-2.5 mt-2 border-t border-[#E8E1D6]">
-                    <button
-                      onClick={() => handleOpenEditDish(p)}
-                      className="flex-1 bg-white hover:bg-[#FFF0E8] text-[#AA1B2A] py-1.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1 border border-[#E8E1D6] hover:border-[#E09D3D] transition-colors cursor-pointer"
-                    >
-                      <Edit3 className="w-3 h-3" />
-                      <span>Edit &amp; Image</span>
-                    </button>
-                    <button
-                      onClick={() => handleDeleteDish(p.id)}
-                      className="p-1.5 bg-white hover:bg-red-50 text-red-600 rounded-xl border border-[#E8E1D6] hover:border-red-300 transition-colors cursor-pointer"
-                      title="Delete dish"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+                        </td>
+                        <td className="py-3 px-4 font-bold text-[#331E17]">
+                          {log.entityId || log.entity || 'Platform'}
+                        </td>
+                        <td className="py-3 px-4 text-[#745E55] font-mono text-[11px]">
+                          {log.ipAddress || 'Internal'}
+                        </td>
+                        <td className="py-3 px-4 text-[#745E55] text-[11px]">
+                          {new Date(log.createdAt).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-4 text-[#745E55] text-[11px]">
+                          {log.notes || '-'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         )}
@@ -619,8 +485,15 @@ export default function SuperAdminPage() {
                   {filteredRestaurants.map((rest: any) => (
                     <tr key={rest.id} className="hover:bg-[#FEFBF5] transition-colors">
                       <td className="py-3 px-4">
-                        <p className="font-black text-[#331E17]">{rest.name}</p>
-                        <p className="text-[11px] text-[#AA1B2A] font-bold">/{rest.uniqueUsername}</p>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#E09D3D] text-[#331E17] shadow-xs">
+                            {rest.slug === 'aapno-khano' ? 'OSR01' : (rest.slug === 'mr-bagri' ? 'OSR02' : 'TENANT')}
+                          </span>
+                          <div>
+                            <p className="font-black text-[#331E17]">{rest.name}</p>
+                            <p className="text-[11px] text-[#AA1B2A] font-bold">/{rest.slug || rest.uniqueUsername}</p>
+                          </div>
+                        </div>
                       </td>
                       <td className="py-3 px-4 text-[#745E55]">{rest.city}</td>
                       <td className="py-3 px-4">
@@ -655,12 +528,12 @@ export default function SuperAdminPage() {
                           <ExternalLink className="w-3 h-3" />
                           <span>View Menu</span>
                         </Link>
-                        <Link
-                          href="/admin/orders"
-                          className="px-2.5 py-1 bg-[#AA1B2A] hover:bg-[#8e1421] text-white font-black rounded-lg text-[11px] inline-flex items-center gap-1 shadow-2xs"
+                        <button
+                          onClick={() => handleSwitchRestaurant(rest.id)}
+                          className="px-2.5 py-1 bg-[#AA1B2A] hover:bg-[#8e1421] text-white font-black rounded-lg text-[11px] inline-flex items-center gap-1 shadow-2xs cursor-pointer"
                         >
                           <span>Manage POS →</span>
-                        </Link>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -956,202 +829,6 @@ export default function SuperAdminPage() {
                   </tbody>
                 </table>
               </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUPER ADMIN ADD / EDIT DISH MODAL WITH IMAGE EDITOR */}
-        {isDishModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
-            <div className="bg-white border-2 border-[#E09D3D] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-auto animate-in zoom-in-95">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-[#FFF0E8] text-[#AA1B2A] flex items-center justify-center border border-[#E09D3D]">
-                    <UtensilsCrossed className="w-4 h-4" />
-                  </div>
-                  <h3 className="font-black text-base text-[#331E17]">
-                    {editingDishId ? 'Edit Dish & Food Photo' : 'Add New Dish to Catalog'}
-                  </h3>
-                </div>
-                <button onClick={() => setIsDishModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:bg-slate-100">
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <form onSubmit={handleSaveDish} className="space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Dish Name (English)</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Kadhai Paneer Handi"
-                      value={dishFormData.name}
-                      onChange={(e) => setDishFormData({ ...dishFormData, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl font-bold text-[#331E17]"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Local Name (Hindi)</label>
-                    <input
-                      type="text"
-                      placeholder="e.g. कढ़ाई पनीर हांड़ी"
-                      value={dishFormData.localName}
-                      onChange={(e) => setDishFormData({ ...dishFormData, localName: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl font-serif text-[#331E17]"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Category</label>
-                    <select
-                      value={dishFormData.categoryId}
-                      onChange={(e) => setDishFormData({ ...dishFormData, categoryId: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl font-bold"
-                    >
-                      {(data?.categories || []).map((cat: any) => (
-                        <option key={cat.id} value={cat.id}>
-                          {cat.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Diet Type</label>
-                    <select
-                      value={dishFormData.isVeg ? 'VEG' : 'NON_VEG'}
-                      onChange={(e) => setDishFormData({ ...dishFormData, isVeg: e.target.value === 'VEG' })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl font-bold"
-                    >
-                      <option value="VEG">🟢 Vegetarian (Pure Veg)</option>
-                      <option value="NON_VEG">🔴 Non-Vegetarian</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Dish Photo (Optional, URL or Upload) */}
-                <div className="space-y-2 bg-[#FFF0E8] p-3.5 rounded-2xl border border-[#E09D3D]/50">
-                  <div className="flex items-center justify-between">
-                    <label className="font-black text-[#AA1B2A] text-xs flex items-center gap-1.5">
-                      <ImageIcon className="w-4 h-4 text-[#AA1B2A]" /> Dish Photo / Image (Optional)
-                    </label>
-                    {dishFormData.imageUrl && (
-                      <button
-                        type="button"
-                        onClick={() => setDishFormData({ ...dishFormData, imageUrl: '' })}
-                        className="text-[11px] text-red-600 hover:text-red-800 font-bold underline cursor-pointer"
-                      >
-                        Remove Photo
-                      </button>
-                    )}
-                  </div>
-
-                  {dishFormData.imageUrl && (
-                    <div className="flex items-center gap-3 p-2 bg-white rounded-xl border border-[#E8E1D6]">
-                      <div className="w-14 h-14 rounded-lg overflow-hidden border border-[#E8E1D6] bg-slate-100 flex-shrink-0">
-                        <img
-                          src={dishFormData.imageUrl}
-                          alt="Preview"
-                          className="w-full h-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=600';
-                          }}
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-[11px] font-bold text-[#331E17] truncate">Image Selected</p>
-                        <p className="text-[10px] text-slate-500 font-mono truncate">{dishFormData.imageUrl.startsWith('data:') ? 'Custom Uploaded Image' : dishFormData.imageUrl}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Image URL or /images/menu/... (optional)"
-                      value={dishFormData.imageUrl}
-                      onChange={(e) => setDishFormData({ ...dishFormData, imageUrl: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-[#E8E1D6] rounded-xl font-mono text-[11px]"
-                    />
-                    <label className="flex items-center justify-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 border border-dashed border-[#AA1B2A]/40 hover:border-[#AA1B2A] rounded-xl cursor-pointer text-xs font-bold text-[#AA1B2A] transition-colors shadow-2xs">
-                      <Upload className="w-3.5 h-3.5" />
-                      <span>Upload File</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (typeof reader.result === 'string') {
-                                setDishFormData({ ...dishFormData, imageUrl: reader.result });
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                    </label>
-                  </div>
-                  <p className="text-[10px] text-slate-500">Photo is optional. If left blank, a high-quality royal dish image will be shown automatically.</p>
-                </div>
-
-                {/* Pricing & Variations */}
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Base Price (₹)</label>
-                    <input
-                      type="number"
-                      required
-                      placeholder="249"
-                      value={dishFormData.basePrice}
-                      onChange={(e) => setDishFormData({ ...dishFormData, basePrice: e.target.value })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl font-bold text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Half/Small (₹)</label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 179"
-                      value={dishFormData.priceSmallHalf}
-                      onChange={(e) => setDishFormData({ ...dishFormData, priceSmallHalf: e.target.value, hasVariations: Boolean(e.target.value) })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-bold text-[#331E17] mb-1">Full/Large (₹)</label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 299"
-                      value={dishFormData.priceLargeFull}
-                      onChange={(e) => setDishFormData({ ...dishFormData, priceLargeFull: e.target.value, hasVariations: Boolean(e.target.value) })}
-                      className="w-full px-3 py-2 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-xs"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setIsDishModalOpen(false)}
-                    className="px-4 py-2 bg-[#F7F2EA] text-[#331E17] rounded-xl font-bold"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-5 py-2 bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white rounded-xl font-black shadow-md border border-[#E09D3D]/50"
-                  >
-                    {editingDishId ? 'Update Dish' : 'Add to Master Menu'}
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
         )}

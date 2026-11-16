@@ -48,7 +48,7 @@ export default function AdminReservationsPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurantId: (await fetch('/api/restaurants/aapno-khano').then((r) => r.json())).restaurant.id,
+          restaurantId: (await fetch('/api/settings').then((r) => r.json())).restaurant.id,
           customerName: newName,
           customerPhone: newPhone,
           guestCount: parseInt(newGuests),

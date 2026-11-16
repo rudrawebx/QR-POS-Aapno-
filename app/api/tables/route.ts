@@ -4,6 +4,7 @@ import { getCurrentSession } from '@/lib/auth';
 
 export async function GET(request: Request) {
   try {
+    const session = await getCurrentSession();
     const { searchParams } = new URL(request.url);
     const restaurantId = searchParams.get('restaurantId') || session?.restaurantId || 'rest_aapno_khano';
 
@@ -31,7 +32,11 @@ export async function GET(request: Request) {
       orderBy: { displayOrder: 'asc' },
     });
 
-    return NextResponse.json({ tables, floorZones });
+    return NextResponse.json({
+      tables,
+      floorZones,
+      restaurantSlug: session?.restaurantSlug || (restaurantId === 'rest_mr_bagri' ? 'mr-bagri' : 'aapno-khano'),
+    });
   } catch (error) {
     console.error('Tables fetch error:', error);
     return NextResponse.json({ error: 'Failed to fetch tables' }, { status: 500 });

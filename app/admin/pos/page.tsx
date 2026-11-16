@@ -38,7 +38,7 @@ import {
 const MAX_HELD_ORDERS = 50;
 
 export default function AdminPosPage() {
-  const [categories, setCategories] = useState<any[]>(MASTER_AAPNO_KHANO_CATEGORIES);
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isStoreOpen, setIsStoreOpen] = useState(true);
@@ -130,20 +130,25 @@ export default function AdminPosPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [menuRes, settingsRes, ordersRes] = await Promise.all([
-          fetch('/api/menu/aapno-khano'),
-          fetch('/api/settings'),
+        const settingsRes = await fetch('/api/settings');
+        const settingsData = await settingsRes.json();
+        const currentRest = settingsData.restaurant;
+        const restId = currentRest?.id || currentRest?.slug || 'aapno-khano';
+
+        const [menuRes, ordersRes] = await Promise.all([
+          fetch(`/api/menu/${restId}`),
           fetch('/api/invoices?limit=1'),
         ]);
 
         const menuData = await menuRes.json();
         if (menuData.categories && menuData.categories.length > 0) {
           setCategories(menuData.categories);
+        } else {
+          setCategories([]);
         }
 
-        const settingsData = await settingsRes.json();
-        if (settingsData.restaurant?.settings) {
-          setIsStoreOpen(settingsData.restaurant.settings.isRestaurantOpen ?? true);
+        if (currentRest?.settings) {
+          setIsStoreOpen(currentRest.settings.isRestaurantOpen ?? true);
         }
 
         const invData = await ordersRes.json();
@@ -151,16 +156,16 @@ export default function AdminPosPage() {
           const latest = invData.invoices[0];
           setLastBillData({
             restaurant: {
-              name: 'आपणो खाणो (Aapno Khaano)',
-              address: 'Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053',
-              city: 'Fatehabad',
-              state: 'Haryana',
-              postalCode: '125053',
-              phone: '+91 70820 40809, +91 70820 40892',
-              gstin: '06ACOFA4890L1ZT',
-              fssaiNumber: '20826004003060',
-              currencySymbol: '₹',
-              defaultReceiptFooter: 'Padharo Mhare Desh! Thank you for visiting Aapno Khaano.',
+              name: currentRest?.name || 'Restaurant POS',
+              address: currentRest?.address || '',
+              city: currentRest?.city || '',
+              state: currentRest?.state || '',
+              postalCode: currentRest?.postalCode || '',
+              phone: currentRest?.phone || '',
+              gstin: currentRest?.gstin || '',
+              fssaiNumber: currentRest?.fssaiNumber || '',
+              currencySymbol: currentRest?.currencySymbol || '₹',
+              defaultReceiptFooter: currentRest?.settings?.defaultReceiptFooter || 'Thank you for your visit!',
             },
             order: {
               humanOrderId: latest.order?.humanOrderId || latest.humanInvoiceNumber,

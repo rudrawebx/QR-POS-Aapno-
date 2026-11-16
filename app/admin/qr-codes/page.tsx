@@ -17,7 +17,7 @@ export default function QrStudioPage() {
       try {
         const [resTables, resRest] = await Promise.all([
           fetch('/api/tables'),
-          fetch('/api/restaurants/aapno-khano'),
+          fetch('/api/settings'),
         ]);
 
         const tablesData = await resTables.json();
@@ -157,7 +157,7 @@ export default function QrStudioPage() {
                   </button>
 
                   <a
-                    href={`/r/aapno-khano/table-${table.tableNumber}`}
+                    href={`/r/${restaurant?.slug || 'aapno-khano'}/table-${table.tableNumber}`}
                     target="_blank"
                     className="p-2 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-xl text-xs flex items-center gap-1 font-bold transition-colors"
                     title="Test Open in Browser"

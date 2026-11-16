@@ -77,6 +77,11 @@ export async function GET() {
         categories = await prisma.category.findMany({
           orderBy: { displayOrder: 'asc' },
         });
+
+        var auditLogs: any[] = await prisma.auditLog.findMany({
+          orderBy: { createdAt: 'desc' },
+          take: 30,
+        });
       }
     } catch (dbErr) {
       console.warn('Superadmin DB query warning, using fallback catalogs:', dbErr);
@@ -150,6 +155,7 @@ export async function GET() {
       })),
       users: allUsers,
       plans,
+      auditLogs: typeof auditLogs !== 'undefined' ? auditLogs : [],
       products,
       categories,
     });
@@ -168,6 +174,37 @@ export async function POST(request: Request) {
 
     const data = await request.json();
     const { action } = data;
+
+    // 0. SWITCH ACTIVE RESTAURANT CONTEXT FOR SUPER ADMIN
+    if (action === 'SWITCH_RESTAURANT') {
+      const { restaurantId } = data;
+      const targetRest = await prisma.restaurant.findUnique({
+        where: { id: restaurantId },
+      });
+      if (!targetRest) {
+        return NextResponse.json({ error: 'Restaurant not found' }, { status: 404 });
+      }
+
+      const updatedSession = {
+        ...(session || {}),
+        userId: session?.userId || 'cmwi_super_admin',
+        role: 'SUPER_ADMIN',
+        restaurantId: targetRest.id,
+        restaurantSlug: targetRest.slug,
+        restaurantName: targetRest.name,
+        logoUrl: targetRest.logoUrl || (targetRest.slug === 'mr-bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png'),
+      };
+
+      const res = NextResponse.json({ success: true, restaurant: targetRest });
+      res.cookies.set('auth_session', JSON.stringify(updatedSession), {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7,
+      });
+      return res;
+    }
 
     // 1. CREATE PRODUCT / DISH
     if (action === 'CREATE_PRODUCT') {

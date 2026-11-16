@@ -121,6 +121,7 @@ export async function POST(request: Request) {
       branchId: user.branchId || 'branch-aapno-fatehabad',
       restaurantSlug: user.restaurant?.slug || 'aapno-khano',
       restaurantName: user.restaurant?.name || 'आपणो खाणो (Aapno Khaano)',
+      logoUrl: user.restaurant?.logoUrl || (user.restaurant?.slug === 'mr-bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png'),
     };
 
     // Log successful login audit

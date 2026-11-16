@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminMenuPage() {
-  const [categories, setCategories] = useState<any[]>(MASTER_AAPNO_KHANO_CATEGORIES);
+  const [categories, setCategories] = useState<any[]>([]);
   const [kitchenStations, setKitchenStations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,9 +136,10 @@ export default function AdminMenuPage() {
   const fetchMenu = async () => {
     try {
       setLoading(true);
-      const resRest = await fetch('/api/restaurants/aapno-khano');
-      const restData = await resRest.json();
-      const restId = restData.restaurant?.id || 'aapno-khano';
+      const resSettings = await fetch('/api/settings');
+      const settingsData = await resSettings.json();
+      const rest = settingsData.restaurant;
+      const restId = rest?.id || rest?.slug || 'aapno-khano';
 
       const resMenu = await fetch(`/api/menu/${restId}`);
       const menuData = await resMenu.json();
@@ -147,6 +148,8 @@ export default function AdminMenuPage() {
         if (!formData.categoryId) {
           setFormData((prev) => ({ ...prev, categoryId: menuData.categories[0].id }));
         }
+      } else {
+        setCategories([]);
       }
     } catch (err) {
       console.error('Error fetching menu:', err);

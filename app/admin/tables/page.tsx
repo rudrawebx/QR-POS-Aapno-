@@ -21,6 +21,7 @@ import {
 export default function AdminTablesPage() {
   const [tables, setTables] = useState<any[]>([]);
   const [floorZones, setFloorZones] = useState<any[]>([]);
+  const [restaurantSlug, setRestaurantSlug] = useState('aapno-khano');
   const [loading, setLoading] = useState(true);
   const [newTableNum, setNewTableNum] = useState('');
   const [newTableCap, setNewTableCap] = useState('4');
@@ -32,6 +33,7 @@ export default function AdminTablesPage() {
       const data = await res.json();
       if (data.tables) setTables(data.tables);
       if (data.floorZones) setFloorZones(data.floorZones);
+      if (data.restaurantSlug) setRestaurantSlug(data.restaurantSlug);
     } catch (err) {
       console.error('Error loading tables:', err);
     } finally {
@@ -233,7 +235,7 @@ export default function AdminTablesPage() {
                   </select>
 
                   <Link
-                    href={`/r/aapno-khano/table-${table.tableNumber}`}
+                    href={`/r/${restaurantSlug}/table-${table.tableNumber}`}
                     target="_blank"
                     className="p-1.5 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-600"
                     title="Open Table QR Menu"

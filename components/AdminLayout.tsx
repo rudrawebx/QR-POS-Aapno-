@@ -200,15 +200,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <Link href="/admin" className="flex-shrink-0 group">
             <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-md border-2 border-[#E09D3D] flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
               <img
-                src="/images/aapno-khano-logo.png"
-                alt="Aapno Khaano"
+                src={sessionUser?.logoUrl || (sessionUser?.restaurantSlug === 'mr-bagri' || sessionUser?.restaurantId === 'rest_mr_bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png')}
+                alt={sessionUser?.restaurantName || 'Restaurant'}
                 className="w-full h-full object-contain"
               />
             </div>
           </Link>
           <div className="min-w-0">
             <h2 className="font-black text-sm text-white tracking-wide truncate">
-              {sessionUser?.restaurantName || 'आपणो खाणो'}
+              {sessionUser?.restaurantName || (sessionUser?.restaurantSlug === 'mr-bagri' ? 'Mr. Bagri' : 'आपणो खाणो')}
             </h2>
             <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1">
               <span>QSR &amp; Table Service Platform</span>
@@ -304,7 +304,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
               <h1 className="text-xs sm:text-sm font-black text-[#331E17] truncate">
-                {sessionUser?.restaurantName || 'Aapno Khaano'} • Live Terminal
+                {sessionUser?.restaurantName || (sessionUser?.restaurantSlug === 'mr-bagri' ? 'Mr. Bagri' : 'Aapno Khaano')} • Live Terminal
               </h1>
             </div>
           </div>
