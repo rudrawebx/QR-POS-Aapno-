@@ -487,7 +487,7 @@ export default function SuperAdminPage() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#E09D3D] text-[#331E17] shadow-xs">
-                            {rest.slug === 'aapno-khano' ? 'OSR01' : (rest.slug === 'mr-bagri' ? 'OSR02' : 'TENANT')}
+                            {rest.slug === 'aapno-khano' ? 'QSR01' : (rest.slug === 'mr-bagri' ? 'QSR02' : 'TENANT')}
                           </span>
                           <div>
                             <p className="font-black text-[#331E17]">{rest.name}</p>
