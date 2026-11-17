@@ -389,23 +389,14 @@ export default function SuperAdminPage() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Maroon Brand Header */}
-        <div className="bg-gradient-to-br from-[#7A101B] to-[#981826] p-4 text-white space-y-2.5 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="bg-white rounded-xl p-1 shadow-sm">
-                <img src="/images/aapno-khano-login-logo.png" alt="Aapno Khaano" className="h-8 w-auto object-contain" />
-              </div>
-              <span className="px-2 py-0.5 rounded bg-white text-[#8E1521] text-[10px] font-black tracking-wider">POS</span>
-            </div>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white">
-              <X className="w-5 h-5" />
-            </button>
+        {/* Maroon Brand Header - Logo Only */}
+        <div className="bg-gradient-to-br from-[#7A101B] to-[#981826] p-4 flex items-center justify-center relative flex-shrink-0">
+          <div className="bg-white/95 rounded-2xl px-3 py-1.5 shadow-md">
+            <img src="/images/aapno-khano-login-logo.png" alt="Aapno Khaano" className="h-12 w-auto object-contain" />
           </div>
-          <div className="flex items-center gap-1.5 text-xs font-black text-[#F5D28C]">
-            <Crown className="w-3.5 h-3.5" />
-            <span>Super Admin Control Center</span>
-          </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white absolute right-3 top-3">
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation Links */}
