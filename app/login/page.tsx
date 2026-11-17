@@ -145,19 +145,19 @@ function LoginForm() {
   };
 
   return (
-    <div className="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-[#E7DDD0] shadow-[0_24px_60px_-15px_rgba(60,24,14,0.16)] space-y-5 w-full">
+    <div className="bg-white/95 backdrop-blur-md p-5 xl:p-7 rounded-[26px] border border-[#E7DDD0] shadow-[0_24px_60px_-15px_rgba(60,24,14,0.16)] space-y-3.5 xl:space-y-4 w-full">
       {/* Card Header */}
-      <div className="text-center space-y-1">
+      <div className="text-center space-y-0.5">
         <div className="lg:hidden mb-2">
           <img
             src="/images/aapno-khano-login-logo.png"
             alt="Aapno Khaano"
-            className="h-16 w-auto mx-auto object-contain"
+            className="h-14 w-auto mx-auto object-contain"
           />
         </div>
-        <p className="text-sm font-bold text-[#331E17]">Welcome to</p>
-        <h2 className="text-2xl font-black text-[#8E1521] tracking-tight">Aapno Khano POS</h2>
-        <p className="text-xs text-[#745E55] font-medium">Restaurant Management System</p>
+        <p className="text-xs font-bold text-[#331E17]">Welcome to</p>
+        <h2 className="text-xl xl:text-2xl font-black text-[#8E1521] tracking-tight">Aapno Khano POS</h2>
+        <p className="text-[11px] text-[#745E55] font-medium">Restaurant Management System</p>
       </div>
 
       {/* Top Segmented Pill: Login | Register */}
@@ -168,14 +168,14 @@ function LoginForm() {
             setIsPinMode(false);
             setError('');
           }}
-          className="py-2.5 rounded-full bg-gradient-to-r from-[#8E1521] to-[#B01F2E] text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+          className="py-2 rounded-full bg-gradient-to-r from-[#8E1521] to-[#B01F2E] text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <User className="w-3.5 h-3.5" />
           <span>Login</span>
         </button>
         <Link
           href="/register"
-          className="py-2.5 rounded-full text-[#5C463E] hover:text-[#8E1521] flex items-center justify-center gap-1.5 transition-colors"
+          className="py-2 rounded-full text-[#5C463E] hover:text-[#8E1521] flex items-center justify-center gap-1.5 transition-colors"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span>Register</span>
@@ -183,13 +183,13 @@ function LoginForm() {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 font-bold">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 font-bold">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="space-y-4 text-xs">
+      <form onSubmit={handleLogin} className="space-y-3 text-xs">
         {!isPinMode ? (
           <>
             <div className="relative">
@@ -200,7 +200,7 @@ function LoginForm() {
                 placeholder="Email Address / Mobile Number"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
               />
             </div>
 
@@ -212,7 +212,7 @@ function LoginForm() {
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-10 py-3 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
+                className="w-full pl-10 pr-10 py-2.5 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
               />
               <button
                 type="button"
@@ -262,7 +262,7 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-[#8E1521] to-[#AE1D2B] hover:from-[#7A101B] hover:to-[#961724] text-white font-black py-3.5 px-4 rounded-xl text-xs sm:text-sm shadow-lg shadow-[#8E1521]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-[#8E1521] to-[#AE1D2B] hover:from-[#7A101B] hover:to-[#961724] text-white font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-lg shadow-[#8E1521]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
         >
           <ArrowRight className="w-4 h-4" />
           <span>{loading ? 'Authenticating...' : 'Sign In to Terminal'}</span>
@@ -413,83 +413,82 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FBF7F0] via-[#F4E9D8] to-[#EBDCBF] flex flex-col justify-between font-sans selection:bg-[#E09D3D] selection:text-[#8E1521]">
+    <div className="min-h-screen lg:h-screen lg:overflow-hidden relative bg-gradient-to-br from-[#FBF7F0] via-[#F4E9D8] to-[#EBDCBF] flex flex-col justify-between font-sans selection:bg-[#E09D3D] selection:text-[#8E1521]">
       {/* Warm Ambient Background Glows */}
       <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#E09D3D]/15 blur-3xl" />
       <div className="pointer-events-none absolute bottom-0 right-0 w-[30rem] h-[30rem] rounded-full bg-[#8E1521]/10 blur-3xl" />
 
-      <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex items-center">
-        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+      <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-3 flex items-center min-h-0">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           {/* LEFT HERO & HARDWARE SHOWCASE (Desktop) */}
-          <div className="hidden lg:flex lg:col-span-7 flex-col space-y-6">
+          <div className="hidden lg:flex lg:col-span-7 flex-col space-y-3.5 xl:space-y-4">
             {/* Brand Badge */}
             <Link href="/" className="inline-flex items-center gap-3 w-fit group">
               <img
                 src="/images/aapno-khano-login-logo.png"
                 alt="Aapno Khaano"
-                className="h-20 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+                className="h-14 xl:h-16 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-3.5 py-1 rounded-lg bg-[#8E1521] text-white text-sm font-black tracking-wider shadow-xs">
+                  <span className="px-3 py-0.5 rounded-lg bg-[#8E1521] text-white text-xs font-black tracking-wider shadow-xs">
                     POS
                   </span>
                 </div>
-                <p className="text-xs font-bold text-[#5C463E] mt-1">Restaurant Management System</p>
+                <p className="text-[11px] font-bold text-[#5C463E] mt-1">Restaurant Management System</p>
               </div>
             </Link>
 
             {/* Hero Headline */}
-            <div className="space-y-3">
-              <h1 className="text-4xl xl:text-[44px] font-black text-[#2B1810] leading-[1.12] tracking-tight">
+            <div className="space-y-1.5">
+              <h1 className="text-3xl xl:text-[40px] font-black text-[#2B1810] leading-[1.1] tracking-tight">
                 Run Your Restaurant
                 <br />
-                Smarter with
-                <br />
+                Smarter with{' '}
                 <span className="text-[#8E1521] relative inline-block">
                   Aapno Khano POS
-                  <span className="block h-1.5 w-full bg-gradient-to-r from-[#8E1521] via-[#E09D3D] to-transparent rounded-full mt-1" />
+                  <span className="block h-1 w-full bg-gradient-to-r from-[#8E1521] via-[#E09D3D] to-transparent rounded-full mt-0.5" />
                 </span>
               </h1>
-              <p className="text-sm text-[#5C463E] max-w-md leading-relaxed font-medium">
+              <p className="text-xs xl:text-sm text-[#5C463E] max-w-md leading-relaxed font-medium">
                 A complete POS, KDS and restaurant management platform for QSRs, cafés and hotels.
               </p>
             </div>
 
             {/* 4 Feature Icon Badges */}
-            <div className="grid grid-cols-4 gap-3 max-w-xl">
-              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
-                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+            <div className="grid grid-cols-4 gap-2.5 max-w-xl">
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-2.5 text-center shadow-xs">
+                <div className="w-8 h-8 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1">
                   <Monitor className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] font-black text-[#331E17] leading-tight">Smart POS &amp; Billing</p>
+                <p className="text-[10px] font-black text-[#331E17] leading-tight">Smart POS &amp; Billing</p>
               </div>
-              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
-                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-2.5 text-center shadow-xs">
+                <div className="w-8 h-8 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1">
                   <ChefHat className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] font-black text-[#331E17] leading-tight">Kitchen Display (KDS)</p>
+                <p className="text-[10px] font-black text-[#331E17] leading-tight">Kitchen Display (KDS)</p>
               </div>
-              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
-                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-2.5 text-center shadow-xs">
+                <div className="w-8 h-8 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1">
                   <QrCode className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] font-black text-[#331E17] leading-tight">QR Menu &amp; Ordering</p>
+                <p className="text-[10px] font-black text-[#331E17] leading-tight">QR Menu &amp; Ordering</p>
               </div>
-              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
-                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-2.5 text-center shadow-xs">
+                <div className="w-8 h-8 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1">
                   <BarChart3 className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] font-black text-[#331E17] leading-tight">Reports &amp; Analytics</p>
+                <p className="text-[10px] font-black text-[#331E17] leading-tight">Reports &amp; Analytics</p>
               </div>
             </div>
 
             {/* POS Terminal + Thermal Printer + Scanner + QR Standee Image */}
-            <div className="pt-2 max-w-2xl">
+            <div className="pt-1 max-w-xl">
               <img
                 src="/images/pos-hardware-showcase.png"
                 alt="Aapno Khano POS Terminal, Thermal Printer & QR Standee"
-                className="w-full h-auto object-contain drop-shadow-[0_20px_35px_rgba(43,24,16,0.18)]"
+                className="w-full max-h-[210px] xl:max-h-[250px] object-contain object-left drop-shadow-[0_18px_30px_rgba(43,24,16,0.16)]"
               />
             </div>
           </div>
@@ -498,7 +497,7 @@ export default function LoginPage() {
           <div className="lg:col-span-5 w-full max-w-md mx-auto">
             <Suspense
               fallback={
-                <div className="bg-white p-8 rounded-[28px] text-center text-xs font-bold text-slate-500 shadow-xl border border-[#E8E1D6]">
+                <div className="bg-white p-8 rounded-[26px] text-center text-xs font-bold text-slate-500 shadow-xl border border-[#E8E1D6]">
                   Loading authentication portal...
                 </div>
               }
@@ -509,7 +508,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <footer className="relative z-10 py-4 text-center text-[11px] text-[#5C463E]">
+      <footer className="relative z-10 py-2.5 text-center text-[11px] text-[#5C463E] flex-shrink-0">
         © All Copyright 2026 by{' '}
         <a
           href="https://rudrawebx.com/"
