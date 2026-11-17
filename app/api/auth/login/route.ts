@@ -68,7 +68,10 @@ export async function POST(request: Request) {
       }
     } catch (dbErr) {
       console.warn('[Auth Security] Database query warning during login:', dbErr);
-      user = null;
+      return NextResponse.json(
+        { error: 'Database connection unreachable. Please check internet/MySQL connectivity and try again.' },
+        { status: 503 }
+      );
     }
 
     // 3. Credential Verification
