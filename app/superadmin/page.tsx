@@ -389,12 +389,10 @@ export default function SuperAdminPage() {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         }`}
       >
-        {/* Maroon Brand Header - Logo Only */}
-        <div className="bg-gradient-to-br from-[#7A101B] to-[#981826] p-4 flex items-center justify-center relative flex-shrink-0">
-          <div className="bg-white/95 rounded-2xl px-3 py-1.5 shadow-md">
-            <img src="/images/aapno-khano-login-logo.png" alt="Aapno Khaano" className="h-12 w-auto object-contain" />
-          </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-white absolute right-3 top-3">
+        {/* Clean Brand Header - Transparent Logo Only */}
+        <div className="bg-white border-b border-[#E8DFD3] py-4 px-4 flex items-center justify-center relative flex-shrink-0">
+          <img src="/images/aapno-khano-login-logo.png" alt="Aapno Khaano" className="h-14 w-auto object-contain" />
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-[#331E17] absolute right-3 top-3">
             <X className="w-5 h-5" />
           </button>
         </div>
