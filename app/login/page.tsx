@@ -404,6 +404,18 @@ export default function LoginPage() {
           <LoginForm />
         </Suspense>
       </div>
+
+      <footer className="mt-8 text-center text-[11px] text-[#745E55]">
+        © All Copyright 2026 by{' '}
+        <a
+          href="https://rudrawebx.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#AA1B2A] font-black hover:underline"
+        >
+          Rudra Web X
+        </a>
+      </footer>
     </div>
   );
 }

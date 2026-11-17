@@ -234,10 +234,16 @@ function StatusTracker() {
 
 export default function ApplicationStatusPage() {
   return (
-    <div className="min-h-screen bg-[#FEFBF5] py-10 px-4 font-sans">
+    <div className="min-h-screen bg-[#FEFBF5] py-10 px-4 font-sans flex flex-col justify-between">
       <Suspense fallback={<div className="text-center text-xs font-bold text-[#745E55]">Loading tracker...</div>}>
         <StatusTracker />
       </Suspense>
+      <footer className="mt-10 text-center text-[11px] text-[#745E55]">
+        © All Copyright 2026 by{' '}
+        <a href="https://rudrawebx.com/" target="_blank" rel="noopener noreferrer" className="text-[#AA1B2A] font-black hover:underline">
+          Rudra Web X
+        </a>
+      </footer>
     </div>
   );
 }

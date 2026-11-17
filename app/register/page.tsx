@@ -516,6 +516,13 @@ export default function RegisterRestaurantPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        <footer className="text-center text-[11px] text-[#745E55] pb-4">
+          © All Copyright 2026 by{' '}
+          <a href="https://rudrawebx.com/" target="_blank" rel="noopener noreferrer" className="text-[#AA1B2A] font-black hover:underline">
+            Rudra Web X
+          </a>
+        </footer>
       </div>
     </div>
   );

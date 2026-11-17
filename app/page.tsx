@@ -314,8 +314,16 @@ export default function MasterLandingPage() {
         <p className="text-[#E8E1D6]/80 text-xs max-w-md mx-auto">
           Official Standee UPI: <b className="text-white font-mono">9996213962@hdfc</b> • 5% GST Compliant • 80mm Dual Thermal Printing
         </p>
-        <p className="text-[10px] text-[#E8E1D6]/50">
-          © {new Date().getFullYear()} Aapno Khaano. All Rights Reserved. Reference: www.aapnokhano.com
+        <p className="text-[11px] text-[#E8E1D6]/70">
+          © All Copyright 2026 by{' '}
+          <a
+            href="https://rudrawebx.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#E09D3D] font-black hover:underline"
+          >
+            Rudra Web X
+          </a>
         </p>
       </footer>
     </div>
