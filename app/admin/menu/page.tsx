@@ -141,7 +141,7 @@ export default function AdminMenuPage() {
       const rest = settingsData.restaurant;
       const restId = rest?.id || rest?.slug || 'aapno-khano';
 
-      const resMenu = await fetch(`/api/menu/${restId}`);
+      const resMenu = await fetch(`/api/menu/${restId}?t=${Date.now()}`, { cache: 'no-store' });
       const menuData = await resMenu.json();
       if (menuData.categories && menuData.categories.length > 0) {
         setCategories(menuData.categories);
@@ -274,6 +274,10 @@ export default function AdminMenuPage() {
           showToast(`✓ Updated "${formData.name}" successfully!`);
           setIsDishModalOpen(false);
           fetchMenu();
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert(errData.error || 'Failed to update dish.');
+          return;
         }
       } else {
         // CREATE (POST)
@@ -294,6 +298,10 @@ export default function AdminMenuPage() {
             );
           }
           showToast(`✓ Created new dish "${formData.name}"!`);
+        } else {
+          const errData = await res.json().catch(() => ({}));
+          alert(errData.error || 'Failed to create dish.');
+          return;
         }
       }
       setIsDishModalOpen(false);

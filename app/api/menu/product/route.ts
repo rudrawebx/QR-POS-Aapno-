@@ -248,7 +248,13 @@ export async function PATCH(request: Request) {
       },
     }).catch(() => {});
 
+    const restSlugObj = await prisma.restaurant.findUnique({
+      where: { id: existing.restaurantId },
+      select: { slug: true },
+    }).catch(() => null);
+
     invalidateMenuCache(existing.restaurantId);
+    if (restSlugObj?.slug) invalidateMenuCache(restSlugObj.slug);
     return NextResponse.json({ success: true, product });
   } catch (error) {
     console.error('Update product error:', error);

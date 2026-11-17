@@ -4,7 +4,7 @@ import { MASTER_AAPNO_KHANO_CATEGORIES, getMergedCategories } from '@/lib/menuDa
 import { memoryCache, CacheKeys } from '@/lib/cache';
 
 const CACHE_HEADERS = {
-  'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+  'Cache-Control': 'no-store',
 };
 
 export async function GET(
@@ -13,15 +13,19 @@ export async function GET(
 ) {
   try {
     const { restaurantId } = await params;
+    const { searchParams } = new URL(request.url);
+    const bypassCache = searchParams.has('t') || searchParams.get('fresh') === '1';
     const cacheKey = CacheKeys.menu(restaurantId || 'aapno-khano');
 
-    // ⚡ INSTANT IN-MEMORY CACHE HIT (<1ms)
-    const cachedCategories = memoryCache.get<any[]>(cacheKey);
-    if (cachedCategories && cachedCategories.length > 0) {
-      return NextResponse.json(
-        { categories: cachedCategories, cached: true },
-        { headers: CACHE_HEADERS }
-      );
+    // ⚡ INSTANT IN-MEMORY CACHE HIT (<1ms) unless fresh requested
+    if (!bypassCache) {
+      const cachedCategories = memoryCache.get<any[]>(cacheKey);
+      if (cachedCategories && cachedCategories.length > 0) {
+        return NextResponse.json(
+          { categories: cachedCategories, cached: true },
+          { headers: CACHE_HEADERS }
+        );
+      }
     }
 
     // Resolve restaurant by ID or slug
