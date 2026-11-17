@@ -150,9 +150,9 @@ function LoginForm() {
       <div className="text-center space-y-1">
         <div className="lg:hidden mb-2">
           <img
-            src="/images/aapno-khano-logo.png"
+            src="/images/aapno-khano-login-logo.png"
             alt="Aapno Khaano"
-            className="h-14 w-auto mx-auto object-contain"
+            className="h-16 w-auto mx-auto object-contain"
           />
         </div>
         <p className="text-sm font-bold text-[#331E17]">Welcome to</p>
@@ -425,13 +425,13 @@ export default function LoginPage() {
             {/* Brand Badge */}
             <Link href="/" className="inline-flex items-center gap-3 w-fit group">
               <img
-                src="/images/aapno-khano-logo.png"
+                src="/images/aapno-khano-login-logo.png"
                 alt="Aapno Khaano"
-                className="h-14 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+                className="h-20 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
               />
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-0.5 rounded-lg bg-[#8E1521] text-white text-xs font-black tracking-wider shadow-xs">
+                  <span className="px-3.5 py-1 rounded-lg bg-[#8E1521] text-white text-sm font-black tracking-wider shadow-xs">
                     POS
                   </span>
                 </div>
@@ -484,68 +484,13 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* POS Terminal + Thermal Bill + QR Standee Visual Preview */}
-            <div className="flex items-end gap-4 pt-2 max-w-xl">
-              {/* Mini Thermal Printer Receipt Card */}
-              <div className="w-28 bg-[#2B1F1A] rounded-2xl p-2.5 shadow-xl border border-[#4A3830] flex-shrink-0">
-                <div className="bg-white rounded-lg p-2 text-center space-y-1 shadow-inner">
-                  <img src="/images/aapno-khano-logo.png" alt="Bill" className="h-5 mx-auto object-contain" />
-                  <div className="border-t border-dashed border-slate-300 pt-1 space-y-0.5 text-[7px] font-mono text-slate-600">
-                    <div className="flex justify-between"><span>Paneer Tikka</span><span>₹190</span></div>
-                    <div className="flex justify-between"><span>Dal Makhani</span><span>₹190</span></div>
-                    <div className="flex justify-between font-black text-slate-900 border-t border-slate-200 pt-0.5">
-                      <span>TOTAL</span><span>₹399</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-2 flex items-center justify-between px-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="text-[8px] font-bold text-amber-200/80 uppercase tracking-wider">80mm ESC/POS</span>
-                </div>
-              </div>
-
-              {/* Mini POS Screen Mockup */}
-              <div className="flex-1 bg-[#1E1614] rounded-2xl p-2.5 shadow-2xl border-2 border-[#3E2E29]">
-                <div className="bg-[#FEFBF5] rounded-xl overflow-hidden flex h-36">
-                  {/* Mini Sidebar */}
-                  <div className="w-16 bg-[#8E1521] p-2 space-y-1.5 text-[7px] text-amber-100 font-bold flex-shrink-0">
-                    <div className="bg-[#E09D3D] text-[#331E17] px-1.5 py-0.5 rounded font-black">POS</div>
-                    <div className="opacity-80">Orders</div>
-                    <div className="opacity-80">KDS</div>
-                    <div className="opacity-80">Menu</div>
-                    <div className="opacity-80">Reports</div>
-                  </div>
-                  {/* Mini Dish Grid */}
-                  <div className="flex-1 p-2 grid grid-cols-3 gap-1.5 bg-[#FAF5ED]">
-                    {[
-                      { name: 'Paneer Tikka', price: '₹249' },
-                      { name: 'Dal Tadka', price: '₹189' },
-                      { name: 'Veg Biryani', price: '₹229' },
-                      { name: 'Butter Naan', price: '₹49' },
-                      { name: 'Shahi Paneer', price: '₹259' },
-                      { name: 'Masala Chaas', price: '₹59' },
-                    ].map((d) => (
-                      <div key={d.name} className="bg-white rounded-lg p-1.5 border border-[#E8DFD3] flex flex-col justify-between shadow-2xs">
-                        <div className="h-5 rounded bg-gradient-to-br from-[#FFF0E8] to-[#F7DFC2]" />
-                        <div>
-                          <p className="text-[7px] font-black text-[#331E17] truncate">{d.name}</p>
-                          <p className="text-[7px] font-black text-[#8E1521]">{d.price}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Mini QR Standee Card */}
-              <div className="w-24 bg-white rounded-2xl p-2.5 shadow-xl border border-[#E5D9C8] text-center space-y-1 flex-shrink-0">
-                <img src="/images/aapno-khano-logo.png" alt="QR" className="h-5 mx-auto object-contain" />
-                <p className="text-[8px] font-black text-[#8E1521] uppercase">Scan to Order</p>
-                <div className="w-12 h-12 mx-auto bg-[#FCF9F4] border border-[#E5D9C8] rounded-lg flex items-center justify-center">
-                  <QrCode className="w-9 h-9 text-[#2B1810]" />
-                </div>
-                <p className="text-[7px] font-bold text-[#745E55]">Table QR Menu</p>
-              </div>
+            {/* POS Terminal + Thermal Printer + Scanner + QR Standee Image */}
+            <div className="pt-2 max-w-2xl">
+              <img
+                src="/images/pos-hardware-showcase.png"
+                alt="Aapno Khano POS Terminal, Thermal Printer & QR Standee"
+                className="w-full h-auto object-contain drop-shadow-[0_20px_35px_rgba(43,24,16,0.18)]"
+              />
             </div>
           </div>
 
