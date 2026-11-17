@@ -422,21 +422,13 @@ export default function LoginPage() {
         <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 items-center">
           {/* LEFT HERO & HARDWARE SHOWCASE (Desktop) */}
           <div className="hidden lg:flex lg:col-span-7 flex-col space-y-3.5 xl:space-y-4">
-            {/* Brand Badge */}
-            <Link href="/" className="inline-flex items-center gap-3 w-fit group">
+            {/* Brand Logo */}
+            <Link href="/" className="inline-flex items-center w-fit group">
               <img
                 src="/images/aapno-khano-login-logo.png"
                 alt="Aapno Khaano"
-                className="h-14 xl:h-16 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+                className="h-20 xl:h-24 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
               />
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-0.5 rounded-lg bg-[#8E1521] text-white text-xs font-black tracking-wider shadow-xs">
-                    POS
-                  </span>
-                </div>
-                <p className="text-[11px] font-bold text-[#5C463E] mt-1">Restaurant Management System</p>
-              </div>
             </Link>
 
             {/* Hero Headline */}
