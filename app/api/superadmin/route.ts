@@ -10,11 +10,45 @@ import {
 } from '@/lib/auth';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await getCurrentSession();
     if (!session || session.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: 'Unauthorized. Super Admin access only.' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const range = searchParams.get('range') || '7D'; // TODAY, YESTERDAY, 7D, 30D, MONTH, CUSTOM
+    const customFrom = searchParams.get('from');
+    const customTo = searchParams.get('to');
+
+    const now = new Date();
+    let rangeStart = new Date(now);
+    let rangeEnd = new Date(now);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    if (range === 'TODAY') {
+      rangeStart.setHours(0, 0, 0, 0);
+    } else if (range === 'YESTERDAY') {
+      rangeStart.setDate(now.getDate() - 1);
+      rangeStart.setHours(0, 0, 0, 0);
+      rangeEnd = new Date(rangeStart);
+      rangeEnd.setHours(23, 59, 59, 999);
+    } else if (range === '30D') {
+      rangeStart.setDate(now.getDate() - 29);
+      rangeStart.setHours(0, 0, 0, 0);
+    } else if (range === 'MONTH') {
+      rangeStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    } else if (range === 'CUSTOM' && customFrom) {
+      rangeStart = new Date(customFrom);
+      if (customTo) {
+        rangeEnd = new Date(customTo);
+        rangeEnd.setHours(23, 59, 59, 999);
+      }
+    } else {
+      // 7D default
+      rangeStart.setDate(now.getDate() - 6);
+      rangeStart.setHours(0, 0, 0, 0);
     }
 
     let restaurants: any[] = [];
@@ -71,8 +105,10 @@ export async function GET() {
             phone: true,
             role: true,
             isActive: true,
+            lastLoginAt: true,
             createdAt: true,
-            restaurant: { select: { id: true, name: true, slug: true } },
+            restaurant: { select: { id: true, name: true, slug: true, qsrNumber: true } },
+            branch: { select: { id: true, name: true } },
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -151,20 +187,92 @@ export async function GET() {
       }));
     }
 
-    const totalGmv = allOrders
+    const filteredOrders = allOrders.filter((o) => {
+      const d = new Date(o.createdAt);
+      return d >= rangeStart && d <= rangeEnd;
+    });
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayOrders = allOrders.filter((o) => new Date(o.createdAt) >= todayStart);
+    const todaySales = todayOrders
       .filter((o) => o.status === 'COMPLETED' || o.paymentStatus === 'PAID')
       .reduce((sum, o) => sum + o.grandTotal, 0);
 
-    const activeTenants = restaurants.filter((r) => r.isActive).length;
-    const totalTransactions = allOrders.length;
+    const totalGmv = filteredOrders
+      .filter((o) => o.status === 'COMPLETED' || o.paymentStatus === 'PAID')
+      .reduce((sum, o) => sum + o.grandTotal, 0);
 
-    let monthlyPlatformRevenue = 0;
-    restaurants.forEach((r) => {
-      const activeSub = r.subscriptions[0];
-      if (activeSub && activeSub.status === 'ACTIVE' && activeSub.plan) {
-        monthlyPlatformRevenue += activeSub.plan.monthlyPrice;
+    // Build daily sales trend from real orders in selected range
+    const salesByDay = new Map<string, { date: string; sales: number; orders: number }>();
+    const cursor = new Date(rangeStart);
+    while (cursor <= rangeEnd && salesByDay.size < 31) {
+      const key = cursor.toISOString().slice(0, 10);
+      const label = cursor.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+      salesByDay.set(key, { date: label, sales: 0, orders: 0 });
+      cursor.setDate(cursor.getDate() + 1);
+    }
+    filteredOrders.forEach((o) => {
+      const key = new Date(o.createdAt).toISOString().slice(0, 10);
+      const bucket = salesByDay.get(key);
+      if (bucket) {
+        bucket.orders += 1;
+        if (o.status === 'COMPLETED' || o.paymentStatus === 'PAID') {
+          bucket.sales += Math.round(o.grandTotal);
+        }
       }
     });
+    const salesSeries = Array.from(salesByDay.values());
+
+    const activeTenants = restaurants.filter((r) => r.isActive).length;
+    const totalTransactions = filteredOrders.length;
+    const totalOutlets = restaurants.reduce((sum, r) => sum + (r.branches?.length || 1), 0);
+
+    let monthlyPlatformRevenue = 0;
+    let activeSubscriptions = 0;
+    let expiringSubscriptions = 0;
+    let trialTenants = 0;
+    const sevenDaysFromNow = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+    restaurants.forEach((r) => {
+      const activeSub = r.subscriptions?.[0];
+      if (activeSub) {
+        if (activeSub.status === 'ACTIVE') {
+          activeSubscriptions += 1;
+          if (activeSub.plan) monthlyPlatformRevenue += activeSub.plan.monthlyPrice;
+          if (activeSub.currentPeriodEnd && new Date(activeSub.currentPeriodEnd) <= sevenDaysFromNow) {
+            expiringSubscriptions += 1;
+          }
+        } else if (activeSub.status === 'TRIAL') {
+          trialTenants += 1;
+        }
+      }
+    });
+
+    const pendingPayments = allOrders.filter((o) => o.paymentStatus === 'PENDING').length;
+
+    let activeTerminals = 0;
+    let openTicketsCount = 0;
+    let recentTickets: any[] = [];
+    try {
+      activeTerminals = await (prisma as any).posTerminal.count({
+        where: { isActive: true, status: 'ONLINE' },
+      });
+    } catch {
+      activeTerminals = 0;
+    }
+    try {
+      openTicketsCount = await (prisma as any).supportTicket.count({
+        where: { status: { in: ['NEW', 'ASSIGNED', 'IN_PROGRESS', 'WAITING_FOR_RESTAURANT'] } },
+      });
+      recentTickets = await (prisma as any).supportTicket.findMany({
+        orderBy: { createdAt: 'desc' },
+        take: 5,
+      });
+    } catch {
+      openTicketsCount = 0;
+      recentTickets = [];
+    }
 
     const pendingApprovals = applications.filter((a) => a.status === 'PENDING_APPROVAL').length;
     const underReview = applications.filter((a) => a.status === 'UNDER_REVIEW').length;
@@ -177,17 +285,28 @@ export async function GET() {
         totalRestaurants: restaurants.length,
         activeTenants,
         activeRestaurants: activeTenants,
+        trialTenants,
         newRequests: pendingApprovals + underReview,
         pendingApprovals,
         underReview,
         approvedRestaurants: approvedApps || restaurants.length,
         rejectedApplications,
         suspendedRestaurants,
-        totalOrders: allOrders.length,
+        totalOutlets,
+        activeTerminals,
+        totalOrders: filteredOrders.length,
+        todayOrdersCount: todayOrders.length,
+        todaySales: Math.round(todaySales),
         totalGmv: Math.round(totalGmv),
+        activeSubscriptions,
+        expiringSubscriptions,
+        openTicketsCount,
+        pendingPayments,
         monthlyPlatformRevenue: Math.round(monthlyPlatformRevenue),
         totalTransactions,
       },
+      salesSeries,
+      recentTickets,
       restaurants: restaurants.map((r) => ({
         id: r.id,
         qsrNumber: r.qsrNumber || (r.slug === 'aapno-khano' ? 'QSR01' : r.slug === 'mr-bagri' ? 'QSR02' : 'TENANT'),

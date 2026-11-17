@@ -975,3 +975,113 @@ model Session {
   @@index([userId])
 }
 
+model PosTerminal {
+  id              String    @id @default(cuid())
+  restaurantId    String
+  branchId        String?
+  terminalCode    String    @unique
+  deviceName      String
+  deviceType      String    @default("POS_TERMINAL") // POS_TERMINAL, KDS_SCREEN, WAITER_TAB
+  ipAddress       String?
+  status          String    @default("OFFLINE") // ONLINE, OFFLINE, INACTIVE
+  lastHeartbeatAt DateTime?
+  configJson      String?   @db.Text
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([restaurantId])
+}
+
+model SupportTicket {
+  id              String    @id @default(cuid())
+  ticketNumber    String    @unique
+  restaurantId    String
+  userId          String?
+  category        String    @default("OTHER") // POS_BILLING, KOT_KITCHEN, PRINTER, QR_MENU, PAYMENT, INVENTORY, MENU, LOGIN, REPORTS, SUBSCRIPTION, TECHNICAL, OTHER
+  priority        String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status          String    @default("NEW") // NEW, ASSIGNED, IN_PROGRESS, WAITING_FOR_RESTAURANT, RESOLVED, CLOSED
+  subject         String
+  description     String    @db.Text
+  assignedToId    String?
+  assignedToName  String?
+  internalNotes   String?   @db.Text
+  resolutionNotes String?   @db.Text
+  resolvedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  replies         SupportTicketReply[]
+
+  @@index([restaurantId])
+  @@index([status])
+}
+
+model SupportTicketReply {
+  id         String        @id @default(cuid())
+  ticketId   String
+  senderId   String?
+  senderName String
+  senderRole String
+  message    String        @db.Text
+  isInternal Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+
+model HelpArticle {
+  id           String   @id @default(cuid())
+  title        String
+  category     String   // FAQ, PRINTER_SETUP, QR_MENU, BILLING_GST, INVENTORY, ACCOUNT
+  content      String   @db.Text
+  videoUrl     String?
+  isPublished  Boolean  @default(true)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Announcement {
+  id              String   @id @default(cuid())
+  title           String
+  message         String   @db.Text
+  type            String   @default("UPDATE") // UPDATE, MAINTENANCE, ALERT, FEATURE, NOTICE
+  targetType      String   @default("ALL") // ALL, SELECTED_RESTAURANTS, SELECTED_ROLES
+  targetIdsJson   String?  @db.Text
+  targetRolesJson String?  @db.Text
+  channelsJson    String?  @db.Text
+  publishedBy     String?
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  logs            NotificationLog[]
+}
+
+model NotificationLog {
+  id             String       @id @default(cuid())
+  announcementId String
+  restaurantId   String?
+  channel        String       @default("IN_APP")
+  status         String       @default("DELIVERED")
+  sentAt         DateTime     @default(now())
+
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+
+  @@index([announcementId])
+}
+
+model PlatformSettings {
+  id              String   @id @default("PLATFORM_DEFAULT")
+  platformName    String   @default("Aapno Khano POS")
+  logoUrl         String   @default("/images/aapno-khano-login-logo.png")
+  supportEmail    String   @default("support@aapnokhano.com")
+  supportPhone    String   @default("+91 70820 40809")
+  defaultTaxRate  Float    @default(5.0)
+  defaultTrialDays Int     @default(14)
+  maintenanceMode Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
