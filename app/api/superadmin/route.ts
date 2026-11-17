@@ -1,12 +1,19 @@
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
-import { getCurrentSession, hashPassword } from '@/lib/auth';
+import {
+  getCurrentSession,
+  hashPassword,
+  allocateNextQsrNumber,
+  signSessionToken,
+  normalizeEmail,
+  normalizeMobile,
+} from '@/lib/auth';
 import { MASTER_AAPNO_KHANO_CATEGORIES } from '@/lib/menuData';
 
 export async function GET() {
   try {
     const session = await getCurrentSession();
-    if (session && session.role !== 'SUPER_ADMIN') {
+    if (!session || session.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: 'Unauthorized. Super Admin access only.' }, { status: 403 });
     }
 
@@ -16,11 +23,13 @@ export async function GET() {
     let allUsers: any[] = [];
     let products: any[] = [];
     let categories: any[] = [];
+    let applications: any[] = [];
 
     try {
       if (prisma) {
         restaurants = await prisma.restaurant.findMany({
           include: {
+            settings: true,
             subscriptions: {
               include: { plan: true },
               orderBy: { createdAt: 'desc' },
@@ -80,7 +89,37 @@ export async function GET() {
 
         var auditLogs: any[] = await prisma.auditLog.findMany({
           orderBy: { createdAt: 'desc' },
-          take: 30,
+          take: 50,
+        });
+
+        applications = await prisma.restaurantApplication.findMany({
+          orderBy: { createdAt: 'desc' },
+          select: {
+            id: true,
+            applicationRef: true,
+            ownerName: true,
+            restaurantName: true,
+            email: true,
+            mobile: true,
+            address: true,
+            city: true,
+            state: true,
+            pincode: true,
+            logoUrl: true,
+            coverUrl: true,
+            gstin: true,
+            fssaiNumber: true,
+            upiId: true,
+            status: true,
+            rejectionReason: true,
+            adminNotes: true,
+            assignedQsrNumber: true,
+            restaurantId: true,
+            reviewedBy: true,
+            reviewedAt: true,
+            createdAt: true,
+            updatedAt: true,
+          },
         });
       }
     } catch (dbErr) {
@@ -127,32 +166,58 @@ export async function GET() {
       }
     });
 
+    const pendingApprovals = applications.filter((a) => a.status === 'PENDING_APPROVAL').length;
+    const underReview = applications.filter((a) => a.status === 'UNDER_REVIEW').length;
+    const approvedApps = applications.filter((a) => a.status === 'APPROVED').length;
+    const rejectedApplications = applications.filter((a) => a.status === 'REJECTED').length;
+    const suspendedRestaurants = restaurants.filter((r) => !r.isActive || r.status === 'SUSPENDED').length;
+
     return NextResponse.json({
       summary: {
-        totalRestaurants: restaurants.length || 1,
-        activeTenants: activeTenants || 1,
-        totalOrders: allOrders.length || 2,
-        totalGmv: Math.round(totalGmv) || 1256,
-        monthlyPlatformRevenue: Math.round(monthlyPlatformRevenue) || 2499,
-        totalTransactions: totalTransactions || 2,
+        totalRestaurants: restaurants.length,
+        activeTenants,
+        activeRestaurants: activeTenants,
+        newRequests: pendingApprovals + underReview,
+        pendingApprovals,
+        underReview,
+        approvedRestaurants: approvedApps || restaurants.length,
+        rejectedApplications,
+        suspendedRestaurants,
+        totalOrders: allOrders.length,
+        totalGmv: Math.round(totalGmv),
+        monthlyPlatformRevenue: Math.round(monthlyPlatformRevenue),
+        totalTransactions,
       },
       restaurants: restaurants.map((r) => ({
         id: r.id,
+        qsrNumber: r.qsrNumber || (r.slug === 'aapno-khano' ? 'QSR01' : r.slug === 'mr-bagri' ? 'QSR02' : 'TENANT'),
         name: r.name,
+        ownerName: r.ownerName || 'Owner',
         slug: r.slug,
         uniqueUsername: r.uniqueUsername,
+        logoUrl: r.logoUrl,
+        address: r.address,
         city: r.city,
+        state: r.state,
+        postalCode: r.postalCode,
         phone: r.phone,
         email: r.email,
+        gstin: r.gstin,
+        fssaiNumber: r.fssaiNumber,
+        upiId: r.settings?.upiId || null,
+        status: r.status || (r.isActive ? 'ACTIVE' : 'SUSPENDED'),
         isActive: r.isActive,
+        lastLoginAt: r.lastLoginAt,
         createdAt: r.createdAt,
-        tablesCount: r.tables?.length || 15,
+        tablesCount: r.tables?.length || 0,
         branchesCount: r.branches?.length || 1,
-        ordersCount: r.orders?.length || 2,
+        usersCount: r.users?.length || 0,
+        ordersCount: r.orders?.length || 0,
         revenue: Math.round((r.invoices || []).reduce((s: number, inv: any) => s + inv.grandTotal, 0)),
         currentPlan: r.subscriptions?.[0]?.plan?.name || 'Professional Plan',
         subscriptionStatus: r.subscriptions?.[0]?.status || 'ACTIVE',
       })),
+      applications,
       users: allUsers,
       plans,
       auditLogs: typeof auditLogs !== 'undefined' ? auditLogs : [],
@@ -168,7 +233,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     const session = await getCurrentSession();
-    if (session && session.role !== 'SUPER_ADMIN') {
+    if (!session || session.role !== 'SUPER_ADMIN') {
       return NextResponse.json({ error: 'Unauthorized. Super Admin access only.' }, { status: 403 });
     }
 
@@ -186,17 +251,17 @@ export async function POST(request: Request) {
       }
 
       const updatedSession = {
-        ...(session || {}),
-        userId: session?.userId || 'cmwi_super_admin',
-        role: 'SUPER_ADMIN',
+        ...session,
+        role: 'SUPER_ADMIN' as const,
         restaurantId: targetRest.id,
         restaurantSlug: targetRest.slug,
         restaurantName: targetRest.name,
+        qsrNumber: targetRest.qsrNumber,
         logoUrl: targetRest.logoUrl || (targetRest.slug === 'mr-bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png'),
       };
 
       const res = NextResponse.json({ success: true, restaurant: targetRest });
-      res.cookies.set('auth_session', JSON.stringify(updatedSession), {
+      res.cookies.set('auth_session', signSessionToken(updatedSession), {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -341,57 +406,275 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, message: 'Product archived successfully' });
     }
 
-    // 4. CREATE RESTAURANT
+    // 4. CREATE RESTAURANT (Atomic QSR Allocation)
     if (action === 'CREATE_RESTAURANT') {
-      const { name, uniqueUsername, cuisine, phone, email, address, city, state, postalCode, planId, ownerName, ownerPassword } = data;
-      const slug = uniqueUsername.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      const { name, uniqueUsername, cuisine, phone, email, address, city, state, postalCode, ownerName, ownerPassword } = data;
+      const baseSlug = (uniqueUsername || name).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+      const normEmail = normalizeEmail(email);
 
-      const restaurant = await prisma.restaurant.create({
+      const existingUser = await prisma.user.findUnique({ where: { email: normEmail } });
+      if (existingUser) {
+        return NextResponse.json({ error: 'A user with this email already exists' }, { status: 409 });
+      }
+
+      const result = await prisma.$transaction(async (tx) => {
+        const qsrNumber = await allocateNextQsrNumber(tx);
+        const slug = `${baseSlug}-${qsrNumber.toLowerCase()}`;
+
+        const restaurant = await tx.restaurant.create({
+          data: {
+            qsrNumber,
+            name: name.trim(),
+            displayName: name.trim(),
+            ownerName: ownerName || `${name} Owner`,
+            slug,
+            uniqueUsername: slug,
+            cuisine: cuisine || 'Multi-Cuisine',
+            phone,
+            email: normEmail,
+            address: address || 'Main Commercial Road',
+            city: city || 'Jaipur',
+            state: state || 'Haryana',
+            postalCode: postalCode || '125001',
+            status: 'ACTIVE',
+            isActive: true,
+          },
+        });
+
+        await tx.restaurantSettings.create({
+          data: {
+            restaurantId: restaurant.id,
+            upiId: '',
+            upiMerchantName: name.trim(),
+            upiQrEnabled: false,
+            defaultReceiptFooter: `Thank you for visiting ${name.trim()}!`,
+          },
+        });
+
+        const branch = await tx.branch.create({
+          data: {
+            restaurantId: restaurant.id,
+            name: 'Main Dining & Kitchen',
+            slug: 'main',
+            address: address || 'Main Commercial Road',
+            phone,
+            isMain: true,
+          },
+        });
+
+        await tx.user.create({
+          data: {
+            restaurantId: restaurant.id,
+            branchId: branch.id,
+            name: ownerName || `${name} Owner`,
+            email: normEmail,
+            passwordHash: hashPassword(ownerPassword || 'owner123'),
+            role: 'OWNER',
+            phone,
+            pinCode: '1111',
+            isActive: true,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            restaurantId: restaurant.id,
+            userId: session.userId,
+            userName: session.name,
+            action: 'RESTAURANT_CREATED',
+            entity: 'Restaurant',
+            entityId: restaurant.id,
+            notes: `Created tenant ${restaurant.name} (${qsrNumber})`,
+          },
+        });
+
+        return restaurant;
+      });
+
+      return NextResponse.json({ success: true, restaurant: result });
+    }
+
+    // 4B. APPROVE RESTAURANT APPLICATION (Atomic Transaction + Unique QSR Number)
+    if (action === 'APPROVE_APPLICATION') {
+      const { applicationId } = data;
+      if (!applicationId) {
+        return NextResponse.json({ error: 'applicationId is required' }, { status: 400 });
+      }
+
+      const app = await prisma.restaurantApplication.findUnique({ where: { id: applicationId } });
+      if (!app) {
+        return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+      }
+      if (app.status === 'APPROVED' && app.restaurantId) {
+        return NextResponse.json({ error: `Application already approved as ${app.assignedQsrNumber}` }, { status: 409 });
+      }
+
+      const normEmail = normalizeEmail(app.email);
+      const existingUser = await prisma.user.findUnique({ where: { email: normEmail } });
+      if (existingUser) {
+        return NextResponse.json({ error: 'An active user with this email already exists' }, { status: 409 });
+      }
+
+      const approvedData = await prisma.$transaction(async (tx) => {
+        const qsrNumber = await allocateNextQsrNumber(tx);
+        const baseSlug = app.restaurantName.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
+        const slug = `${baseSlug}-${qsrNumber.toLowerCase()}`;
+
+        const restaurant = await tx.restaurant.create({
+          data: {
+            qsrNumber,
+            name: app.restaurantName,
+            displayName: app.restaurantName,
+            ownerName: app.ownerName,
+            slug,
+            uniqueUsername: slug,
+            logoUrl: app.logoUrl,
+            bannerUrl: app.coverUrl,
+            phone: app.mobile,
+            email: normEmail,
+            address: app.address,
+            city: app.city,
+            state: app.state,
+            postalCode: app.pincode,
+            gstRegistered: Boolean(app.gstin),
+            gstin: app.gstin,
+            fssaiRegistered: Boolean(app.fssaiNumber),
+            fssaiNumber: app.fssaiNumber,
+            status: 'ACTIVE',
+            isActive: true,
+          },
+        });
+
+        await tx.restaurantSettings.create({
+          data: {
+            restaurantId: restaurant.id,
+            upiId: app.upiId || '',
+            upiMerchantName: app.restaurantName,
+            upiQrEnabled: Boolean(app.upiId),
+            invoicePrefix: `${qsrNumber}-`,
+            defaultReceiptFooter: `Thank you for visiting ${app.restaurantName}!`,
+          },
+        });
+
+        const branch = await tx.branch.create({
+          data: {
+            restaurantId: restaurant.id,
+            name: 'Main Outlet',
+            slug: 'main',
+            address: app.address,
+            phone: app.mobile,
+            isMain: true,
+          },
+        });
+
+        const ownerUser = await tx.user.create({
+          data: {
+            restaurantId: restaurant.id,
+            branchId: branch.id,
+            name: app.ownerName,
+            email: normEmail,
+            phone: app.mobile,
+            passwordHash: app.passwordHash, // Use the hashed password from registration
+            role: 'OWNER',
+            isActive: true,
+          },
+        });
+
+        // Create 5 default starter tables for the new tenant
+        for (let t = 1; t <= 5; t++) {
+          await tx.table.create({
+            data: {
+              restaurantId: restaurant.id,
+              branchId: branch.id,
+              tableNumber: String(t),
+              name: `Table ${t}`,
+              capacity: 4,
+              qrCodeToken: `${qsrNumber.toLowerCase()}_t${t}_${Date.now().toString(36)}`,
+            },
+          });
+        }
+
+        const updatedApp = await tx.restaurantApplication.update({
+          where: { id: app.id },
+          data: {
+            status: 'APPROVED',
+            assignedQsrNumber: qsrNumber,
+            restaurantId: restaurant.id,
+            reviewedBy: session.email,
+            reviewedAt: new Date(),
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            restaurantId: restaurant.id,
+            userId: session.userId,
+            userName: session.name,
+            action: 'APPLICATION_APPROVED',
+            entity: 'RestaurantApplication',
+            entityId: app.id,
+            notes: `Approved ${app.applicationRef} -> Assigned ${qsrNumber} (${app.restaurantName})`,
+          },
+        });
+
+        return { restaurant, ownerUser, application: updatedApp, qsrNumber };
+      });
+
+      return NextResponse.json({
+        success: true,
+        qsrNumber: approvedData.qsrNumber,
+        restaurant: approvedData.restaurant,
+        message: `Application approved and assigned ${approvedData.qsrNumber}`,
+      });
+    }
+
+    // 4C. REJECT OR REQUEST MORE INFO ON APPLICATION
+    if (action === 'REJECT_APPLICATION' || action === 'REQUEST_INFO_APPLICATION') {
+      const { applicationId, reason, notes } = data;
+      const newStatus = action === 'REJECT_APPLICATION' ? 'REJECTED' : 'UNDER_REVIEW';
+      const updated = await prisma.restaurantApplication.update({
+        where: { id: applicationId },
         data: {
-          name,
-          slug,
-          uniqueUsername: slug,
-          cuisine: cuisine || 'Multi-Cuisine',
-          phone,
-          email: email.toLowerCase().trim(),
-          address: address || 'Main Commercial Road',
-          city: city || 'Jaipur',
-          state: state || 'Rajasthan',
-          postalCode: postalCode || '302001',
-          logoUrl: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=200',
+          status: newStatus,
+          rejectionReason: reason || null,
+          adminNotes: notes || null,
+          reviewedBy: session.email,
+          reviewedAt: new Date(),
         },
       });
 
-      await prisma.restaurantSettings.create({
+      await prisma.auditLog.create({
         data: {
-          restaurantId: restaurant.id,
-          upiId: '9996213962@hdfc',
-          upiMerchantName: name,
+          userId: session.userId,
+          userName: session.name,
+          action: action === 'REJECT_APPLICATION' ? 'APPLICATION_REJECTED' : 'APPLICATION_UNDER_REVIEW',
+          entity: 'RestaurantApplication',
+          entityId: applicationId,
+          notes: `${updated.applicationRef} marked ${newStatus}: ${reason || notes || ''}`,
         },
       });
 
-      const branch = await prisma.branch.create({
-        data: {
-          restaurantId: restaurant.id,
-          name: 'Main Dining & Kitchen',
-          slug: 'main',
-          address: address || 'Main Commercial Road',
-          phone,
-          isMain: true,
-        },
+      return NextResponse.json({ success: true, application: updated });
+    }
+
+    // 4D. UPDATE RESTAURANT STATUS (ACTIVE / SUSPENDED / INACTIVE)
+    if (action === 'UPDATE_RESTAURANT_STATUS') {
+      const { restaurantId, status } = data;
+      const isActive = status === 'ACTIVE' || status === 'APPROVED';
+      const restaurant = await prisma.restaurant.update({
+        where: { id: restaurantId },
+        data: { status, isActive },
       });
 
-      await prisma.user.create({
+      await prisma.auditLog.create({
         data: {
-          restaurantId: restaurant.id,
-          branchId: branch.id,
-          name: ownerName || `${name} Owner`,
-          email: email.toLowerCase().trim(),
-          passwordHash: hashPassword(ownerPassword || 'owner123'),
-          role: 'OWNER',
-          phone,
-          pinCode: '1111',
-          isActive: true,
+          restaurantId,
+          userId: session.userId,
+          userName: session.name,
+          action: 'RESTAURANT_STATUS_CHANGED',
+          entity: 'Restaurant',
+          entityId: restaurantId,
+          notes: `${restaurant.qsrNumber || restaurant.name} status updated to ${status}`,
         },
       });
 

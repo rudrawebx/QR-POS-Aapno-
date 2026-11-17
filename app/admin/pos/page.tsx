@@ -38,6 +38,7 @@ import {
 const MAX_HELD_ORDERS = 50;
 
 export default function AdminPosPage() {
+  const [restaurant, setRestaurant] = useState<any>(null);
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -90,38 +91,12 @@ export default function AdminPosPage() {
   const [showCashModal, setShowCashModal] = useState(false);
   const [cashTendered, setCashTendered] = useState<string>('');
 
-  // Load Held Orders from API & LocalStorage on mount
-  useEffect(() => {
-    async function loadHeldOrders() {
-      try {
-        const saved = localStorage.getItem('AAPNO_POS_HELD_ORDERS_V1');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setHeldOrders(parsed);
-          }
-        }
-        // Fetch latest synced held orders from database
-        const res = await fetch('/api/pos/hold?restaurantId=rest_aapno_khano');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success && Array.isArray(data.heldOrders)) {
-            setHeldOrders(data.heldOrders);
-            localStorage.setItem('AAPNO_POS_HELD_ORDERS_V1', JSON.stringify(data.heldOrders));
-          }
-        }
-      } catch (err) {
-        console.error('Error loading held orders:', err);
-      }
-    }
-    loadHeldOrders();
-  }, []);
-
   // Helper to persist held orders to localStorage & Database
   const updateHeldOrders = (newList: HeldOrder[]) => {
     setHeldOrders(newList);
     try {
-      localStorage.setItem('AAPNO_POS_HELD_ORDERS_V1', JSON.stringify(newList));
+      const storageKey = restaurant?.id ? `POS_HELD_ORDERS_${restaurant.id}` : 'AAPNO_POS_HELD_ORDERS_V1';
+      localStorage.setItem(storageKey, JSON.stringify(newList));
     } catch (err) {
       console.error('Error saving held orders to localStorage:', err);
     }
@@ -133,7 +108,21 @@ export default function AdminPosPage() {
         const settingsRes = await fetch('/api/settings');
         const settingsData = await settingsRes.json();
         const currentRest = settingsData.restaurant;
-        const restId = currentRest?.id || currentRest?.slug || 'aapno-khano';
+        if (currentRest) setRestaurant(currentRest);
+        const restId = currentRest?.id || currentRest?.slug || 'rest_aapno_khano';
+
+        // Load tenant-specific held orders
+        try {
+          const holdRes = await fetch(`/api/pos/hold?restaurantId=${restId}`);
+          if (holdRes.ok) {
+            const holdData = await holdRes.json();
+            if (holdData.success && Array.isArray(holdData.heldOrders)) {
+              setHeldOrders(holdData.heldOrders);
+            }
+          }
+        } catch (err) {
+          console.error('Error loading held orders:', err);
+        }
 
         const [menuRes, ordersRes] = await Promise.all([
           fetch(`/api/menu/${restId}`),
@@ -157,6 +146,7 @@ export default function AdminPosPage() {
           setLastBillData({
             restaurant: {
               name: currentRest?.name || 'Restaurant POS',
+              logoUrl: currentRest?.logoUrl || '',
               address: currentRest?.address || '',
               city: currentRest?.city || '',
               state: currentRest?.state || '',
@@ -436,7 +426,7 @@ export default function AdminPosPage() {
     setResumePromptHeld(null);
 
     // Remove from Database in background
-    fetch(`/api/pos/hold?id=${held.id}&restaurantId=rest_aapno_khano`, {
+    fetch(`/api/pos/hold?id=${held.id}&restaurantId=${restaurant?.id || 'rest_aapno_khano'}`, {
       method: 'DELETE',
     }).catch((e) => console.warn('Failed to remove resumed order from database:', e));
   };
@@ -451,7 +441,7 @@ export default function AdminPosPage() {
     updateHeldOrders(updated);
 
     // Delete from Database in background
-    fetch(`/api/pos/hold?id=${id}&restaurantId=rest_aapno_khano`, {
+    fetch(`/api/pos/hold?id=${id}&restaurantId=${restaurant?.id || 'rest_aapno_khano'}`, {
       method: 'DELETE',
     }).catch((e) => console.warn('Failed to delete held order from database:', e));
   };
@@ -462,7 +452,7 @@ export default function AdminPosPage() {
       fetch('/api/pos/hold', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'CLEAR_ALL', restaurantId: 'rest_aapno_khano' }),
+        body: JSON.stringify({ action: 'CLEAR_ALL', restaurantId: restaurant?.id || 'rest_aapno_khano' }),
       }).catch((e) => console.warn('Failed to clear held orders in database:', e));
     }
   };
@@ -481,7 +471,7 @@ export default function AdminPosPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          restaurantId: 'rest_aapno_khano',
+          restaurantId: restaurant?.id || 'rest_aapno_khano',
           source: 'POS_TERMINAL',
           clientRequestId,
           customerName: guestDisplayName,
@@ -709,7 +699,7 @@ export default function AdminPosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           clientRequestId,
-          restaurantId: "rest_aapno_khano",
+          restaurantId: restaurant?.id || "rest_aapno_khano",
           source: "POS_TERMINAL",
           customerName: guestDisplayName,
           customerPhone: guestPhone,

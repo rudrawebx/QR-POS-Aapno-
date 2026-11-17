@@ -1,14 +1,35 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+function decodeSessionCookieEdge(rawCookie: string): any | null {
+  try {
+    if (rawCookie.includes('.') && !rawCookie.trim().startsWith('{')) {
+      const [data] = rawCookie.split('.');
+      if (!data) return null;
+      // Convert base64url to base64
+      const base64 = data.replace(/-/g, '+').replace(/_/g, '/');
+      const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+      const jsonStr = decodeURIComponent(
+        atob(padded)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join('')
+      );
+      return JSON.parse(jsonStr);
+    }
+    return JSON.parse(rawCookie);
+  } catch {
+    return null;
+  }
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Always allow public static assets and public customer paths
+  // 1. Always allow public static assets and public customer/auth paths
   if (
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/api/auth/login') ||
-    pathname.startsWith('/api/auth/session') ||
+    pathname.startsWith('/api/auth/') ||
     pathname.startsWith('/api/menu') ||
     pathname.startsWith('/api/payments') ||
     pathname.startsWith('/api/restaurants') ||
@@ -17,6 +38,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/images') ||
     pathname === '/favicon.ico' ||
     pathname === '/login' ||
+    pathname === '/register' ||
+    pathname === '/application-status' ||
     pathname === '/'
   ) {
     return NextResponse.next();
@@ -24,15 +47,7 @@ export function middleware(request: NextRequest) {
 
   // 2. Read session cookie
   const sessionCookie = request.cookies.get('auth_session')?.value;
-  let session: any = null;
-
-  if (sessionCookie) {
-    try {
-      session = JSON.parse(sessionCookie);
-    } catch {
-      session = null;
-    }
-  }
+  const session = sessionCookie ? decodeSessionCookieEdge(sessionCookie) : null;
 
   // 3. Super Admin Route Protection
   if (pathname.startsWith('/superadmin')) {

@@ -287,9 +287,9 @@ export default function PrintDualThermal({
               <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
                 <div className="w-14 h-14 mx-auto mb-1 flex items-center justify-center">
                   <img
-                    src="/images/aapno-khano-logo.png"
-                    alt="Aapno Khaano"
-                    className="w-full h-full object-contain"
+                    src={billData.restaurant.logoUrl || "/images/aapno-khano-logo.png"}
+                    alt={billData.restaurant.name || "Restaurant Logo"}
+                    className="w-full h-full object-contain rounded-lg"
                   />
                 </div>
                 <p className="text-sm font-black uppercase tracking-wider">

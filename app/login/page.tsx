@@ -18,6 +18,10 @@ import {
   X,
   CheckCircle2,
   AlertCircle,
+  Eye,
+  EyeOff,
+  Building2,
+  PhoneCall,
 } from 'lucide-react';
 
 function LoginForm() {
@@ -27,6 +31,8 @@ function LoginForm() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [pinCode, setPinCode] = useState('');
   const [isPinMode, setIsPinMode] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -65,7 +71,7 @@ function LoginForm() {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isPinMode ? { pinCode } : { email, password }),
+        body: JSON.stringify(isPinMode ? { pinCode } : { identifier: email, email, password, rememberMe }),
       });
 
       const data = await res.json();
@@ -180,11 +186,11 @@ function LoginForm() {
         {!isPinMode ? (
           <>
             <div>
-              <label className="block font-bold text-[#331E17] mb-1">Email Address</label>
+              <label className="block font-bold text-[#331E17] mb-1">Email Address / Registered Mobile</label>
               <input
-                type="email"
+                type="text"
                 required
-                placeholder="owner@aapnokhano.com"
+                placeholder="owner@restaurant.com or 9876543210"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
@@ -202,14 +208,36 @@ function LoginForm() {
                   Forgot Password?
                 </button>
               </div>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full pl-3.5 pr-10 py-2.5 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#331E17] cursor-pointer"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-0.5">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="w-3.5 h-3.5 rounded accent-[#AA1B2A]"
+                />
+                <span className="text-[11px] font-bold text-[#745E55]">Remember me for 30 days</span>
+              </label>
             </div>
           </>
         ) : (
@@ -236,6 +264,32 @@ function LoginForm() {
           <ArrowRight className="w-4 h-4" />
         </button>
       </form>
+
+      {/* New Restaurant Onboarding & Support Links */}
+      <div className="pt-4 border-t border-[#E8E1D6] space-y-2.5 text-center text-xs">
+        <Link
+          href="/register"
+          className="w-full py-2.5 px-4 bg-[#FFF0E8] hover:bg-[#ffe5d6] text-[#AA1B2A] font-black rounded-xl border border-[#E09D3D]/50 flex items-center justify-center gap-2 transition-colors"
+        >
+          <Building2 className="w-4 h-4" />
+          <span>New Restaurant? Register Your Restaurant</span>
+        </Link>
+
+        <div className="flex items-center justify-between text-[11px] font-bold text-[#745E55] pt-1">
+          <Link href="/application-status" className="hover:text-[#AA1B2A] hover:underline">
+            Check Application Status
+          </Link>
+          <a
+            href="https://wa.me/917082040809?text=Hello%20Support%2C%20I%20need%20help%20with%20Aapno%20Khano%20POS."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 hover:text-[#AA1B2A] hover:underline"
+          >
+            <PhoneCall className="w-3 h-3" />
+            <span>Contact Support</span>
+          </a>
+        </div>
+      </div>
 
       {/* Forgot Password Modal */}
       {isForgotModalOpen && (

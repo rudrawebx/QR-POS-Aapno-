@@ -34,7 +34,10 @@ model SubscriptionPlan {
 
 model Restaurant {
   id                  String   @id @default(cuid())
+  qsrNumber           String?  @unique // Atomic QSR01, QSR02, QSR03...
   name                String
+  displayName         String?
+  ownerName           String?
   slug                String   @unique
   uniqueUsername      String   @unique
   logoUrl             String?
@@ -51,9 +54,16 @@ model Restaurant {
   currency            String   @default("INR")
   currencySymbol      String   @default("₹")
   timezone            String   @default("Asia/Kolkata")
+  gstRegistered       Boolean  @default(false)
   gstin               String?
+  gstBusinessName     String?
+  fssaiRegistered     Boolean  @default(false)
   fssaiNumber         String?
+  fssaiBusinessName   String?
   commissionRate      Float    @default(0.0)
+  status              String   @default("ACTIVE") // PENDING_APPROVAL, UNDER_REVIEW, APPROVED, REJECTED, SUSPENDED, ACTIVE, INACTIVE
+  rejectionReason     String?
+  lastLoginAt         DateTime?
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -189,6 +199,7 @@ model User {
   forcePasswordChange Boolean  @default(false)
   resetPasswordToken  String?
   resetPasswordExpiry DateTime?
+  lastLoginAt         DateTime?
   isActive            Boolean  @default(true)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -199,6 +210,7 @@ model User {
   ordersServed        Order[]     @relation("OrderServedBy")
   expenses            Expense[]
   auditLogs           AuditLog[]
+  sessions            Session[]
 }
 
 model RestaurantSubscription {
@@ -893,5 +905,73 @@ model HeldOrder {
   restaurant           Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
 
   @@index([restaurantId])
+}
+
+model RestaurantSequence {
+  id         String   @id @default("QSR_SEQ")
+  lastNumber Int      @default(2)
+  updatedAt  DateTime @updatedAt
+}
+
+model RestaurantApplication {
+  id                String    @id @default(cuid())
+  applicationRef    String    @unique
+  ownerName         String
+  restaurantName    String
+  email             String
+  mobile            String
+  passwordHash      String
+  address           String
+  city              String
+  state             String
+  pincode           String
+  logoUrl           String?
+  coverUrl          String?
+  gstin             String?
+  fssaiNumber       String?
+  upiId             String?
+  status            String    @default("PENDING_APPROVAL") // PENDING_APPROVAL, UNDER_REVIEW, APPROVED, REJECTED, SUSPENDED, ACTIVE, INACTIVE
+  rejectionReason   String?
+  adminNotes        String?
+  assignedQsrNumber String?
+  restaurantId      String?
+  reviewedBy        String?
+  reviewedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([email])
+  @@index([mobile])
+  @@index([status])
+}
+
+model OtpVerification {
+  id         String   @id @default(cuid())
+  identifier String
+  purpose    String   // REGISTRATION, PASSWORD_RESET, CONTACT_CHANGE
+  otpHash    String
+  attempts   Int      @default(0)
+  verified   Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, purpose])
+}
+
+model Session {
+  id             String   @id @default(cuid())
+  tokenHash      String   @unique
+  userId         String
+  restaurantId   String?
+  deviceInfo     String?
+  ipAddress      String?
+  lastActivityAt DateTime @default(now())
+  expiresAt      DateTime
+  isRevoked      Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 

@@ -246,7 +246,6 @@ export async function POST(request: Request) {
     }
 
     const {
-      restaurantId = session?.restaurantId || "rest_aapno_khano",
       customerName = "Direct Guest",
       customerPhone,
       carNumber,
@@ -259,6 +258,44 @@ export async function POST(request: Request) {
       discountAmount = 0,
       clientRequestId,
     } = data;
+
+    // 🔒 STRICT TENANT RESOLUTION: Never let a logged-in tenant spoof another restaurantId
+    const restaurantId = (session && session.role !== "SUPER_ADMIN" && session.restaurantId)
+      ? session.restaurantId
+      : (data.restaurantId || session?.restaurantId || "rest_aapno_khano");
+
+    const targetRest = prisma
+      ? await prisma.restaurant.findUnique({
+          where: { id: restaurantId },
+          include: { settings: true },
+        }).catch(() => null)
+      : null;
+
+    const dynamicRestaurantReceipt = targetRest
+      ? {
+          name: targetRest.name,
+          logoUrl: targetRest.logoUrl || (targetRest.slug === "mr-bagri" ? "/images/mr-bagri-logo.jpg" : "/images/aapno-khano-logo.png"),
+          address: targetRest.address,
+          city: targetRest.city,
+          state: targetRest.state,
+          postalCode: targetRest.postalCode,
+          phone: targetRest.phone,
+          gstin: targetRest.gstin || "",
+          fssaiNumber: targetRest.fssaiNumber || "",
+          currencySymbol: targetRest.currencySymbol || "₹",
+          defaultReceiptFooter: targetRest.settings?.defaultReceiptFooter || `Thank you for visiting ${targetRest.name}!`,
+        }
+      : {
+          name: "आपणो खाणो (Aapno Khaano)",
+          logoUrl: "/images/aapno-khano-logo.png",
+          address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
+          city: "Fatehabad",
+          phone: "+91 70820 40809, +91 70820 40892",
+          gstin: "06ACOFA4890L1ZT",
+          fssaiNumber: "20826004003060",
+          currencySymbol: "₹",
+          defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
+        };
 
     // 🔒 IDEMPOTENCY CHECK — If client sent same requestId within 15s, return identical response
     if (clientRequestId) {
@@ -454,16 +491,7 @@ export async function POST(request: Request) {
             const existingKot = prevOrder.kots?.[0];
 
             const printReceiptData = {
-              restaurant: {
-                name: "आपणो खाणो (Aapno Khaano)",
-                address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
-                city: "Fatehabad",
-                phone: "+91 70820 40809, +91 70820 40892",
-                gstin: "06ACOFA4890L1ZT",
-                fssaiNumber: "20826004003060",
-                currencySymbol: "₹",
-                defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
-              },
+              restaurant: dynamicRestaurantReceipt,
               order: {
                 humanOrderId: prevOrder.humanOrderId,
                 createdAt: prevOrder.createdAt,
@@ -797,20 +825,11 @@ export async function POST(request: Request) {
     const orderWithSource = { ...orderRecord, source: effectiveOrderSource, isStaffCashConfirmed: Boolean(isStaffCashConfirmed) };
     recordLiveOrder(orderWithSource);
     recordLiveInvoice(invoiceRecord);
-    broadcastEvent("pos_rest_aapno_khano", { type: "NEW_CONFIRMED_ORDER", order: orderWithSource, invoice: invoiceRecord, source: effectiveOrderSource });
-    broadcastEvent("kds_rest_aapno_khano", { type: "NEW_KOT", kot: kotRecord });
+    broadcastEvent(`pos_${restaurantId}`, { type: "NEW_CONFIRMED_ORDER", order: orderWithSource, invoice: invoiceRecord, source: effectiveOrderSource });
+    broadcastEvent(`kds_${restaurantId}`, { type: "NEW_KOT", kot: kotRecord });
 
     const printReceiptData = {
-      restaurant: {
-        name: "आपणो खाणो (Aapno Khaano)",
-        address: "Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053",
-        city: "Fatehabad",
-        phone: "+91 70820 40809, +91 70820 40892",
-        gstin: "06ACOFA4890L1ZT",
-        fssaiNumber: "20826004003060",
-        currencySymbol: "₹",
-        defaultReceiptFooter: "Padharo Mhare Desh! Thank you for visiting Aapno Khaano.",
-      },
+      restaurant: dynamicRestaurantReceipt,
       order: {
         humanOrderId,
         createdAt: orderRecord.createdAt,

@@ -165,11 +165,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/session', { method: 'DELETE' });
+      await fetch('/api/auth/logout', { method: 'POST' });
     } catch (e) {
       console.error(e);
     }
-    router.push('/login');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('auth_session');
+    }
+    window.location.href = '/login';
   };
 
   const userRole = sessionUser?.role || 'OWNER';
@@ -210,8 +213,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <h2 className="font-black text-sm text-white tracking-wide truncate">
               {sessionUser?.restaurantName || (sessionUser?.restaurantSlug === 'mr-bagri' ? 'Mr. Bagri' : 'आपणो खाणो')}
             </h2>
-            <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1">
-              <span>QSR &amp; Table Service Platform</span>
+            <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1.5 mt-0.5">
+              {sessionUser?.qsrNumber && (
+                <span className="px-1.5 py-0.2 rounded bg-[#E09D3D] text-[#331E17] font-mono font-black text-[9px]">
+                  {sessionUser.qsrNumber}
+                </span>
+              )}
+              <span className="truncate">QSR &amp; Table Service</span>
             </p>
           </div>
         </div>

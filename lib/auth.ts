@@ -3,6 +3,21 @@ import crypto from 'crypto';
 import prisma from './prisma';
 import { UserRole } from './types';
 
+const SESSION_SECRET = process.env.SESSION_SECRET || process.env.NEXTAUTH_SECRET || 'aapno-khano-qsr-saas-hmac-secret-2026';
+
+// Normalize email & mobile for consistent duplicate prevention
+export function normalizeEmail(email: string): string {
+  return (email || '').trim().toLowerCase();
+}
+
+export function normalizeMobile(mobile: string): string {
+  const digits = (mobile || '').replace(/\D/g, '');
+  if (digits.length > 10 && digits.startsWith('91')) {
+    return digits.slice(-10);
+  }
+  return digits;
+}
+
 // Cryptographically secure password/PIN hashing using scrypt with random salt
 export function hashPassword(password: string): string {
   if (!password) return '';
@@ -52,7 +67,61 @@ export function verifyPassword(password: string, storedHash: string): boolean {
   }
 }
 
-// In-memory rate limiter for login attempts (15 minute lockout after 5 failed attempts)
+// Password strength validation
+export function validatePasswordStrength(password: string): { valid: boolean; message?: string } {
+  if (!password || password.length < 8) {
+    return { valid: false, message: 'Password must be at least 8 characters long.' };
+  }
+  if (!/[A-Z]/.test(password) && !/[a-z]/.test(password)) {
+    return { valid: false, message: 'Password must include letters.' };
+  }
+  if (!/[0-9]/.test(password)) {
+    return { valid: false, message: 'Password must include at least one number.' };
+  }
+  return { valid: true };
+}
+
+// OTP Generation & Verification
+export function generateOtpCode(): string {
+  return crypto.randomInt(100000, 999999).toString();
+}
+
+export function hashToken(token: string): string {
+  return crypto.createHmac('sha256', SESSION_SECRET).update(token).digest('hex');
+}
+
+// Sign & Verify Session Cookie Payload
+export function signSessionToken(payload: AuthSession): string {
+  const data = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+  return `${data}.${sig}`;
+}
+
+export function verifySignedSessionToken(token: string): AuthSession | null {
+  try {
+    // Support signed format: base64url.sig
+    if (token.includes('.') && !token.trim().startsWith('{')) {
+      const [data, sig] = token.split('.');
+      if (!data || !sig) return null;
+      const expectedSig = crypto.createHmac('sha256', SESSION_SECRET).update(data).digest('base64url');
+      if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+        return null;
+      }
+      const parsed = JSON.parse(Buffer.from(data, 'base64url').toString('utf-8')) as AuthSession;
+      if (!parsed || !parsed.userId) return null;
+      return parsed;
+    }
+
+    // Legacy JSON cookie fallback for seamless non-breaking transition
+    const parsed = JSON.parse(token) as AuthSession;
+    if (!parsed || !parsed.userId) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+// In-memory rate limiter for login & OTP attempts
 interface RateLimitRecord {
   attempts: number;
   lockoutUntil: number | null;
@@ -74,7 +143,6 @@ export function checkLoginRateLimit(identifier: string): { allowed: boolean; rem
     return { allowed: false, remainingMinutes };
   }
 
-  // If lockout expired, reset
   if (record.lockoutUntil && record.lockoutUntil <= now) {
     loginRateLimits.delete(identifier);
     return { allowed: true };
@@ -89,7 +157,6 @@ export function recordFailedLogin(identifier: string) {
   record.attempts += 1;
   record.lastAttempt = now;
 
-  // Lock out for 15 minutes after 5 failed attempts
   if (record.attempts >= 5) {
     record.lockoutUntil = now + 15 * 60 * 1000;
   }
@@ -110,6 +177,9 @@ export interface AuthSession {
   branchId: string | null;
   restaurantSlug?: string;
   restaurantName?: string;
+  qsrNumber?: string | null;
+  logoUrl?: string;
+  sessionId?: string;
 }
 
 export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
@@ -169,8 +239,20 @@ export async function getCurrentSession(): Promise<AuthSession | null> {
 
     if (!sessionCookie) return null;
 
-    const parsed = JSON.parse(sessionCookie) as AuthSession;
+    const parsed = verifySignedSessionToken(sessionCookie);
     if (!parsed || !parsed.userId) return null;
+
+    // If a server-side sessionId is present, verify it is not revoked or expired
+    if (parsed.sessionId && prisma) {
+      const dbSession = await prisma.session.findUnique({
+        where: { id: parsed.sessionId },
+        select: { isRevoked: true, expiresAt: true },
+      }).catch(() => null);
+
+      if (dbSession && (dbSession.isRevoked || dbSession.expiresAt < new Date())) {
+        return null;
+      }
+    }
 
     return parsed;
   } catch {
@@ -183,3 +265,29 @@ export function hasPermission(role: UserRole, resource: string): boolean {
   return permissions.includes('*') || permissions.includes(resource);
 }
 
+// Atomic QSR Number Generator (must be called inside a Prisma transaction)
+export async function allocateNextQsrNumber(tx: any): Promise<string> {
+  // Ensure sequence row exists
+  const existingSeq = await tx.restaurantSequence.findUnique({
+    where: { id: 'QSR_SEQ' },
+  });
+
+  if (!existingSeq) {
+    // Count existing QSR restaurants to initialize safely
+    const count = await tx.restaurant.count({
+      where: { qsrNumber: { not: null } },
+    });
+    const nextNum = Math.max(count, 2) + 1;
+    await tx.restaurantSequence.create({
+      data: { id: 'QSR_SEQ', lastNumber: nextNum },
+    });
+    return `QSR${String(nextNum).padStart(2, '0')}`;
+  }
+
+  const updated = await tx.restaurantSequence.update({
+    where: { id: 'QSR_SEQ' },
+    data: { lastNumber: { increment: 1 } },
+  });
+
+  return `QSR${String(updated.lastNumber).padStart(2, '0')}`;
+}

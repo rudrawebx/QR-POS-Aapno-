@@ -32,12 +32,15 @@ import {
 } from 'lucide-react';
 
 export default function SuperAdminPage() {
-  const [activeTab, setActiveTab] = useState<'RESTAURANTS' | 'USERS' | 'PLANS' | 'AUDIT_LOGS' | 'POS_CONFIG'>('RESTAURANTS');
+  const [activeTab, setActiveTab] = useState<'RESTAURANTS' | 'APPLICATIONS' | 'USERS' | 'PLANS' | 'AUDIT_LOGS' | 'POS_CONFIG'>('RESTAURANTS');
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
+  const [selectedRestaurant, setSelectedRestaurant] = useState<any>(null);
+  const [selectedApplication, setSelectedApplication] = useState<any>(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   // New Restaurant Onboarding state
   const [newName, setNewName] = useState('');
@@ -71,9 +74,6 @@ export default function SuperAdminPage() {
           }
           if (sData.restaurants && sData.restaurants.length > 0 && !userRestaurantId) {
             setUserRestaurantId(sData.restaurants[0].id);
-          }
-          if (sData.categories && sData.categories.length > 0 && !dishFormData.categoryId) {
-            setDishFormData((prev) => ({ ...prev, categoryId: sData.categories[0].id }));
           }
           return;
         }
@@ -222,10 +222,71 @@ export default function SuperAdminPage() {
     }
   };
 
+  const handleApproveApplication = async (applicationId: string) => {
+    if (!confirm('Approve this restaurant application and generate a permanent QSR Number?')) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/superadmin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'APPROVE_APPLICATION', applicationId }),
+      });
+      const result = await res.json();
+      if (res.ok && result.success) {
+        alert(`Approved! Assigned QSR Number: ${result.qsrNumber}`);
+        setSelectedApplication(null);
+        fetchSuperadminData();
+      } else {
+        alert(result.error || 'Failed to approve application');
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    const reason = prompt('Enter rejection reason (shown to restaurant owner):');
+    if (reason === null) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/superadmin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'REJECT_APPLICATION', applicationId, reason }),
+      });
+      if (res.ok) {
+        setSelectedApplication(null);
+        fetchSuperadminData();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRequestInfoApplication = async (applicationId: string) => {
+    const notes = prompt('Enter notes / requested info (moves to UNDER_REVIEW):');
+    if (notes === null) return;
+    setActionLoading(true);
+    try {
+      const res = await fetch('/api/superadmin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'REQUEST_INFO_APPLICATION', applicationId, notes }),
+      });
+      if (res.ok) {
+        setSelectedApplication(null);
+        fetchSuperadminData();
+      }
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const filteredRestaurants = (data?.restaurants || []).filter((r: any) => {
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     return (
+      (r.qsrNumber || '').toLowerCase().includes(q) ||
       r.name.toLowerCase().includes(q) ||
       r.uniqueUsername.toLowerCase().includes(q) ||
       r.city.toLowerCase().includes(q)
@@ -313,17 +374,69 @@ export default function SuperAdminPage() {
           </div>
         </div>
 
+        {/* Onboarding & Lifecycle Mini Stats Bar */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 text-center">
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Total</p>
+            <p className="text-base font-black text-[#331E17]">{data?.summary?.totalRestaurants || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">New Requests</p>
+            <p className="text-base font-black text-[#AA1B2A]">{data?.summary?.newRequests || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Pending</p>
+            <p className="text-base font-black text-amber-700">{data?.summary?.pendingApprovals || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Under Review</p>
+            <p className="text-base font-black text-blue-700">{data?.summary?.underReview || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Approved</p>
+            <p className="text-base font-black text-emerald-700">{data?.summary?.approvedRestaurants || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Active</p>
+            <p className="text-base font-black text-emerald-700">{data?.summary?.activeRestaurants || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Rejected</p>
+            <p className="text-base font-black text-red-700">{data?.summary?.rejectedApplications || 0}</p>
+          </div>
+          <div className="bg-white p-2.5 rounded-2xl border border-[#E8E1D6]">
+            <p className="text-[9px] font-black uppercase text-[#745E55]">Suspended</p>
+            <p className="text-base font-black text-slate-600">{data?.summary?.suspendedRestaurants || 0}</p>
+          </div>
+        </div>
+
         {/* Tab Controls */}
         <div className="flex items-center gap-2 border-b border-[#E8E1D6] pb-2 overflow-x-auto">
           <button
             onClick={() => setActiveTab('RESTAURANTS')}
-            className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
               activeTab === 'RESTAURANTS'
                 ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-md'
                 : 'bg-white text-[#745E55] hover:text-[#331E17] border border-[#E8E1D6]'
             }`}
           >
             🏢 Restaurants &amp; Tenants ({data?.restaurants?.length || 0})
+          </button>
+
+          <button
+            onClick={() => setActiveTab('APPLICATIONS')}
+            className={`px-4 py-2 rounded-2xl text-xs font-black transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              activeTab === 'APPLICATIONS'
+                ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-md'
+                : 'bg-white text-[#745E55] hover:text-[#331E17] border border-[#E8E1D6]'
+            }`}
+          >
+            <span>📋 Registration Requests ({data?.applications?.length || 0})</span>
+            {(data?.summary?.newRequests || 0) > 0 && (
+              <span className="px-1.5 py-0.2 bg-amber-400 text-[#331E17] rounded-full text-[10px] font-black">
+                {data.summary.newRequests}
+              </span>
+            )}
           </button>
 
           <button
@@ -486,8 +599,8 @@ export default function SuperAdminPage() {
                     <tr key={rest.id} className="hover:bg-[#FEFBF5] transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
-                          <span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#E09D3D] text-[#331E17] shadow-xs">
-                            {rest.slug === 'aapno-khano' ? 'QSR01' : (rest.slug === 'mr-bagri' ? 'QSR02' : 'TENANT')}
+                          <span className="px-2 py-0.5 rounded font-black text-[10px] bg-[#E09D3D] text-[#331E17] shadow-xs font-mono">
+                            {rest.qsrNumber || (rest.slug === 'aapno-khano' ? 'QSR01' : (rest.slug === 'mr-bagri' ? 'QSR02' : 'TENANT'))}
                           </span>
                           <div>
                             <p className="font-black text-[#331E17]">{rest.name}</p>
@@ -519,14 +632,20 @@ export default function SuperAdminPage() {
                           {rest.isActive ? 'Active Tenant' : 'Suspended'}
                         </button>
                       </td>
-                      <td className="py-3 px-4 text-right space-x-2">
+                      <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        <button
+                          onClick={() => setSelectedRestaurant(rest)}
+                          className="px-2 py-1 bg-[#F7F2EA] hover:bg-[#e8dfd2] text-[#331E17] rounded-lg text-[11px] font-bold inline-flex items-center gap-1 border border-[#E8E1D6] cursor-pointer"
+                        >
+                          <span>Profile</span>
+                        </button>
                         <Link
                           href={`/r/${rest.slug}`}
                           target="_blank"
                           className="px-2 py-1 bg-white hover:bg-[#F7F2EA] text-[#331E17] rounded-lg text-[11px] font-bold inline-flex items-center gap-1 border border-[#E8E1D6]"
                         >
                           <ExternalLink className="w-3 h-3" />
-                          <span>View Menu</span>
+                          <span>Menu</span>
                         </Link>
                         <button
                           onClick={() => handleSwitchRestaurant(rest.id)}
@@ -537,6 +656,105 @@ export default function SuperAdminPage() {
                       </td>
                     </tr>
                   ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* 2B. REGISTRATION APPLICATIONS TAB */}
+        {activeTab === 'APPLICATIONS' && (
+          <div className="bg-white rounded-3xl border border-[#E8E1D6] shadow-xs overflow-hidden">
+            <div className="p-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-black text-[#331E17]">Restaurant Registration Requests</h3>
+                <p className="text-[11px] text-[#745E55]">Review new restaurant applications, verify details, and assign atomic QSR Numbers on approval.</p>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs text-[#331E17]">
+                <thead className="bg-[#F7F2EA] border-b border-[#E8E1D6] text-[#745E55] font-black uppercase tracking-wider text-[10px]">
+                  <tr>
+                    <th className="py-3 px-4">Application ID</th>
+                    <th className="py-3 px-4">Restaurant Name</th>
+                    <th className="py-3 px-4">Owner</th>
+                    <th className="py-3 px-4">Contact</th>
+                    <th className="py-3 px-4">City</th>
+                    <th className="py-3 px-4">Date</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">QSR No.</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E8E1D6]/60">
+                  {(!data?.applications || data.applications.length === 0) ? (
+                    <tr>
+                      <td colSpan={9} className="py-8 text-center text-[#745E55]">
+                        No restaurant registration requests yet.
+                      </td>
+                    </tr>
+                  ) : (
+                    data.applications.map((app: any) => (
+                      <tr key={app.id} className="hover:bg-[#FEFBF5] transition-colors">
+                        <td className="py-3 px-4 font-mono font-black text-[#AA1B2A]">{app.applicationRef}</td>
+                        <td className="py-3 px-4 font-black">{app.restaurantName}</td>
+                        <td className="py-3 px-4 font-bold">{app.ownerName}</td>
+                        <td className="py-3 px-4 text-[11px]">
+                          <p className="font-mono">{app.email}</p>
+                          <p className="text-[#745E55] font-mono">{app.mobile}</p>
+                        </td>
+                        <td className="py-3 px-4 text-[#745E55]">{app.city}</td>
+                        <td className="py-3 px-4 text-[11px] text-[#745E55]">
+                          {new Date(app.createdAt).toLocaleDateString('en-IN')}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-black ${
+                              app.status === 'APPROVED'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : app.status === 'REJECTED'
+                                ? 'bg-red-100 text-red-800'
+                                : app.status === 'UNDER_REVIEW'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-amber-100 text-amber-800'
+                            }`}
+                          >
+                            {app.status.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 font-mono font-black text-[#331E17]">
+                          {app.assignedQsrNumber || '—'}
+                        </td>
+                        <td className="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                          <button
+                            onClick={() => setSelectedApplication(app)}
+                            className="px-2 py-1 bg-[#F7F2EA] hover:bg-[#e7ded1] rounded-lg text-[11px] font-bold cursor-pointer"
+                          >
+                            View
+                          </button>
+                          {(app.status === 'PENDING_APPROVAL' || app.status === 'UNDER_REVIEW') && (
+                            <>
+                              <button
+                                onClick={() => handleApproveApplication(app.id)}
+                                disabled={actionLoading}
+                                className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-black cursor-pointer"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() => handleRejectApplication(app.id)}
+                                disabled={actionLoading}
+                                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[11px] font-black cursor-pointer"
+                              >
+                                Reject
+                              </button>
+                            </>
+                          )}
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -829,6 +1047,112 @@ export default function SuperAdminPage() {
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* RESTAURANT PROFILE MODAL */}
+        {selectedRestaurant && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
+            <div className="bg-white border-2 border-[#E09D3D] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-auto">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-1 rounded-lg bg-[#E09D3D] text-[#331E17] font-mono font-black text-xs">
+                    {selectedRestaurant.qsrNumber}
+                  </span>
+                  <h3 className="font-black text-base text-[#331E17]">{selectedRestaurant.name}</h3>
+                </div>
+                <button onClick={() => setSelectedRestaurant(null)} className="p-1 rounded-full text-slate-400 hover:bg-slate-100">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs bg-[#FEFBF5] p-4 rounded-2xl border border-[#E8E1D6]">
+                <div><p className="text-[10px] text-[#745E55]">Owner</p><b>{selectedRestaurant.ownerName}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Status</p><b>{selectedRestaurant.status}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Email</p><b className="font-mono">{selectedRestaurant.email}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Phone</p><b className="font-mono">{selectedRestaurant.phone}</b></div>
+                <div className="col-span-2"><p className="text-[10px] text-[#745E55]">Address</p><b>{selectedRestaurant.address}, {selectedRestaurant.city}, {selectedRestaurant.state} {selectedRestaurant.postalCode}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">GSTIN</p><b className="font-mono">{selectedRestaurant.gstin || 'Not Provided'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">FSSAI</p><b className="font-mono">{selectedRestaurant.fssaiNumber || 'Not Provided'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">UPI ID</p><b className="font-mono">{selectedRestaurant.upiId || 'Not Configured'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Subscription</p><b>{selectedRestaurant.currentPlan} ({selectedRestaurant.subscriptionStatus})</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Users / Outlets</p><b>{selectedRestaurant.usersCount} Staff • {selectedRestaurant.branchesCount} Outlet</b></div>
+                <div><p className="text-[10px] text-[#745E55]">POS Activity</p><b>{selectedRestaurant.ordersCount} Orders • ₹{selectedRestaurant.revenue?.toLocaleString() || 0}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Registered</p><b>{new Date(selectedRestaurant.createdAt).toLocaleDateString('en-IN')}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Last Login</p><b>{selectedRestaurant.lastLoginAt ? new Date(selectedRestaurant.lastLoginAt).toLocaleString('en-IN') : 'Never'}</b></div>
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    handleToggleStatus(selectedRestaurant.id, selectedRestaurant.isActive);
+                    setSelectedRestaurant(null);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-black text-white cursor-pointer ${
+                    selectedRestaurant.isActive ? 'bg-red-600 hover:bg-red-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
+                >
+                  {selectedRestaurant.isActive ? 'Suspend Restaurant' : 'Activate Restaurant'}
+                </button>
+                <button
+                  onClick={() => handleSwitchRestaurant(selectedRestaurant.id)}
+                  className="px-4 py-2 bg-[#AA1B2A] text-white rounded-xl text-xs font-black cursor-pointer"
+                >
+                  Open Restaurant POS →
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* APPLICATION DETAILS MODAL */}
+        {selectedApplication && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-xs p-4 overflow-y-auto">
+            <div className="bg-white border-2 border-[#E09D3D] rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 my-auto">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <span className="text-[10px] font-mono font-black text-[#AA1B2A]">{selectedApplication.applicationRef}</span>
+                  <h3 className="font-black text-base text-[#331E17]">{selectedApplication.restaurantName}</h3>
+                </div>
+                <button onClick={() => setSelectedApplication(null)} className="p-1 rounded-full text-slate-400 hover:bg-slate-100">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-3 text-xs bg-[#FEFBF5] p-4 rounded-2xl border border-[#E8E1D6]">
+                <div><p className="text-[10px] text-[#745E55]">Owner Full Name</p><b>{selectedApplication.ownerName}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Status</p><b>{selectedApplication.status}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Email</p><b className="font-mono">{selectedApplication.email}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Mobile</p><b className="font-mono">{selectedApplication.mobile}</b></div>
+                <div className="col-span-2"><p className="text-[10px] text-[#745E55]">Address</p><b>{selectedApplication.address}, {selectedApplication.city}, {selectedApplication.state} - {selectedApplication.pincode}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">GSTIN</p><b className="font-mono">{selectedApplication.gstin || 'Optional / Not entered'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">FSSAI</p><b className="font-mono">{selectedApplication.fssaiNumber || 'Optional / Not entered'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">UPI ID</p><b className="font-mono">{selectedApplication.upiId || 'Not entered'}</b></div>
+                <div><p className="text-[10px] text-[#745E55]">Assigned QSR</p><b className="font-mono text-[#AA1B2A]">{selectedApplication.assignedQsrNumber || 'Pending Approval'}</b></div>
+              </div>
+              {(selectedApplication.status === 'PENDING_APPROVAL' || selectedApplication.status === 'UNDER_REVIEW') && (
+                <div className="flex flex-wrap justify-end gap-2 pt-2">
+                  <button
+                    onClick={() => handleRequestInfoApplication(selectedApplication.id)}
+                    disabled={actionLoading}
+                    className="px-3 py-2 bg-blue-600 text-white rounded-xl text-xs font-black cursor-pointer"
+                  >
+                    Request More Info
+                  </button>
+                  <button
+                    onClick={() => handleRejectApplication(selectedApplication.id)}
+                    disabled={actionLoading}
+                    className="px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-black cursor-pointer"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => handleApproveApplication(selectedApplication.id)}
+                    disabled={actionLoading}
+                    className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-black cursor-pointer"
+                  >
+                    Approve &amp; Assign QSR →
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
