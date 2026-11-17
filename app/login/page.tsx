@@ -1,31 +1,32 @@
 'use client';
 
 import React, { useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import {
-  UtensilsCrossed,
-  Lock,
   Mail,
+  Lock,
   KeyRound,
-  ShieldCheck,
-  Sparkles,
   ArrowRight,
-  Store,
-  ChefHat,
-  CreditCard,
-  Users,
+  Building2,
   X,
   CheckCircle2,
   AlertCircle,
   Eye,
   EyeOff,
-  Building2,
   PhoneCall,
+  User,
+  UserPlus,
+  ChefHat,
+  QrCode,
+  BarChart3,
+  Receipt,
+  FileText,
+  Monitor,
+  Headphones,
 } from 'lucide-react';
 
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '';
 
@@ -109,7 +110,7 @@ function LoginForm() {
       } else {
         setForgotMessage(data.error || 'Failed to process request');
       }
-    } catch (err) {
+    } catch {
       setForgotMessage('Error requesting reset');
     } finally {
       setLoading(false);
@@ -136,7 +137,7 @@ function LoginForm() {
       } else {
         setForgotMessage(data.error || 'Failed to reset password');
       }
-    } catch (err) {
+    } catch {
       setForgotMessage('Error resetting password');
     } finally {
       setLoading(false);
@@ -144,39 +145,45 @@ function LoginForm() {
   };
 
   return (
-    <div className="bg-white p-6 sm:p-8 rounded-3xl border border-[#E8E1D6] shadow-xl space-y-5">
-      {/* Toggle PIN vs Email */}
-      <div className="grid grid-cols-2 bg-[#F7F2EA] p-1 rounded-2xl text-xs font-bold">
+    <div className="bg-white/95 backdrop-blur-md p-6 sm:p-8 rounded-[28px] border border-[#E7DDD0] shadow-[0_24px_60px_-15px_rgba(60,24,14,0.16)] space-y-5 w-full">
+      {/* Card Header */}
+      <div className="text-center space-y-1">
+        <div className="lg:hidden mb-2">
+          <img
+            src="/images/aapno-khano-logo.png"
+            alt="Aapno Khaano"
+            className="h-14 w-auto mx-auto object-contain"
+          />
+        </div>
+        <p className="text-sm font-bold text-[#331E17]">Welcome to</p>
+        <h2 className="text-2xl font-black text-[#8E1521] tracking-tight">Aapno Khano POS</h2>
+        <p className="text-xs text-[#745E55] font-medium">Restaurant Management System</p>
+      </div>
+
+      {/* Top Segmented Pill: Login | Register */}
+      <div className="grid grid-cols-2 bg-[#F5EFE6] p-1 rounded-full text-xs font-bold border border-[#EAE0D2]">
         <button
+          type="button"
           onClick={() => {
             setIsPinMode(false);
             setError('');
           }}
-          className={`py-2 rounded-xl transition-all cursor-pointer ${
-            !isPinMode
-              ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs'
-              : 'text-[#745E55] hover:text-[#331E17]'
-          }`}
+          className="py-2.5 rounded-full bg-gradient-to-r from-[#8E1521] to-[#B01F2E] text-white shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
         >
-          Email &amp; Password
+          <User className="w-3.5 h-3.5" />
+          <span>Login</span>
         </button>
-        <button
-          onClick={() => {
-            setIsPinMode(true);
-            setError('');
-          }}
-          className={`py-2 rounded-xl transition-all cursor-pointer ${
-            isPinMode
-              ? 'bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] text-white shadow-xs'
-              : 'text-[#745E55] hover:text-[#331E17]'
-          }`}
+        <Link
+          href="/register"
+          className="py-2.5 rounded-full text-[#5C463E] hover:text-[#8E1521] flex items-center justify-center gap-1.5 transition-colors"
         >
-          Quick Waiter PIN
-        </button>
+          <UserPlus className="w-3.5 h-3.5" />
+          <span>Register</span>
+        </Link>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 font-bold animate-in zoom-in-95">
+        <div className="bg-red-50 border border-red-200 text-red-700 px-3.5 py-2.5 rounded-xl text-xs flex items-center gap-2 font-bold">
           <AlertCircle className="w-4 h-4 flex-shrink-0" />
           <span>{error}</span>
         </div>
@@ -185,47 +192,36 @@ function LoginForm() {
       <form onSubmit={handleLogin} className="space-y-4 text-xs">
         {!isPinMode ? (
           <>
-            <div>
-              <label className="block font-bold text-[#331E17] mb-1">Email Address / Registered Mobile</label>
+            <div className="relative">
+              <Mail className="w-4 h-4 text-[#8E7368] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
                 type="text"
                 required
-                placeholder="owner@restaurant.com or 9876543210"
+                placeholder="Email Address / Mobile Number"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
+                className="w-full pl-10 pr-4 py-3 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
               />
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="block font-bold text-[#331E17]">Password</label>
-                <button
-                  type="button"
-                  onClick={() => setIsForgotModalOpen(true)}
-                  className="text-[11px] font-bold text-[#AA1B2A] hover:underline cursor-pointer"
-                >
-                  Forgot Password?
-                </button>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-3.5 pr-10 py-2.5 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#331E17] placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-[#331E17] cursor-pointer"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+            <div className="relative">
+              <Lock className="w-4 h-4 text-[#8E7368] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-10 py-3 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#331E17] placeholder-[#8E7368] font-medium focus:outline-none focus:ring-2 focus:ring-[#8E1521] focus:bg-white transition-all"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8E7368] hover:text-[#331E17] cursor-pointer"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
 
             <div className="flex items-center justify-between pt-0.5">
@@ -234,23 +230,31 @@ function LoginForm() {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded accent-[#AA1B2A]"
+                  className="w-3.5 h-3.5 rounded accent-[#8E1521]"
                 />
-                <span className="text-[11px] font-bold text-[#745E55]">Remember me for 30 days</span>
+                <span className="text-[11px] font-bold text-[#5C463E]">Remember me for 30 days</span>
               </label>
+
+              <button
+                type="button"
+                onClick={() => setIsForgotModalOpen(true)}
+                className="text-[11px] font-bold text-[#8E1521] hover:underline cursor-pointer"
+              >
+                Forgot Password?
+              </button>
             </div>
           </>
         ) : (
           <div>
-            <label className="block font-bold text-[#331E17] mb-1">4-Digit POS Staff PIN</label>
+            <label className="block font-bold text-[#331E17] mb-1.5 text-center">Enter 4-Digit Staff POS PIN</label>
             <input
               type="password"
               maxLength={4}
               required
-              placeholder="1111"
+              placeholder="••••"
               value={pinCode}
               onChange={(e) => setPinCode(e.target.value)}
-              className="w-full px-3.5 py-3 bg-[#FEFBF5] border border-[#E8E1D6] rounded-xl text-[#AA1B2A] font-mono text-center text-2xl font-black tracking-widest focus:outline-none focus:ring-2 focus:ring-[#AA1B2A]"
+              className="w-full px-4 py-3 bg-[#FCF9F4] border border-[#E3D8C8] rounded-xl text-[#8E1521] font-mono text-center text-2xl font-black tracking-[0.5em] focus:outline-none focus:ring-2 focus:ring-[#8E1521]"
             />
           </div>
         )}
@@ -258,37 +262,60 @@ function LoginForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-gradient-to-r from-[#AA1B2A] to-[#DA4339] hover:from-[#901622] hover:to-[#C0392F] text-white font-black py-3 px-4 rounded-xl text-xs sm:text-sm shadow-md transition-transform active:scale-98 cursor-pointer flex items-center justify-center gap-2"
+          className="w-full bg-gradient-to-r from-[#8E1521] to-[#AE1D2B] hover:from-[#7A101B] hover:to-[#961724] text-white font-black py-3.5 px-4 rounded-xl text-xs sm:text-sm shadow-lg shadow-[#8E1521]/20 transition-all active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
         >
-          <span>{loading ? 'Authenticating...' : 'Sign In to Terminal'}</span>
           <ArrowRight className="w-4 h-4" />
+          <span>{loading ? 'Authenticating...' : 'Sign In to Terminal'}</span>
         </button>
+
+        {/* Subtle PIN / Password Mode Switcher */}
+        <div className="text-center">
+          <button
+            type="button"
+            onClick={() => {
+              setIsPinMode(!isPinMode);
+              setError('');
+            }}
+            className="text-[11px] font-bold text-[#745E55] hover:text-[#8E1521] inline-flex items-center gap-1 cursor-pointer"
+          >
+            <KeyRound className="w-3 h-3" />
+            <span>{isPinMode ? 'Use Email / Mobile & Password instead' : 'Staff Quick PIN Login'}</span>
+          </button>
+        </div>
       </form>
 
-      {/* New Restaurant Onboarding & Support Links */}
-      <div className="pt-4 border-t border-[#E8E1D6] space-y-2.5 text-center text-xs">
-        <Link
-          href="/register"
-          className="w-full py-2.5 px-4 bg-[#FFF0E8] hover:bg-[#ffe5d6] text-[#AA1B2A] font-black rounded-xl border border-[#E09D3D]/50 flex items-center justify-center gap-2 transition-colors"
-        >
-          <Building2 className="w-4 h-4" />
-          <span>New Restaurant? Register Your Restaurant</span>
-        </Link>
+      {/* OR Divider */}
+      <div className="relative flex items-center py-0.5">
+        <div className="flex-grow border-t border-[#EAE0D2]" />
+        <span className="flex-shrink mx-3 text-[11px] font-bold text-[#8E7368]">or</span>
+        <div className="flex-grow border-t border-[#EAE0D2]" />
+      </div>
 
-        <div className="flex items-center justify-between text-[11px] font-bold text-[#745E55] pt-1">
-          <Link href="/application-status" className="hover:text-[#AA1B2A] hover:underline">
-            Check Application Status
-          </Link>
-          <a
-            href="https://wa.me/917082040809?text=Hello%20Support%2C%20I%20need%20help%20with%20Aapno%20Khano%20POS."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-1 hover:text-[#AA1B2A] hover:underline"
-          >
-            <PhoneCall className="w-3 h-3" />
-            <span>Contact Support</span>
-          </a>
-        </div>
+      {/* Create New Restaurant Account Button */}
+      <Link
+        href="/register"
+        className="w-full py-3 px-4 bg-[#FCF9F4] hover:bg-[#FFF0E8] text-[#8E1521] font-black rounded-xl border border-[#DFC7B0] flex items-center justify-center gap-2 text-xs transition-colors"
+      >
+        <Building2 className="w-4 h-4" />
+        <span>Create New Restaurant Account</span>
+      </Link>
+
+      {/* Bottom Links */}
+      <div className="pt-2 border-t border-[#F0E8DC] flex items-center justify-between text-[11px] font-bold text-[#5C463E]">
+        <Link href="/application-status" className="inline-flex items-center gap-1.5 hover:text-[#8E1521] hover:underline">
+          <FileText className="w-3.5 h-3.5 text-[#8E7368]" />
+          <span>Check Application Status</span>
+        </Link>
+        <span className="text-[#E0D4C4]">|</span>
+        <a
+          href="https://wa.me/917082040809?text=Hello%20Support%2C%20I%20need%20help%20with%20Aapno%20Khano%20POS."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 hover:text-[#8E1521] hover:underline"
+        >
+          <Headphones className="w-3.5 h-3.5 text-[#8E7368]" />
+          <span>Contact Support</span>
+        </a>
       </div>
 
       {/* Forgot Password Modal */}
@@ -342,7 +369,7 @@ function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-4 py-1.5 bg-[#AA1B2A] text-white rounded-xl font-bold hover:bg-[#8e1421] shadow-xs"
+                    className="px-4 py-1.5 bg-[#8E1521] text-white rounded-xl font-bold hover:bg-[#7A101B] shadow-xs"
                   >
                     {loading ? 'Sending...' : 'Send Reset Link'}
                   </button>
@@ -370,7 +397,7 @@ function LoginForm() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-2 bg-[#AA1B2A] text-white rounded-xl font-bold hover:bg-[#8e1421] shadow-xs"
+                    className="w-full py-2 bg-[#8E1521] text-white rounded-xl font-bold hover:bg-[#7A101B] shadow-xs"
                   >
                     {loading ? 'Updating...' : 'Set New Password'}
                   </button>
@@ -386,32 +413,164 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-[#FEFBF5] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans selection:bg-[#E09D3D] selection:text-[#AA1B2A]">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <Link href="/" className="inline-block group mb-3">
-          <img
-            src="/images/aapno-khano-logo.png"
-            alt="Aapno Khaano"
-            className="h-20 sm:h-24 w-auto mx-auto object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-300"
-          />
-        </Link>
-        <h1 className="text-2xl font-black text-[#331E17] tracking-tight">आपणो खाणो (Aapno Khaano)</h1>
-        <p className="text-xs text-[#745E55] mt-1 font-medium">QSR POS, Kitchen KDS &amp; Multi-Tenant SaaS Platform</p>
+    <div className="min-h-screen relative overflow-hidden bg-gradient-to-br from-[#FBF7F0] via-[#F4E9D8] to-[#EBDCBF] flex flex-col justify-between font-sans selection:bg-[#E09D3D] selection:text-[#8E1521]">
+      {/* Warm Ambient Background Glows */}
+      <div className="pointer-events-none absolute -top-24 -left-24 w-96 h-96 rounded-full bg-[#E09D3D]/15 blur-3xl" />
+      <div className="pointer-events-none absolute bottom-0 right-0 w-[30rem] h-[30rem] rounded-full bg-[#8E1521]/10 blur-3xl" />
+
+      <div className="relative z-10 flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex items-center">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          {/* LEFT HERO & HARDWARE SHOWCASE (Desktop) */}
+          <div className="hidden lg:flex lg:col-span-7 flex-col space-y-6">
+            {/* Brand Badge */}
+            <Link href="/" className="inline-flex items-center gap-3 w-fit group">
+              <img
+                src="/images/aapno-khano-logo.png"
+                alt="Aapno Khaano"
+                className="h-14 w-auto object-contain drop-shadow-md group-hover:scale-105 transition-transform"
+              />
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-0.5 rounded-lg bg-[#8E1521] text-white text-xs font-black tracking-wider shadow-xs">
+                    POS
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-[#5C463E] mt-1">Restaurant Management System</p>
+              </div>
+            </Link>
+
+            {/* Hero Headline */}
+            <div className="space-y-3">
+              <h1 className="text-4xl xl:text-[44px] font-black text-[#2B1810] leading-[1.12] tracking-tight">
+                Run Your Restaurant
+                <br />
+                Smarter with
+                <br />
+                <span className="text-[#8E1521] relative inline-block">
+                  Aapno Khano POS
+                  <span className="block h-1.5 w-full bg-gradient-to-r from-[#8E1521] via-[#E09D3D] to-transparent rounded-full mt-1" />
+                </span>
+              </h1>
+              <p className="text-sm text-[#5C463E] max-w-md leading-relaxed font-medium">
+                A complete POS, KDS and restaurant management platform for QSRs, cafés and hotels.
+              </p>
+            </div>
+
+            {/* 4 Feature Icon Badges */}
+            <div className="grid grid-cols-4 gap-3 max-w-xl">
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
+                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+                  <Monitor className="w-4 h-4" />
+                </div>
+                <p className="text-[11px] font-black text-[#331E17] leading-tight">Smart POS &amp; Billing</p>
+              </div>
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
+                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+                  <ChefHat className="w-4 h-4" />
+                </div>
+                <p className="text-[11px] font-black text-[#331E17] leading-tight">Kitchen Display (KDS)</p>
+              </div>
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
+                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+                  <QrCode className="w-4 h-4" />
+                </div>
+                <p className="text-[11px] font-black text-[#331E17] leading-tight">QR Menu &amp; Ordering</p>
+              </div>
+              <div className="bg-white/75 backdrop-blur-xs border border-[#E5D9C8] rounded-2xl p-3 text-center shadow-xs">
+                <div className="w-9 h-9 mx-auto rounded-xl bg-[#FFF0E8] text-[#8E1521] flex items-center justify-center mb-1.5">
+                  <BarChart3 className="w-4 h-4" />
+                </div>
+                <p className="text-[11px] font-black text-[#331E17] leading-tight">Reports &amp; Analytics</p>
+              </div>
+            </div>
+
+            {/* POS Terminal + Thermal Bill + QR Standee Visual Preview */}
+            <div className="flex items-end gap-4 pt-2 max-w-xl">
+              {/* Mini Thermal Printer Receipt Card */}
+              <div className="w-28 bg-[#2B1F1A] rounded-2xl p-2.5 shadow-xl border border-[#4A3830] flex-shrink-0">
+                <div className="bg-white rounded-lg p-2 text-center space-y-1 shadow-inner">
+                  <img src="/images/aapno-khano-logo.png" alt="Bill" className="h-5 mx-auto object-contain" />
+                  <div className="border-t border-dashed border-slate-300 pt-1 space-y-0.5 text-[7px] font-mono text-slate-600">
+                    <div className="flex justify-between"><span>Paneer Tikka</span><span>₹190</span></div>
+                    <div className="flex justify-between"><span>Dal Makhani</span><span>₹190</span></div>
+                    <div className="flex justify-between font-black text-slate-900 border-t border-slate-200 pt-0.5">
+                      <span>TOTAL</span><span>₹399</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-2 flex items-center justify-between px-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                  <span className="text-[8px] font-bold text-amber-200/80 uppercase tracking-wider">80mm ESC/POS</span>
+                </div>
+              </div>
+
+              {/* Mini POS Screen Mockup */}
+              <div className="flex-1 bg-[#1E1614] rounded-2xl p-2.5 shadow-2xl border-2 border-[#3E2E29]">
+                <div className="bg-[#FEFBF5] rounded-xl overflow-hidden flex h-36">
+                  {/* Mini Sidebar */}
+                  <div className="w-16 bg-[#8E1521] p-2 space-y-1.5 text-[7px] text-amber-100 font-bold flex-shrink-0">
+                    <div className="bg-[#E09D3D] text-[#331E17] px-1.5 py-0.5 rounded font-black">POS</div>
+                    <div className="opacity-80">Orders</div>
+                    <div className="opacity-80">KDS</div>
+                    <div className="opacity-80">Menu</div>
+                    <div className="opacity-80">Reports</div>
+                  </div>
+                  {/* Mini Dish Grid */}
+                  <div className="flex-1 p-2 grid grid-cols-3 gap-1.5 bg-[#FAF5ED]">
+                    {[
+                      { name: 'Paneer Tikka', price: '₹249' },
+                      { name: 'Dal Tadka', price: '₹189' },
+                      { name: 'Veg Biryani', price: '₹229' },
+                      { name: 'Butter Naan', price: '₹49' },
+                      { name: 'Shahi Paneer', price: '₹259' },
+                      { name: 'Masala Chaas', price: '₹59' },
+                    ].map((d) => (
+                      <div key={d.name} className="bg-white rounded-lg p-1.5 border border-[#E8DFD3] flex flex-col justify-between shadow-2xs">
+                        <div className="h-5 rounded bg-gradient-to-br from-[#FFF0E8] to-[#F7DFC2]" />
+                        <div>
+                          <p className="text-[7px] font-black text-[#331E17] truncate">{d.name}</p>
+                          <p className="text-[7px] font-black text-[#8E1521]">{d.price}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini QR Standee Card */}
+              <div className="w-24 bg-white rounded-2xl p-2.5 shadow-xl border border-[#E5D9C8] text-center space-y-1 flex-shrink-0">
+                <img src="/images/aapno-khano-logo.png" alt="QR" className="h-5 mx-auto object-contain" />
+                <p className="text-[8px] font-black text-[#8E1521] uppercase">Scan to Order</p>
+                <div className="w-12 h-12 mx-auto bg-[#FCF9F4] border border-[#E5D9C8] rounded-lg flex items-center justify-center">
+                  <QrCode className="w-9 h-9 text-[#2B1810]" />
+                </div>
+                <p className="text-[7px] font-bold text-[#745E55]">Table QR Menu</p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT LOGIN CARD */}
+          <div className="lg:col-span-5 w-full max-w-md mx-auto">
+            <Suspense
+              fallback={
+                <div className="bg-white p-8 rounded-[28px] text-center text-xs font-bold text-slate-500 shadow-xl border border-[#E8E1D6]">
+                  Loading authentication portal...
+                </div>
+              }
+            >
+              <LoginForm />
+            </Suspense>
+          </div>
+        </div>
       </div>
 
-      <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
-        <Suspense fallback={<div className="bg-white p-8 rounded-3xl text-center text-xs font-bold text-slate-500 shadow-xl border border-[#E8E1D6]">Loading authentication portal...</div>}>
-          <LoginForm />
-        </Suspense>
-      </div>
-
-      <footer className="mt-8 text-center text-[11px] text-[#745E55]">
+      <footer className="relative z-10 py-4 text-center text-[11px] text-[#5C463E]">
         © All Copyright 2026 by{' '}
         <a
           href="https://rudrawebx.com/"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#AA1B2A] font-black hover:underline"
+          className="text-[#8E1521] font-black hover:underline"
         >
           Rudra Web X
         </a>
