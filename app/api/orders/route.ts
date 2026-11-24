@@ -67,7 +67,7 @@ export async function GET(request: Request) {
           include: {
             items: true,
             table: true,
-            kots: { include: { items: true } },
+            kots: { include: { kotItems: true } },
             invoices: true,
             payments: true,
             takenByStaff: { select: { id: true, name: true, role: true } },

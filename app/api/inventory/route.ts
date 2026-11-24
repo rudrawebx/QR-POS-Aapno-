@@ -276,7 +276,6 @@ export async function POST(request: Request) {
             data: {
               restaurantId,
               productId,
-              name: "Standard Recipe BOM",
               yieldQuantity: parseFloat(yieldQuantity || "1"),
               ingredients: {
                 create: recipeIngredients.map((ri: any) => ({

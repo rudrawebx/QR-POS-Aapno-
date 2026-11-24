@@ -1292,6 +1292,7 @@ export default function AdminPosPage() {
                         unitPrice: customizingProduct.priceSmallHalf,
                         quantity: 1,
                         isVeg: customizingProduct.isVeg,
+                        modifiers: [],
                         kitchenStationId: customizingProduct.kitchenStationId,
                       },
                     ]);
@@ -1321,6 +1322,7 @@ export default function AdminPosPage() {
                         unitPrice: customizingProduct.priceLargeFull,
                         quantity: 1,
                         isVeg: customizingProduct.isVeg,
+                        modifiers: [],
                         kitchenStationId: customizingProduct.kitchenStationId,
                       },
                     ]);

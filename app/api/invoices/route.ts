@@ -169,6 +169,7 @@ export async function POST(request: Request) {
             restaurantId: 'rest_aapno_khano',
             orderId,
             customerName: 'Direct Guest',
+            customerPhone: '',
             subtotal: grandTotal * 0.95,
             cgstRate: 2.5,
             cgstAmount: grandTotal * 0.025,

@@ -66,9 +66,12 @@ export interface PrintReceiptData {
     name: string;
     address: string;
     city: string;
+    state?: string;
+    postalCode?: string;
     phone: string;
     gstin?: string;
     fssaiNumber?: string;
+    upiId?: string;
     currencySymbol: string;
     logoUrl?: string;
     defaultReceiptFooter?: string;

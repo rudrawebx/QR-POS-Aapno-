@@ -101,7 +101,7 @@ export async function POST(request: Request) {
             action,
             entity: orderId ? "Order" : invoiceId ? "Invoice" : "Kot",
             entityId: orderRef || orderId || invoiceId || "PRINT_JOB",
-            details: `Printed via ${action}. Notes: ${notes || "Verified Paid Print"}`,
+            notes: `Printed via ${action}. Notes: ${notes || "Verified Paid Print"}`,
           },
         });
       } catch (auditErr) {

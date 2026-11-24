@@ -58,6 +58,7 @@ export async function GET(request: Request) {
     let products: any[] = [];
     let categories: any[] = [];
     let applications: any[] = [];
+    let auditLogs: any[] = [];
 
     try {
       if (prisma) {
@@ -123,7 +124,7 @@ export async function GET(request: Request) {
           orderBy: { displayOrder: 'asc' },
         });
 
-        var auditLogs: any[] = await prisma.auditLog.findMany({
+        auditLogs = await prisma.auditLog.findMany({
           orderBy: { createdAt: 'desc' },
           take: 50,
         });
@@ -182,7 +183,7 @@ export async function GET(request: Request) {
       categories = MASTER_AAPNO_KHANO_CATEGORIES.map((c) => ({
         id: c.id,
         name: c.name,
-        localName: c.localName,
+        localName: (c as any).localName || null,
         displayOrder: c.displayOrder,
       }));
     }
@@ -339,7 +340,7 @@ export async function GET(request: Request) {
       applications,
       users: allUsers,
       plans,
-      auditLogs: typeof auditLogs !== 'undefined' ? auditLogs : [],
+      auditLogs,
       products,
       categories,
     });
