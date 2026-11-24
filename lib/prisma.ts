@@ -1,5 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 
+// Limit Tokio/libuv threads on shared hosting (e.g. Hostinger) to prevent
+// "PANIC: timer has gone away" caused by thread/nproc limits.
+if (!process.env.TOKIO_WORKER_THREADS) {
+  process.env.TOKIO_WORKER_THREADS = '1';
+}
+if (!process.env.UV_THREADPOOL_SIZE) {
+  process.env.UV_THREADPOOL_SIZE = '1';
+}
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
