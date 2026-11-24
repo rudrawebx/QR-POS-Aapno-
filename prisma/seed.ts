@@ -1,7 +1,22 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../lib/generated/prisma';
+import { PrismaMariaDb } from '@prisma/adapter-mariadb';
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
+const seedDbUrl = new URL(
+  process.env.DATABASE_URL ||
+    'mysql://u931854669_aapno_khano:RudraWebX%4012@127.0.0.1:3306/u931854669_aapno_khano'
+);
+const prisma = new PrismaClient({
+  adapter: new PrismaMariaDb({
+    host: seedDbUrl.hostname || '127.0.0.1',
+    port: seedDbUrl.port ? Number(seedDbUrl.port) : 3306,
+    user: decodeURIComponent(seedDbUrl.username),
+    password: decodeURIComponent(seedDbUrl.password),
+    database: seedDbUrl.pathname.replace(/^\//, ''),
+    connectionLimit: 5,
+    allowPublicKeyRetrieval: true,
+  }),
+});
 
 function hashPassword(password: string): string {
   if (!password) return '';

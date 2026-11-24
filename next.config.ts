@@ -11,11 +11,10 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-  serverExternalPackages: ['@prisma/client', 'prisma', '@prisma/adapter-mariadb', 'mariadb'],
+  serverExternalPackages: ['prisma', '@prisma/adapter-mariadb', 'mariadb'],
   outputFileTracingIncludes: {
     '/**': [
-      './node_modules/.prisma/client/**/*',
-      './node_modules/@prisma/client/**/*',
+      './lib/generated/prisma/**/*',
     ],
   },
   experimental: {
