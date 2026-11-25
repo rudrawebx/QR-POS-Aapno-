@@ -919,35 +919,56 @@ export default function AdminPosPage() {
                   className="p-2.5 rounded-3xl border border-[#E8E1D6] hover:border-[#E09D3D] bg-white hover:bg-[#FFF0E8] shadow-2xs flex flex-col justify-between text-left transition-all group cursor-pointer"
                 >
                   <div>
-                    <div className="relative h-24 w-full rounded-2xl overflow-hidden bg-slate-100 mb-2 border border-[#E8E1D6]">
-                      <img
-                        src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80'}
-                        alt={product.name}
-                        loading="lazy"
-                        decoding="async"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        onError={(e) => {
-                          e.currentTarget.onerror = null;
-                          e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80';
-                        }}
-                      />
-                      <span
-                        className={`absolute top-1.5 left-1.5 w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center bg-white ${
-                          product.isVeg ? 'border-emerald-600' : 'border-red-600'
-                        }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            product.isVeg ? 'bg-emerald-600' : 'bg-red-600'
-                          }`}
+                    {product.imageUrl ? (
+                      <div className="relative h-24 w-full rounded-2xl overflow-hidden bg-slate-100 mb-2 border border-[#E8E1D6]">
+                        <img
+                          src={product.imageUrl}
+                          alt={product.name}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            e.currentTarget.onerror = null;
+                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80';
+                          }}
                         />
-                      </span>
-                      {product.sku && (
-                        <span className="absolute bottom-1 right-1 bg-black/75 text-[#E09D3D] font-mono text-[9px] px-1 rounded font-bold">
-                          {product.sku}
+                        <span
+                          className={`absolute top-1.5 left-1.5 w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center bg-white ${
+                            product.isVeg ? 'border-emerald-600' : 'border-red-600'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              product.isVeg ? 'bg-emerald-600' : 'bg-red-600'
+                            }`}
+                          />
                         </span>
-                      )}
-                    </div>
+                        {product.sku && (
+                          <span className="absolute bottom-1 right-1 bg-black/75 text-[#E09D3D] font-mono text-[9px] px-1 rounded font-bold">
+                            {product.sku}
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span
+                          className={`w-3.5 h-3.5 rounded-xs border-2 flex items-center justify-center bg-white ${
+                            product.isVeg ? 'border-emerald-600' : 'border-red-600'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              product.isVeg ? 'bg-emerald-600' : 'bg-red-600'
+                            }`}
+                          />
+                        </span>
+                        {product.sku && (
+                          <span className="bg-black/75 text-[#E09D3D] font-mono text-[9px] px-1.5 py-0.5 rounded font-bold">
+                            {product.sku}
+                          </span>
+                        )}
+                      </div>
+                    )}
 
                     <h4 className="font-black text-xs text-[#331E17] line-clamp-1 group-hover:text-[#AA1B2A] transition-colors">
                       {product.name}

@@ -110,7 +110,7 @@ export async function GET(request: Request) {
       console.warn("Inventory DB query error, using fallback state:", dbErr);
     }
 
-    if (!ingredients || ingredients.length === 0) {
+    if ((!ingredients || ingredients.length === 0) && restaurantId === "rest_aapno_khano") {
       ingredients = DEFAULT_RAW_MATERIALS;
     }
 
@@ -135,7 +135,7 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Inventory fetch error:", error);
     return NextResponse.json({
-      ingredients: DEFAULT_RAW_MATERIALS,
+      ingredients: [],
       suppliers: [],
       purchaseOrders: [],
       stockTransactions: [],

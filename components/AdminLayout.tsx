@@ -205,7 +205,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               <img
                 src={sessionUser?.logoUrl || '/images/love-greens-logo.jpg'}
                 alt={sessionUser?.restaurantName || 'Love Greens & Health Cafe'}
-                className="w-full max-w-[200px] h-16 object-contain group-hover:scale-105 transition-transform"
+                className="w-full max-w-[210px] h-16 object-contain rounded-xl group-hover:scale-105 transition-transform"
               />
             </Link>
             <div className="min-w-0 w-full">

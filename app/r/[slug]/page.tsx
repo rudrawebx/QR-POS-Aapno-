@@ -460,25 +460,27 @@ export default function CustomerQsrMenuPage() {
                         </div>
                       </div>
 
-                      {/* Right: Food Image */}
-                      <div className="w-24 h-24 sm:w-26 sm:h-26 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0 relative border border-[#E8E1D6] shadow-2xs">
-                        <img
-                          src={product.imageUrl || 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80'}
-                          alt={product.name}
-                          loading="lazy"
-                          decoding="async"
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80';
-                          }}
-                        />
-                        {product.hasVariations && (
-                          <div className="absolute bottom-1 right-1 bg-black/75 text-[#E09D3D] text-[9px] font-black px-1.5 py-0.5 rounded backdrop-blur-xs">
-                            Portions
-                          </div>
-                        )}
-                      </div>
+                      {/* Right: Food Image (only if product has an imageUrl) */}
+                      {product.imageUrl && (
+                        <div className="w-24 h-24 sm:w-26 sm:h-26 rounded-2xl overflow-hidden bg-slate-100 flex-shrink-0 relative border border-[#E8E1D6] shadow-2xs">
+                          <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=1000&h=1000&fit=crop&q=80';
+                            }}
+                          />
+                          {product.hasVariations && (
+                            <div className="absolute bottom-1 right-1 bg-black/75 text-[#E09D3D] text-[9px] font-black px-1.5 py-0.5 rounded backdrop-blur-xs">
+                              Portions
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
