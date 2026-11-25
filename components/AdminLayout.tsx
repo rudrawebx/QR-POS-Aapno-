@@ -199,30 +199,53 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       {/* Sidebar for Desktop - Sticky & Fixed */}
       <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-gradient-to-b from-[#AA1B2A] to-[#80101C] text-[#FEFBF5] border-r border-[#E09D3D]/30 shadow-2xl flex-shrink-0 z-30 select-none">
         {/* Brand Header */}
-        <div className="p-4 border-b border-[#E09D3D]/20 flex items-center gap-3 flex-shrink-0">
-          <Link href="/admin" className="flex-shrink-0 group">
-            <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-md border-2 border-[#E09D3D] flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+        {sessionUser?.qsrNumber === 'QSR03' || sessionUser?.restaurantId === 'rest_love_greens' || sessionUser?.restaurantSlug === 'love-greens' ? (
+          <div className="px-4 py-4 border-b border-[#E09D3D]/20 flex flex-col items-center text-center gap-2 flex-shrink-0">
+            <Link href="/admin" className="w-full flex justify-center group">
               <img
-                src={sessionUser?.logoUrl || (sessionUser?.restaurantSlug === 'mr-bagri' || sessionUser?.restaurantId === 'rest_mr_bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png')}
-                alt={sessionUser?.restaurantName || 'Restaurant'}
-                className="w-full h-full object-contain"
+                src={sessionUser?.logoUrl || '/images/love-greens-logo.jpg'}
+                alt={sessionUser?.restaurantName || 'Love Greens & Health Cafe'}
+                className="w-full max-w-[200px] h-16 object-contain group-hover:scale-105 transition-transform"
               />
-            </div>
-          </Link>
-          <div className="min-w-0">
-            <h2 className="font-black text-sm text-white tracking-wide truncate">
-              {sessionUser?.restaurantName || (sessionUser?.restaurantSlug === 'mr-bagri' ? 'Mr. Bagri' : 'आपणो खाणो')}
-            </h2>
-            <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1.5 mt-0.5">
-              {sessionUser?.qsrNumber && (
+            </Link>
+            <div className="min-w-0 w-full">
+              <h2 className="font-black text-sm text-white tracking-wide leading-tight">
+                {sessionUser?.restaurantName || 'Love Greens & Health Cafe'}
+              </h2>
+              <p className="text-[10px] text-[#E09D3D] font-bold flex items-center justify-center gap-1.5 mt-1">
                 <span className="px-1.5 py-0.2 rounded bg-[#E09D3D] text-[#331E17] font-mono font-black text-[9px]">
-                  {sessionUser.qsrNumber}
+                  {sessionUser?.qsrNumber || 'QSR03'}
                 </span>
-              )}
-              <span className="truncate">QSR &amp; Table Service</span>
-            </p>
+                <span className="truncate">QSR &amp; Table Service</span>
+              </p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="p-4 border-b border-[#E09D3D]/20 flex items-center gap-3 flex-shrink-0">
+            <Link href="/admin" className="flex-shrink-0 group">
+              <div className="w-10 h-10 rounded-2xl bg-white p-1 shadow-md border-2 border-[#E09D3D] flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:scale-105 transition-transform">
+                <img
+                  src={sessionUser?.logoUrl || (sessionUser?.restaurantSlug === 'mr-bagri' || sessionUser?.restaurantId === 'rest_mr_bagri' ? '/images/mr-bagri-logo.jpg' : '/images/aapno-khano-logo.png')}
+                  alt={sessionUser?.restaurantName || 'Restaurant'}
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </Link>
+            <div className="min-w-0">
+              <h2 className="font-black text-sm text-white tracking-wide truncate">
+                {sessionUser?.restaurantName || (sessionUser?.restaurantSlug === 'mr-bagri' ? 'Mr. Bagri' : 'आपणो खाणो')}
+              </h2>
+              <p className="text-[10px] text-[#E09D3D] font-bold flex items-center gap-1.5 mt-0.5">
+                {sessionUser?.qsrNumber && (
+                  <span className="px-1.5 py-0.2 rounded bg-[#E09D3D] text-[#331E17] font-mono font-black text-[9px]">
+                    {sessionUser.qsrNumber}
+                  </span>
+                )}
+                <span className="truncate">QSR &amp; Table Service</span>
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Navigation Links (Scrolls internally if items overflow) */}
         <nav className="flex-1 p-3 space-y-1 overflow-y-auto">

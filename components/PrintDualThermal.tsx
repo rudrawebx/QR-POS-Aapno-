@@ -298,11 +298,11 @@ export default function PrintDualThermal({
             >
               {/* Header */}
               <div className="text-center pb-2 border-b border-dashed border-black space-y-0.5">
-                <div className="w-14 h-14 mx-auto mb-1 flex items-center justify-center">
+                <div className={`${is58mm ? 'w-full max-w-[150px] h-14' : 'w-14 h-14'} mx-auto mb-1 flex items-center justify-center`}>
                   <img
                     src={billData.restaurant.logoUrl || "/images/aapno-khano-logo.png"}
                     alt={billData.restaurant.name || "Restaurant Logo"}
-                    className="w-full h-full object-contain rounded-lg"
+                    className={`w-full h-full object-contain ${is58mm ? '' : 'rounded-lg'}`}
                   />
                 </div>
                 <p className="text-sm font-black uppercase tracking-wider">
