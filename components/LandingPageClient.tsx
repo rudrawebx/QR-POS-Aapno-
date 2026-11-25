@@ -5,37 +5,20 @@ import Link from 'next/link';
 import {
   ArrowRight,
   BarChart3,
-  Building2,
-  Car,
   Check,
-  CheckCircle2,
   ChefHat,
   ChevronDown,
-  Clock,
   CreditCard,
-  ExternalLink,
   Flame,
-  Layers,
-  Lock,
   Mail,
   MapPin,
   Menu,
-  MessageSquare,
   Package,
   Phone,
   Plus,
   Printer,
   QrCode,
-  Receipt,
-  ShieldCheck,
-  ShoppingBag,
-  Smartphone,
-  Sparkles,
-  Store,
-  TrendingUp,
-  UserCheck,
   Users,
-  UtensilsCrossed,
   X,
 } from 'lucide-react';
 
@@ -76,7 +59,7 @@ interface LandingPageClientProps {
   stats: PlatformStats;
 }
 
-const HERO_DISHES = [
+const POS_DISHES = [
   {
     id: 'd1',
     name: 'Sweet Corn Chaat',
@@ -96,7 +79,7 @@ const HERO_DISHES = [
   {
     id: 'd3',
     name: 'Royal Egg Curry',
-    category: 'Specials',
+    category: 'Main Course',
     price: 240,
     isVeg: false,
     img: '/images/menu/Egg Curry.png',
@@ -104,162 +87,99 @@ const HERO_DISHES = [
   {
     id: 'd4',
     name: 'Mint Green Chutney',
-    category: 'Accompaniments',
+    category: 'Sides',
     price: 40,
     isVeg: true,
     img: '/images/menu/green-chutney.png',
   },
+  {
+    id: 'd5',
+    name: 'Sprite 500ml',
+    category: 'Drinks',
+    price: 45,
+    isVeg: true,
+    img: '/images/menu/Sprite 500 ml.jpg',
+  },
+  {
+    id: 'd6',
+    name: 'Bisleri Water 1L',
+    category: 'Drinks',
+    price: 20,
+    isVeg: true,
+    img: '/images/menu/Bisleri Water.jpg',
+  },
 ];
 
-const FEATURES = [
+const CORE_FEATURES = [
   {
-    title: 'Smart POS Billing',
-    desc: 'Touch-ready counter terminal with dish tiles, Half/Full portions, flat/% discounts, 50-order hold queue, and 1-tap 80mm & 58mm thermal printing.',
+    title: 'Counter POS & GST Billing',
+    desc: 'Fast touch billing with cash, UPI, card and split payments. Prints clean 80mm or 2-inch (58mm) GST thermal receipts.',
     icon: CreditCard,
-    tag: 'Cashier Terminal',
   },
   {
-    title: 'QR Code Menu & Car Ordering',
-    desc: 'Table & parking-bay QR menus with Veg/Non-Veg filters, live portion pricing, vehicle plate capture, and direct UPI / Razorpay checkout.',
+    title: 'QR Table & Car Ordering',
+    desc: 'Guests scan a table or parking-bay QR on their phone, pick dishes, and pay via UPI without installing any app.',
     icon: QrCode,
-    tag: 'Contactless QR',
   },
   {
-    title: 'Kitchen Display System (KDS)',
-    desc: 'Real-time station routing (Handi, Tandoor, Snacks, Beverages), bump timers with delay alerts, and instant 80mm/58mm KOT tickets.',
+    title: 'Kitchen Display & KOT',
+    desc: 'Orders go straight to the kitchen screen and KOT printer, sorted by station (Tandoor, Handi, Snacks, Drinks).',
     icon: ChefHat,
-    tag: 'Chef Screen',
   },
   {
-    title: 'Order Management',
-    desc: '5-column live Kanban board uniting Dine-In, Car Service, Takeaway, and QR orders with audio chime alerts and status tracking.',
+    title: 'Live Order Tracking',
+    desc: 'Manage dine-in tables, takeaway parcels, and car service orders in one live board with audio order alerts.',
     icon: Flame,
-    tag: 'Live Kanban',
   },
   {
-    title: 'Inventory Management',
-    desc: 'Ingredient stock ledger, Recipe BOM auto-deduction per sold dish, supplier purchase orders, and low-stock threshold alerts.',
+    title: 'Raw Inventory & Recipes',
+    desc: 'Track ingredients, suppliers, and purchase orders. Stock automatically reduces when dishes are billed.',
     icon: Package,
-    tag: 'Recipe BOM',
   },
   {
-    title: 'Restaurant Analytics',
-    desc: 'Daily Z-Reports, GST tax breakdown (CGST/SGST), payment mode splits (UPI/Cash/Card), and outlet-wise revenue insights.',
-    icon: BarChart3,
-    tag: 'GST & Reports',
-  },
-  {
-    title: 'Staff Management',
-    desc: 'Role-based access control for Owner, Manager, Cashier, Chef, and Captain with quick staff PIN login and audit trails.',
+    title: 'Staff PINs & Daily Reports',
+    desc: 'Separate logins for Owner, Manager, Cashier, and Chef, plus daily Z-reports and CGST/SGST tax summaries.',
     icon: Users,
-    tag: 'RBAC & PIN',
-  },
-  {
-    title: 'Customer Management',
-    desc: 'Automatic guest CRM capturing phone numbers, vehicle plates, visit frequency, lifetime spend, and 1-click WhatsApp bill sharing.',
-    icon: UserCheck,
-    tag: 'Guest CRM',
-  },
-];
-
-const SHOWCASE_TABS = [
-  {
-    id: 'pos',
-    label: 'Touch POS & Billing',
-    title: 'Built for Rush-Hour Counter Speed',
-    desc: 'Ring up Dine-In tables, Car Drive-In bays, and Takeaway tickets in seconds. Supports Cash, UPI, Card, Split payments, and instant 80mm or 2-inch (58mm) GST thermal invoices.',
-    bullets: [
-      'Hold up to 50 active tickets with color-coded priority',
-      'Instant GST (5% CGST/SGST) & FSSAI compliant thermal bills',
-      '1-click WhatsApp digital bill sharing & last bill reprint',
-    ],
-    ctaLabel: 'Open POS Login',
-    ctaHref: '/login?redirect=/admin/pos',
-  },
-  {
-    id: 'qr',
-    label: 'QR & Car Drive-In',
-    title: 'Zero-App Mobile Ordering from Any Table or Car',
-    desc: 'Guests scan a printed table or parking QR standee, browse your live menu with veg/non-veg filters, enter their table or vehicle number, and pay seamlessly.',
-    bullets: [
-      'Works on any mobile browser — no app download needed',
-      'Live order tracking screen for guests after checkout',
-      'Per-outlet custom branding, logo, and theme support',
-    ],
-    ctaLabel: 'Try Live QR Menu',
-    ctaHref: '/r/aapno-khano',
-    external: true,
-  },
-  {
-    id: 'kds',
-    label: 'Kitchen KDS & KOT',
-    title: 'Zero Missed Tickets Between Counter and Kitchen',
-    desc: 'Confirmed orders route automatically to kitchen stations with live prep timers, item notes, and dual Bill + KOT printing.',
-    bullets: [
-      'Station-wise filtering (Tandoor, Handi, Snacks, Drinks)',
-      'Visual prep-time warning badges for delayed tickets',
-      'Direct bump-to-ready updates synced to counter & guests',
-    ],
-    ctaLabel: 'Open KDS Login',
-    ctaHref: '/login?redirect=/kitchen',
-  },
-  {
-    id: 'multi',
-    label: 'Multi-Outlet Control',
-    title: 'Scale From One Outlet to a Multi-City Chain',
-    desc: 'Isolated tenant architecture keeps every restaurant’s menu, inventory, thermal paper width (80mm or 58mm), staff, and revenue strictly separated.',
-    bullets: [
-      'Dedicated QSR numbering (QSR01, QSR02, QSR03…) & branches',
-      'Centralized Super Admin governance, subscriptions & support tickets',
-      'Per-restaurant GSTIN, FSSAI, logo, and UPI configuration',
-    ],
-    ctaLabel: 'Register Your Outlet',
-    ctaHref: '/register',
   },
 ];
 
 const FAQS = [
   {
-    q: 'Does Aapno Khano POS support both 80mm and 2-inch (58mm) thermal printers?',
-    a: 'Yes. Each restaurant outlet can configure its thermal receipt width independently — 80mm standard printers (like QSR01) or compact 2-inch 58mm printers (like QSR03) — with automatic CSS print formatting for both GST Bills and KOTs.',
-  },
-  {
-    q: 'How does QR Code & Car Drive-In ordering work?',
-    a: 'Every restaurant gets a unique QR menu URL and table/bay QR codes. Customers scan the QR on their phone, select dishes and portions, enter their table or vehicle number, and place orders directly into your POS and Kitchen Display.',
+    q: 'Does it work with both 80mm and 2-inch (58mm) thermal printers?',
+    a: 'Yes. Each restaurant outlet can choose 80mm standard receipts or 2-inch (58mm) compact receipts for both customer GST bills and kitchen KOTs.',
   },
   {
     q: 'Can each outlet have its own menu, logo, and inventory?',
-    a: 'Yes. The platform uses strict multi-tenant data isolation. Every restaurant manages its own categories, dishes (with or without product photos), raw material inventory, recipe BOMs, staff logins, and brand logo on bills and POS.',
+    a: 'Yes. Every outlet has its own menu (with or without dish photos), its own logo on the POS and bill, separate inventory, and isolated sales reports.',
   },
   {
-    q: 'Are GST and FSSAI details included on customer bills?',
-    a: 'Yes. Bills automatically include your configured GSTIN, FSSAI license number, CGST/SGST tax breakdown, invoice sequence number, QR/UPI details, and custom receipt footer.',
+    q: 'How does QR ordering work for tables and car service?',
+    a: 'Place a printed QR standee on each table or parking bay. Guests scan it, browse your menu, enter their table or car number, and pay via UPI or Razorpay.',
   },
   {
-    q: 'What staff roles and access controls are supported?',
-    a: 'You can create role-scoped accounts for Owner, Manager, Cashier, Chef, and Waiter/Captain, with quick Staff PIN login at the terminal and server-side authorization checks.',
+    q: 'Are GSTIN and FSSAI numbers printed on the bill?',
+    a: 'Yes. Your GSTIN, FSSAI license number, CGST/SGST breakdown, invoice number, and custom footer appear automatically on every receipt.',
   },
   {
-    q: 'How do subscription plans and onboarding work?',
-    a: 'Click Get Started to submit your restaurant registration. Once verified and approved by our onboarding team, your QSR account, branch, tables, and owner login are activated immediately on your chosen Starter or Professional plan.',
+    q: 'How do I get started for my restaurant?',
+    a: 'Click Get Started to submit your restaurant details, or fill out the callback form below. Once approved, your QSR terminal and owner login are ready immediately.',
   },
 ];
 
 export default function LandingPageClient({ plans, stats }: LandingPageClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
-  const [activeTab, setActiveTab] = useState('pos');
   const [openFaq, setOpenFaq] = useState<number | null>(0);
   const [legalModal, setLegalModal] = useState<'privacy' | 'terms' | null>(null);
 
-  // Interactive Hero POS Mockup state
-  const [heroCategory, setHeroCategory] = useState('All');
-  const [heroCart, setHeroCart] = useState<{ id: string; name: string; price: number; qty: number }[]>([
+  // Interactive Hero POS Preview state
+  const [activeCat, setActiveCat] = useState('All');
+  const [ticket, setTicket] = useState<{ id: string; name: string; price: number; qty: number }[]>([
     { id: 'd2', name: 'Chana Masala Handi', price: 219, qty: 1 },
   ]);
 
-  // Contact / Demo form state
-  const [contactForm, setContactForm] = useState({
+  // Contact form state
+  const [form, setForm] = useState({
     name: '',
     restaurantName: '',
     phone: '',
@@ -267,51 +187,43 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
     city: '',
     message: '',
   });
-  const [contactStatus, setContactStatus] = useState<{
-    type: 'idle' | 'submitting' | 'success' | 'error';
-    text?: string;
-  }>({ type: 'idle' });
+  const [formState, setFormState] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [formMsg, setFormMsg] = useState('');
 
-  const addHeroItem = (dish: (typeof HERO_DISHES)[number]) => {
-    setHeroCart((prev) => {
-      const existing = prev.find((i) => i.id === dish.id);
-      if (existing) {
+  const addDish = (dish: (typeof POS_DISHES)[number]) => {
+    setTicket((prev) => {
+      const found = prev.find((i) => i.id === dish.id);
+      if (found) {
         return prev.map((i) => (i.id === dish.id ? { ...i, qty: i.qty + 1 } : i));
       }
       return [...prev, { id: dish.id, name: dish.name, price: dish.price, qty: 1 }];
     });
   };
 
-  const heroSubtotal = heroCart.reduce((s, i) => s + i.price * i.qty, 0);
-  const heroGst = Math.round(heroSubtotal * 0.05);
-  const heroTotal = heroSubtotal + heroGst;
+  const ticketCount = ticket.reduce((s, i) => s + i.qty, 0);
+  const ticketTotal = ticket.reduce((s, i) => s + i.price * i.qty, 0);
 
-  const currentShowcase = SHOWCASE_TABS.find((t) => t.id === activeTab) || SHOWCASE_TABS[0];
-
-  const handleContactSubmit = async (e: React.FormEvent) => {
+  const handleContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    setContactStatus({ type: 'submitting' });
+    setFormState('sending');
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(contactForm),
+        body: JSON.stringify(form),
       });
       const data = await res.json();
       if (!res.ok) {
-        setContactStatus({ type: 'error', text: data.error || 'Could not submit inquiry.' });
+        setFormState('error');
+        setFormMsg(data.error || 'Could not send message.');
         return;
       }
-      setContactStatus({
-        type: 'success',
-        text: data.message || 'Thank you! Our team will contact you shortly.',
-      });
-      setContactForm({ name: '', restaurantName: '', phone: '', email: '', city: '', message: '' });
+      setFormState('sent');
+      setFormMsg(data.message || 'Thank you! We will call you back shortly.');
+      setForm({ name: '', restaurantName: '', phone: '', email: '', city: '', message: '' });
     } catch {
-      setContactStatus({
-        type: 'error',
-        text: 'Network error. Please call +91 70820 40809 directly.',
-      });
+      setFormState('error');
+      setFormMsg('Network error. Please call +91 70820 40809.');
     }
   };
 
@@ -322,25 +234,17 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
     applicationCategory: 'BusinessApplication',
     operatingSystem: 'Web, Android, iOS, Windows',
     url: 'https://pos.aapnokhano.com',
-    description:
-      'Multi-restaurant SaaS POS, QR Code Menu Ordering, Kitchen Display System (KDS), 80mm & 58mm Thermal GST Billing, and Inventory Management.',
     offers: plans.map((p) => ({
       '@type': 'Offer',
       name: p.name,
       price: p.monthlyPrice,
       priceCurrency: 'INR',
     })),
-    publisher: {
-      '@type': 'Organization',
-      name: 'Aapno Khano POS • Rudra Web X',
-      telephone: '+91-70820-40809',
-      email: 'contact@aapnokhano.com',
-    },
   };
 
   return (
     <div
-      className="min-h-screen flex flex-col bg-[#FAF6EE] text-[#0F172A] selection:bg-[#D4A037]/30 selection:text-[#0F172A]"
+      className="min-h-screen flex flex-col bg-[#FBF8F3] text-[#141E30]"
       style={{ fontFamily: 'var(--font-manrope), -apple-system, BlinkMacSystemFont, sans-serif' }}
     >
       <script
@@ -348,56 +252,50 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaJsonLd) }}
       />
 
-      {/* 1. Sticky Navigation */}
-      <header className="sticky top-0 z-50 bg-[#FAF6EE]/90 backdrop-blur-xl border-b border-[#E5DEC9]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
+      {/* Floating Clean Header */}
+      <header className="sticky top-0 z-50 pt-3 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto bg-white/95 backdrop-blur-md border border-[#E8E0D0] rounded-2xl shadow-sm px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2.5 flex-shrink-0">
             <img
               src="/images/aapno-khano-logo.png"
               alt="Aapno Khano POS"
-              className="h-11 w-auto object-contain group-hover:scale-105 transition-transform"
+              className="h-9 w-auto object-contain"
             />
-            <div className="hidden sm:block">
-              <div className="text-base font-extrabold tracking-tight text-[#0F172A] leading-none">
-                Aapno Khano <span className="text-[#B8821E]">POS</span>
-              </div>
-              <div className="text-[11px] font-semibold text-slate-500 mt-0.5">
-                Restaurant Operating System
-              </div>
-            </div>
+            <span className="font-extrabold text-base tracking-tight text-[#141E30]">
+              Aapno Khano <span className="text-[#C88A2E]">POS</span>
+            </span>
           </Link>
 
-          <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-700">
-            <a href="#features" className="hover:text-[#0F172A] transition-colors">
+          <nav className="hidden lg:flex items-center gap-7 text-sm font-semibold text-slate-600">
+            <a href="#features" className="hover:text-[#141E30] transition-colors">
               Features
             </a>
-            <a href="#solutions" className="hover:text-[#0F172A] transition-colors">
-              Solutions
+            <a href="#how-it-works" className="hover:text-[#141E30] transition-colors">
+              How it works
             </a>
-            <a href="#pricing" className="hover:text-[#0F172A] transition-colors">
+            <a href="#pricing" className="hover:text-[#141E30] transition-colors">
               Pricing
             </a>
-            <a href="#about" className="hover:text-[#0F172A] transition-colors">
-              About Us
+            <a href="#faq" className="hover:text-[#141E30] transition-colors">
+              FAQs
             </a>
-            <a href="#contact" className="hover:text-[#0F172A] transition-colors">
+            <a href="#contact" className="hover:text-[#141E30] transition-colors">
               Contact
             </a>
           </nav>
 
-          <div className="hidden lg:flex items-center gap-3">
+          <div className="hidden lg:flex items-center gap-2.5">
             <Link
               href="/login"
-              className="px-4 py-2.5 rounded-xl text-sm font-bold text-[#0F172A] hover:bg-[#EFE8D8] transition-colors"
+              className="px-4 py-2 rounded-xl text-sm font-bold text-[#141E30] hover:bg-[#F5EFE4] transition-colors"
             >
               Login
             </Link>
             <Link
               href="/register"
-              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#0F172A] hover:bg-[#1E293B] text-[#FAF6EE] shadow-lg shadow-[#0F172A]/15 flex items-center gap-2 transition-all hover:-translate-y-0.5"
+              className="px-5 py-2.5 rounded-xl text-sm font-bold bg-[#141E30] hover:bg-[#1E2C45] text-[#FBF8F3] transition-colors"
             >
-              <span>Get Started</span>
-              <ArrowRight className="w-4 h-4 text-[#E09D3D]" />
+              Get Started
             </Link>
           </div>
 
@@ -405,70 +303,39 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label="Toggle Menu"
-            className="lg:hidden p-2.5 rounded-xl border border-[#E5DEC9] bg-white text-[#0F172A]"
+            className="lg:hidden p-2 rounded-xl border border-[#E8E0D0] text-[#141E30]"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-[#E5DEC9] px-4 py-5 space-y-3 shadow-xl">
+          <div className="lg:hidden max-w-7xl mx-auto mt-2 bg-white border border-[#E8E0D0] rounded-2xl p-4 shadow-lg space-y-3">
             <div className="grid grid-cols-2 gap-2 text-sm font-semibold text-slate-700">
-              <a
-                href="#features"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE]"
-              >
+              <a href="#features" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3]">
                 Features
               </a>
-              <a
-                href="#solutions"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE]"
-              >
-                Solutions
+              <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3]">
+                How it works
               </a>
-              <a
-                href="#pricing"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE]"
-              >
+              <a href="#pricing" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3]">
                 Pricing
               </a>
-              <a
-                href="#about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE]"
-              >
-                About Us
+              <a href="#faq" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3]">
+                FAQs
               </a>
-              <a
-                href="#contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE]"
-              >
+              <a href="#contact" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3]">
                 Contact
               </a>
-              <Link
-                href="/r/aapno-khano"
-                onClick={() => setMobileMenuOpen(false)}
-                className="px-3 py-2.5 rounded-xl hover:bg-[#FAF6EE] text-[#8B1A2B]"
-              >
+              <Link href="/r/aapno-khano" onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg hover:bg-[#FBF8F3] text-[#C88A2E]">
                 Live QR Menu
               </Link>
             </div>
             <div className="pt-2 border-t border-slate-100 flex gap-2">
-              <Link
-                href="/login"
-                className="flex-1 py-3 rounded-xl border border-[#0F172A]/20 text-center text-sm font-bold text-[#0F172A]"
-              >
+              <Link href="/login" className="flex-1 py-2.5 rounded-xl border border-[#E8E0D0] text-center text-sm font-bold">
                 Login
               </Link>
-              <Link
-                href="/register"
-                className="flex-1 py-3 rounded-xl bg-[#0F172A] text-center text-sm font-bold text-[#FAF6EE]"
-              >
+              <Link href="/register" className="flex-1 py-2.5 rounded-xl bg-[#141E30] text-center text-sm font-bold text-white">
                 Get Started
               </Link>
             </div>
@@ -477,213 +344,174 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
       </header>
 
       <main className="flex-1">
-        {/* 2. Hero Section */}
-        <section className="relative overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-28">
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute -top-24 -right-24 w-[520px] h-[520px] rounded-full bg-[#D4A037]/12 blur-3xl" />
-            <div className="absolute top-1/2 -left-32 w-[420px] h-[420px] rounded-full bg-[#0F172A]/6 blur-3xl" />
-          </div>
-
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        {/* Hero Section (Inspired by clean Bayaro layout) */}
+        <section className="pt-12 pb-16 lg:pt-20 lg:pb-24 overflow-hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
               {/* Left Copy */}
-              <div className="lg:col-span-6 space-y-7">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-[#E5DEC9] shadow-xs text-xs font-bold text-[#0F172A]">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                  <span>Built for QSRs, Cafés, Drive-Ins &amp; Multi-Outlet Chains</span>
+              <div className="lg:col-span-5 space-y-6">
+                <div className="inline-block px-3.5 py-1.5 rounded-xl bg-white border border-[#E8E0D0] text-xs font-bold text-slate-600 shadow-2xs">
+                  Built for QSRs, Cafés &amp; Drive-In Restaurants
                 </div>
 
-                <h1 className="text-4xl sm:text-5xl lg:text-[56px] font-extrabold tracking-tight text-[#0F172A] leading-[1.08]">
+                <h1 className="text-4xl sm:text-5xl lg:text-[52px] font-extrabold tracking-tight text-[#141E30] leading-[1.08]">
                   Run Your Restaurant.{' '}
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#B8821E] via-[#D4A037] to-[#8B1A2B]">
-                    Not Your Paperwork.
-                  </span>
+                  <span className="text-[#C88A2E]">Not Your Paperwork.</span>
                 </h1>
 
-                <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-                  Unify Touch POS billing, QR Code &amp; Car Drive-In ordering, Kitchen Display
-                  System (KDS), 80mm &amp; 58mm GST thermal printing, and Recipe BOM inventory in
-                  one fast cloud platform.
+                <p className="text-base text-slate-600 leading-relaxed">
+                  Fast counter billing, table &amp; car QR ordering, kitchen KOT display, and GST
+                  thermal printing — designed for busy cashiers, chefs, and restaurant owners.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-3.5 pt-1">
+                <div className="flex flex-wrap items-center gap-3 pt-1">
                   <Link
                     href="/register"
-                    className="px-7 py-4 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] text-[#FAF6EE] font-bold text-sm sm:text-base shadow-xl shadow-[#0F172A]/20 flex items-center gap-2.5 transition-all hover:-translate-y-0.5"
+                    className="px-6 py-3.5 rounded-2xl bg-[#141E30] hover:bg-[#1E2C45] text-white font-bold text-sm flex items-center gap-2 shadow-lg shadow-[#141E30]/15 transition-all"
                   >
                     <span>Get Started</span>
                     <ArrowRight className="w-4 h-4 text-[#E09D3D]" />
                   </Link>
                   <a
                     href="#features"
-                    className="px-7 py-4 rounded-2xl bg-white hover:bg-[#F3ECE0] text-[#0F172A] font-bold text-sm sm:text-base border border-[#E5DEC9] shadow-sm flex items-center gap-2 transition-all"
+                    className="px-6 py-3.5 rounded-2xl bg-white hover:bg-[#F5EFE4] text-[#141E30] font-bold text-sm border border-[#E8E0D0] flex items-center gap-2 transition-colors"
                   >
                     <span>Explore Features</span>
                   </a>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-2 text-xs font-semibold text-slate-600">
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    5% GST &amp; FSSAI Thermal Bills
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    80mm &amp; 2-Inch (58mm) Ready
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    Multi-Tenant Role Isolation
-                  </span>
+                {/* Live Outlets Using Platform */}
+                <div className="pt-6 border-t border-[#E8E0D0]">
+                  <p className="text-xs font-semibold text-slate-500 mb-3">
+                    Currently running live at:
+                  </p>
+                  <div className="flex flex-wrap items-center gap-3">
+                    {stats.outlets.map((o) => (
+                      <Link
+                        key={o.qsrNumber}
+                        href={`/r/${o.slug}`}
+                        target="_blank"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-[#E8E0D0] hover:border-[#C88A2E] transition-colors"
+                      >
+                        <img
+                          src={o.logoUrl}
+                          alt={o.name}
+                          className="w-5 h-5 rounded object-contain"
+                        />
+                        <span className="text-xs font-bold text-[#141E30]">{o.name}</span>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Right Interactive POS Dashboard Mockup */}
-              <div className="lg:col-span-6">
-                <div className="relative mx-auto max-w-2xl">
-                  <div className="rounded-3xl bg-white border border-[#E5DEC9] shadow-2xl shadow-[#0F172A]/12 overflow-hidden transition-transform duration-500 hover:scale-[1.01]">
-                    {/* Browser / App Top Bar */}
-                    <div className="bg-[#0F172A] text-white px-4 py-3 flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="w-2.5 h-2.5 rounded-full bg-rose-400" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
-                        <span className="ml-2 text-[11px] font-semibold text-slate-300">
-                          Aapno Khano Touch POS • Interactive Preview
-                        </span>
+              {/* Right Crisp Light POS Product Mockup */}
+              <div className="lg:col-span-7">
+                <div className="rounded-3xl bg-white border border-[#E5DDD0] shadow-2xl shadow-[#141E30]/10 overflow-hidden lg:transform lg:rotate-[-0.8deg] hover:rotate-0 transition-transform duration-500">
+                  <div className="grid grid-cols-12">
+                    {/* Sidebar */}
+                    <div className="hidden sm:flex sm:col-span-3 bg-[#FCFBF9] border-r border-[#EFE9DD] p-4 flex-col justify-between">
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                          <img
+                            src="/images/aapno-khano-logo.png"
+                            alt="Logo"
+                            className="w-7 h-7 rounded-lg object-contain"
+                          />
+                          <span className="text-xs font-extrabold text-[#141E30]">Aapno Khano</span>
+                        </div>
+                        <div className="space-y-1 text-[11px] font-semibold text-slate-600">
+                          <div className="px-2.5 py-2 rounded-xl bg-[#141E30] text-white font-bold">
+                            Point of Sale
+                          </div>
+                          <div className="px-2.5 py-1.5 rounded-xl">Live Orders</div>
+                          <div className="px-2.5 py-1.5 rounded-xl">Kitchen KDS</div>
+                          <div className="px-2.5 py-1.5 rounded-xl">Menu &amp; Prices</div>
+                          <div className="px-2.5 py-1.5 rounded-xl">Tables &amp; QR</div>
+                          <div className="px-2.5 py-1.5 rounded-xl">Inventory</div>
+                          <div className="px-2.5 py-1.5 rounded-xl">GST Reports</div>
+                        </div>
                       </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D4A037]/20 text-[#E09D3D] border border-[#D4A037]/30">
-                        LIVE TERMINAL UI
-                      </span>
+                      <div className="pt-4 border-t border-[#EFE9DD] text-[10px] text-slate-500">
+                        <div className="font-bold text-[#141E30]">Counter Terminal</div>
+                        <div>80mm &amp; 58mm Ready</div>
+                      </div>
                     </div>
 
-                    {/* Mockup Body */}
-                    <div className="grid grid-cols-12 bg-[#FAF6EE]/60">
-                      {/* Mini Sidebar */}
-                      <div className="hidden sm:flex sm:col-span-3 bg-[#0F172A] text-slate-300 p-3 flex-col justify-between border-r border-slate-800">
-                        <div className="space-y-1.5 text-[11px] font-semibold">
-                          <div className="px-2.5 py-2 rounded-lg bg-[#D4A037] text-[#0F172A] font-extrabold">
-                            Touch POS
-                          </div>
-                          <div className="px-2.5 py-1.5 rounded-lg hover:bg-white/5">Live Orders</div>
-                          <div className="px-2.5 py-1.5 rounded-lg hover:bg-white/5">Kitchen KDS</div>
-                          <div className="px-2.5 py-1.5 rounded-lg hover:bg-white/5">Inventory BOM</div>
-                          <div className="px-2.5 py-1.5 rounded-lg hover:bg-white/5">GST Reports</div>
-                        </div>
-                        <div className="pt-4 border-t border-slate-800 text-[10px] text-slate-400">
-                          <div className="font-bold text-white">QSR01 • Fatehabad</div>
-                          <div>Cashier Terminal</div>
-                        </div>
-                      </div>
-
-                      {/* Menu Tiles */}
-                      <div className="col-span-12 sm:col-span-5 p-3.5 space-y-3">
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-                          {['All', 'Starters', 'Main Course'].map((cat) => (
+                    {/* Menu Grid */}
+                    <div className="col-span-12 sm:col-span-9 p-4 sm:p-5 bg-white">
+                      <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#F1ECE2]">
+                        <div className="flex items-center gap-1.5">
+                          {['All', 'Starters', 'Main Course', 'Drinks'].map((c) => (
                             <button
-                              key={cat}
+                              key={c}
                               type="button"
-                              onClick={() => setHeroCategory(cat)}
-                              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold whitespace-nowrap transition-colors ${
-                                heroCategory === cat
-                                  ? 'bg-[#0F172A] text-white'
-                                  : 'bg-white text-slate-600 border border-[#E5DEC9]'
+                              onClick={() => setActiveCat(c)}
+                              className={`px-3 py-1 rounded-lg text-[11px] font-bold transition-colors ${
+                                activeCat === c
+                                  ? 'bg-[#141E30] text-white'
+                                  : 'bg-[#FBF8F3] text-slate-600 hover:bg-[#F2ECE0]'
                               }`}
                             >
-                              {cat}
+                              {c}
                             </button>
                           ))}
                         </div>
+                        <span className="text-[11px] font-semibold text-slate-400">
+                          Click any dish to test ticket
+                        </span>
+                      </div>
 
-                        <div className="grid grid-cols-2 gap-2.5">
-                          {HERO_DISHES.filter(
-                            (d) => heroCategory === 'All' || d.category === heroCategory
-                          ).map((dish) => (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+                        {POS_DISHES.filter((d) => activeCat === 'All' || d.category === activeCat).map(
+                          (dish) => (
                             <button
                               key={dish.id}
                               type="button"
-                              onClick={() => addHeroItem(dish)}
-                              className="bg-white rounded-xl p-2 border border-[#E5DEC9] hover:border-[#D4A037] text-left transition-all shadow-2xs group"
+                              onClick={() => addDish(dish)}
+                              className="rounded-2xl border border-[#ECE5D8] hover:border-[#C88A2E] bg-[#FCFBF9] p-2.5 text-left transition-all group"
                             >
-                              <div className="h-16 rounded-lg overflow-hidden bg-slate-100 mb-1.5 relative">
+                              <div className="h-20 rounded-xl overflow-hidden bg-slate-100 mb-2 relative">
                                 <img
                                   src={dish.img}
                                   alt={dish.name}
                                   className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                                 />
-                                <span
-                                  className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-xs border bg-white flex items-center justify-center ${
-                                    dish.isVeg ? 'border-emerald-600' : 'border-red-600'
-                                  }`}
-                                >
-                                  <span
-                                    className={`w-1 h-1 rounded-full ${
-                                      dish.isVeg ? 'bg-emerald-600' : 'bg-red-600'
-                                    }`}
-                                  />
-                                </span>
                               </div>
-                              <div className="text-[11px] font-bold text-[#0F172A] truncate">
+                              <div className="text-[10px] font-semibold text-slate-400">
+                                {dish.category}
+                              </div>
+                              <div className="text-xs font-extrabold text-[#141E30] truncate">
                                 {dish.name}
                               </div>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-[11px] font-extrabold text-[#B8821E]">
+                              <div className="flex items-center justify-between mt-1.5">
+                                <span className="text-xs font-extrabold text-[#C88A2E]">
                                   ₹{dish.price}
                                 </span>
-                                <span className="w-5 h-5 rounded-md bg-[#0F172A] text-white flex items-center justify-center">
-                                  <Plus className="w-3 h-3" />
+                                <span className="px-2 py-0.5 rounded-lg bg-[#141E30] text-white text-[10px] font-bold flex items-center gap-0.5">
+                                  <Plus className="w-3 h-3" /> Add
                                 </span>
                               </div>
                             </button>
-                          ))}
-                        </div>
+                          )
+                        )}
                       </div>
 
-                      {/* Live Ticket Panel */}
-                      <div className="col-span-12 sm:col-span-4 bg-white border-t sm:border-t-0 sm:border-l border-[#E5DEC9] p-3.5 flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                            <span className="text-[11px] font-extrabold text-[#0F172A]">
-                              LIVE TICKET
-                            </span>
-                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                              Table 04
-                            </span>
-                          </div>
-                          <div className="py-2.5 space-y-2 max-h-40 overflow-y-auto">
-                            {heroCart.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center justify-between text-[11px]"
-                              >
-                                <span className="font-semibold text-slate-700 truncate pr-2">
-                                  {item.qty}× {item.name}
-                                </span>
-                                <span className="font-bold text-[#0F172A]">
-                                  ₹{item.price * item.qty}
-                                </span>
-                              </div>
-                            ))}
-                          </div>
+                      {/* Bottom Ticket Summary Bar */}
+                      <div className="mt-4 pt-3 border-t border-[#F1ECE2] flex flex-wrap items-center justify-between gap-3">
+                        <div className="text-xs text-slate-600">
+                          <span className="font-extrabold text-[#141E30]">{ticketCount} items</span>{' '}
+                          on ticket • Subtotal{' '}
+                          <span className="font-extrabold text-[#141E30]">₹{ticketTotal}</span> + 5%
+                          GST
                         </div>
-
-                        <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-1.5">
-                          <div className="flex justify-between text-[10px] text-slate-500">
-                            <span>GST (5%)</span>
-                            <span>₹{heroGst}</span>
-                          </div>
-                          <div className="flex justify-between text-xs font-extrabold text-[#0F172A]">
-                            <span>Grand Total</span>
-                            <span>₹{heroTotal}</span>
-                          </div>
-                          <Link
-                            href="/login?redirect=/admin/pos"
-                            className="mt-1.5 w-full py-2 rounded-xl bg-[#0F172A] text-[#FAF6EE] text-[11px] font-bold flex items-center justify-center gap-1.5 hover:bg-[#1E293B] transition-colors"
-                          >
-                            <Printer className="w-3.5 h-3.5 text-[#E09D3D]" />
-                            <span>Settle &amp; Print Bill</span>
-                          </Link>
-                        </div>
+                        <Link
+                          href="/login?redirect=/admin/pos"
+                          className="px-4 py-2 rounded-xl bg-[#C88A2E] hover:bg-[#B47A22] text-white text-xs font-bold flex items-center gap-1.5 transition-colors"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>Open Real POS</span>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -693,503 +521,152 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
           </div>
         </section>
 
-        {/* 3. Trust & Verified Statistics Section */}
-        <section className="bg-[#0F172A] text-white py-12 border-y border-slate-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 text-center lg:text-left">
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <div className="text-3xl font-extrabold text-[#E09D3D]">
-                  {stats.restaurants}
-                </div>
-                <div className="text-xs font-semibold text-slate-300 mt-1">
-                  Active Live QSR Outlets
-                </div>
+        {/* Verified Stats Bar */}
+        <section className="border-y border-[#E8E0D0] bg-white py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            <div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#141E30]">
+                {stats.restaurants}
               </div>
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <div className="text-3xl font-extrabold text-white">
-                  {stats.orders.toLocaleString('en-IN')}+
-                </div>
-                <div className="text-xs font-semibold text-slate-300 mt-1">
-                  Verified Orders Processed
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <div className="text-3xl font-extrabold text-[#E09D3D]">
-                  {stats.products}+
-                </div>
-                <div className="text-xs font-semibold text-slate-300 mt-1">
-                  Live Digital Menu Items
-                </div>
-              </div>
-              <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                <div className="text-3xl font-extrabold text-white">{stats.tables}</div>
-                <div className="text-xs font-semibold text-slate-300 mt-1">
-                  Active Tables &amp; QR Endpoints
-                </div>
-              </div>
+              <div className="text-xs font-semibold text-slate-500 mt-1">Active Outlets</div>
             </div>
-
-            {stats.outlets.length > 0 && (
-              <div className="mt-8 pt-6 border-t border-white/10 flex flex-wrap items-center justify-between gap-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                  Live Production Outlets Running on Platform:
-                </span>
-                <div className="flex flex-wrap items-center gap-4">
-                  {stats.outlets.map((o) => (
-                    <Link
-                      key={o.qsrNumber}
-                      href={`/r/${o.slug}`}
-                      target="_blank"
-                      className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
-                    >
-                      <img
-                        src={o.logoUrl}
-                        alt={o.name}
-                        className="w-6 h-6 rounded-md object-contain bg-white p-0.5"
-                      />
-                      <span className="text-xs font-bold text-white">{o.name}</span>
-                      <span className="text-[10px] font-mono text-[#E09D3D]">{o.qsrNumber}</span>
-                    </Link>
-                  ))}
-                </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#C88A2E]">
+                {stats.orders.toLocaleString('en-IN')}+
               </div>
-            )}
+              <div className="text-xs font-semibold text-slate-500 mt-1">Orders Processed</div>
+            </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#141E30]">
+                {stats.products}
+              </div>
+              <div className="text-xs font-semibold text-slate-500 mt-1">Active Menu Items</div>
+            </div>
+            <div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#141E30]">
+                {stats.tables}
+              </div>
+              <div className="text-xs font-semibold text-slate-500 mt-1">Tables &amp; QR Points</div>
+            </div>
           </div>
         </section>
 
-        {/* 4. Features Overview */}
+        {/* Features Grid */}
         <section id="features" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-              Complete Platform Capabilities
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] mt-2">
-              Everything Your Restaurant Needs Under One Roof
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 mt-3">
-              Every module works together in real time — from guest QR scan to cashier billing,
-              kitchen preparation, and inventory deduction.
+          <div className="max-w-2xl mb-12">
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#C88A2E]">
+              Core Features
             </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141E30] mt-2">
+              Built around how a real restaurant actually works
+            </h2>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {FEATURES.map((feat) => {
-              const Icon = feat.icon;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {CORE_FEATURES.map((f) => {
+              const Icon = f.icon;
               return (
                 <div
-                  key={feat.title}
-                  className="bg-white rounded-3xl p-6 border border-[#E5DEC9] hover:border-[#D4A037] hover:shadow-xl hover:shadow-[#0F172A]/5 transition-all group flex flex-col justify-between"
+                  key={f.title}
+                  className="bg-white rounded-3xl p-6 border border-[#E8E0D0] hover:border-[#C88A2E] transition-colors space-y-3"
                 >
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="w-11 h-11 rounded-2xl bg-[#0F172A] text-[#E09D3D] flex items-center justify-center group-hover:scale-105 transition-transform">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#FAF6EE] text-[#0F172A] border border-[#E5DEC9]">
-                        {feat.tag}
-                      </span>
-                    </div>
-                    <h3 className="text-base font-extrabold text-[#0F172A]">{feat.title}</h3>
-                    <p className="text-xs text-slate-600 mt-2 leading-relaxed">{feat.desc}</p>
+                  <div className="w-11 h-11 rounded-2xl bg-[#FBF8F3] border border-[#E8E0D0] text-[#141E30] flex items-center justify-center">
+                    <Icon className="w-5 h-5 text-[#C88A2E]" />
                   </div>
+                  <h3 className="text-lg font-extrabold text-[#141E30]">{f.title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed">{f.desc}</p>
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* 5. Product Showcase */}
-        <section id="solutions" className="py-20 bg-white border-y border-[#E5DEC9]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-10">
-              <div>
-                <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-                  Product Showcase
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] mt-2">
-                  Designed for Speed, Built for Reliability
-                </h2>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {SHOWCASE_TABS.map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all ${
-                      activeTab === tab.id
-                        ? 'bg-[#0F172A] text-[#FAF6EE] shadow-md'
-                        : 'bg-[#FAF6EE] text-slate-700 border border-[#E5DEC9] hover:border-[#D4A037]'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center bg-[#FAF6EE] rounded-3xl p-6 sm:p-10 border border-[#E5DEC9]">
-              <div className="lg:col-span-6 space-y-5">
-                <h3 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A]">
-                  {currentShowcase.title}
-                </h3>
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                  {currentShowcase.desc}
-                </p>
-                <ul className="space-y-3">
-                  {currentShowcase.bullets.map((b) => (
-                    <li key={b} className="flex items-start gap-2.5 text-sm font-semibold text-[#0F172A]">
-                      <CheckCircle2 className="w-5 h-5 text-[#B8821E] flex-shrink-0 mt-0.5" />
-                      <span>{b}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="pt-2">
-                  <Link
-                    href={currentShowcase.ctaHref}
-                    target={currentShowcase.external ? '_blank' : '_self'}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] text-[#FAF6EE] font-bold text-sm shadow-lg transition-all"
-                  >
-                    <span>{currentShowcase.ctaLabel}</span>
-                    {currentShowcase.external ? (
-                      <ExternalLink className="w-4 h-4 text-[#E09D3D]" />
-                    ) : (
-                      <ArrowRight className="w-4 h-4 text-[#E09D3D]" />
-                    )}
-                  </Link>
-                </div>
-              </div>
-
-              <div className="lg:col-span-6">
-                <div className="rounded-2xl overflow-hidden bg-white border border-[#E5DEC9] shadow-xl p-3">
-                  <img
-                    src="/images/pos-hardware-showcase.png"
-                    alt="Aapno Khano POS Terminal, Thermal Printer and QR Standee"
-                    className="w-full h-auto rounded-xl object-contain"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 6. QR Ordering Showcase */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-5 order-2 lg:order-1">
-              <div className="mx-auto max-w-[300px] rounded-[36px] bg-[#0F172A] p-3 shadow-2xl border-4 border-slate-800">
-                <div className="bg-[#FAF6EE] rounded-[26px] overflow-hidden">
-                  <div className="bg-[#0F172A] text-white px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <img
-                        src="/images/aapno-khano-logo.png"
-                        alt="Logo"
-                        className="w-7 h-7 rounded-lg bg-white object-contain p-0.5"
-                      />
-                      <div>
-                        <div className="text-xs font-extrabold">QR Table &amp; Car Menu</div>
-                        <div className="text-[10px] text-[#E09D3D]">Scan • Order • Pay</div>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full">
-                      OPEN
-                    </span>
-                  </div>
-                  <div className="p-3.5 space-y-2.5">
-                    <div className="bg-white rounded-xl p-2.5 border border-[#E5DEC9] flex items-center gap-3">
-                      <img
-                        src="/images/menu/p-1-sweet-corn-chaat.png"
-                        alt="Sweet Corn Chaat"
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-extrabold text-[#0F172A] truncate">
-                          Sweet Corn Chaat
-                        </div>
-                        <div className="text-[10px] text-slate-500">Fresh &amp; Crispy</div>
-                        <div className="text-xs font-extrabold text-[#B8821E] mt-0.5">₹120</div>
-                      </div>
-                    </div>
-                    <div className="bg-white rounded-xl p-2.5 border border-[#E5DEC9] flex items-center gap-3">
-                      <img
-                        src="/images/menu/Chana Masala.png"
-                        alt="Chana Masala"
-                        className="w-12 h-12 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-extrabold text-[#0F172A] truncate">
-                          Chana Masala Handi
-                        </div>
-                        <div className="text-[10px] text-slate-500">Half / Full Portion</div>
-                        <div className="text-xs font-extrabold text-[#B8821E] mt-0.5">₹219</div>
-                      </div>
-                    </div>
-                    <Link
-                      href="/r/aapno-khano"
-                      target="_blank"
-                      className="w-full py-2.5 rounded-xl bg-[#0F172A] text-[#FAF6EE] text-xs font-bold flex items-center justify-center gap-1.5"
-                    >
-                      <Smartphone className="w-3.5 h-3.5 text-[#E09D3D]" />
-                      <span>Open Live QR Menu</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-7 space-y-6 order-1 lg:order-2">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-                QR &amp; Car Service Ordering
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A]">
-                Turn Every Table &amp; Parking Bay Into a Self-Ordering Counter
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Reduce waiter bottlenecks during peak hours. Guests browse rich menus, select
-                Half/Full portions, add cooking instructions, and pay via UPI or Razorpay — with
-                orders firing straight to your kitchen.
+        {/* How It Works + Hardware Showcase */}
+        <section id="how-it-works" className="py-20 bg-white border-y border-[#E8E0D0]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 space-y-6">
+              <p className="text-xs font-extrabold uppercase tracking-wider text-[#C88A2E]">
+                How It Works
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-2xl border border-[#E5DEC9]">
-                  <QrCode className="w-6 h-6 text-[#B8821E] mb-2" />
-                  <div className="text-sm font-extrabold text-[#0F172A]">1. Scan Standee</div>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Table-bound or parking-bay QR loads menu in under a second.
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-2xl border border-[#E5DEC9]">
-                  <UtensilsCrossed className="w-6 h-6 text-[#B8821E] mb-2" />
-                  <div className="text-sm font-extrabold text-[#0F172A]">2. Customize Order</div>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Veg/Non-Veg filters, portion sizes, and vehicle plate entry.
-                  </p>
-                </div>
-                <div className="bg-white p-4 rounded-2xl border border-[#E5DEC9]">
-                  <Car className="w-6 h-6 text-[#B8821E] mb-2" />
-                  <div className="text-sm font-extrabold text-[#0F172A]">3. Pay &amp; Track</div>
-                  <p className="text-xs text-slate-600 mt-1">
-                    Direct UPI/Razorpay settlement &amp; live kitchen prep status.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 7. Kitchen Management Showcase */}
-        <section className="py-20 bg-[#0F172A] text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-14">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#E09D3D]">
-                Kitchen Workflow
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold mt-2">
-                From Billing Counter to Kitchen Prep in Milliseconds
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141E30]">
+                From Table or Counter to Kitchen in Seconds
               </h2>
-              <p className="text-sm sm:text-base text-slate-300 mt-3">
-                Keep front-of-house cashiers and back-of-house chefs perfectly synchronized.
-              </p>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-              {[
-                {
-                  step: '01',
-                  title: 'Order Placed',
-                  desc: 'Created via Cashier POS or Customer QR Menu with table/car tag.',
-                  icon: ShoppingBag,
-                },
-                {
-                  step: '02',
-                  title: 'Auto Station KOT',
-                  desc: 'Dishes route to Handi, Tandoor, Snacks, or Drink stations & 80mm/58mm KOT.',
-                  icon: Printer,
-                },
-                {
-                  step: '03',
-                  title: 'Chef KDS Timer',
-                  desc: 'Chefs track live prep duration with warning badges and special notes.',
-                  icon: Clock,
-                },
-                {
-                  step: '04',
-                  title: 'Ready & Served',
-                  desc: '1-tap completion notifies counter, updates Kanban, and deducts Recipe BOM.',
-                  icon: CheckCircle2,
-                },
-              ].map((s) => {
-                const Icon = s.icon;
-                return (
-                  <div
-                    key={s.step}
-                    className="rounded-3xl bg-white/5 border border-white/10 p-6 space-y-3 hover:border-[#E09D3D]/50 transition-colors"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-mono font-extrabold text-[#E09D3D]">
-                        STEP {s.step}
-                      </span>
-                      <Icon className="w-5 h-5 text-[#E09D3D]" />
-                    </div>
-                    <h3 className="text-lg font-extrabold">{s.title}</h3>
-                    <p className="text-xs text-slate-300 leading-relaxed">{s.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* 8. Business Analytics Section (Clearly Labelled Illustrative Preview) */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-5 space-y-5">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-                Business Intelligence
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A]">
-                Clear Visibility Into Every Rupee, Tax &amp; Ingredient
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Track daily sales, UPI vs Cash collections, 5% GST tax summaries, top-selling
-                dishes, and outlet performance with CSV exports and Z-Report printing.
-              </p>
-              <div className="space-y-3 pt-1">
+              <div className="space-y-4 pt-2">
                 {[
-                  'Daily Z-Report & Day-Session cash reconciliation',
-                  'CGST / SGST invoice register with reprint & WhatsApp share',
-                  'Expense ledger & net operating margin visibility',
-                ].map((item) => (
-                  <div key={item} className="flex items-center gap-2.5 text-sm font-semibold">
-                    <TrendingUp className="w-4 h-4 text-[#B8821E] flex-shrink-0" />
-                    <span>{item}</span>
+                  {
+                    n: '1',
+                    title: 'Take Order on POS or QR Menu',
+                    desc: 'Cashier punches an order on touch POS, or guest scans a table/car QR and pays via UPI.',
+                  },
+                  {
+                    n: '2',
+                    title: 'Kitchen Gets Instant KOT & KDS Ticket',
+                    desc: 'Dishes route to the right kitchen station with prep timers and special cooking notes.',
+                  },
+                  {
+                    n: '3',
+                    title: 'Print GST Bill & Update Stock',
+                    desc: '80mm or 58mm thermal bill prints with GSTIN & FSSAI while raw ingredients auto-deduct.',
+                  },
+                ].map((step) => (
+                  <div key={step.n} className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-xl bg-[#141E30] text-[#E09D3D] font-extrabold text-sm flex items-center justify-center flex-shrink-0">
+                      {step.n}
+                    </div>
+                    <div>
+                      <h3 className="text-base font-extrabold text-[#141E30]">{step.title}</h3>
+                      <p className="text-sm text-slate-600 mt-0.5">{step.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
+
+              <div className="flex flex-wrap gap-3 pt-2">
+                <Link
+                  href="/r/aapno-khano"
+                  target="_blank"
+                  className="px-5 py-3 rounded-xl bg-[#141E30] text-white text-sm font-bold hover:bg-[#1E2C45] transition-colors"
+                >
+                  Try Live QR Menu
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-5 py-3 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-[#141E30] text-sm font-bold hover:bg-[#F2ECE0] transition-colors"
+                >
+                  Staff Portal Login
+                </Link>
+              </div>
             </div>
 
-            <div className="lg:col-span-7">
-              <div className="rounded-3xl bg-[#0F172A] text-white p-6 sm:p-8 shadow-2xl border border-slate-800">
-                <div className="flex flex-wrap items-center justify-between gap-2 pb-5 border-b border-white/10">
-                  <div>
-                    <div className="text-sm font-extrabold">Revenue &amp; Payment Analytics</div>
-                    <div className="text-[11px] text-slate-400">
-                      Illustrative Dashboard Preview • Live data loads inside your portal
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#D4A037]/20 text-[#E09D3D] border border-[#D4A037]/30">
-                    Illustrative Mockup
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-3 gap-3 my-5">
-                  <div className="rounded-2xl bg-white/5 p-3.5 border border-white/10">
-                    <div className="text-[10px] text-slate-400 font-semibold">Payment Split</div>
-                    <div className="text-sm font-extrabold text-[#E09D3D] mt-1">UPI • Cash • Card</div>
-                  </div>
-                  <div className="rounded-2xl bg-white/5 p-3.5 border border-white/10">
-                    <div className="text-[10px] text-slate-400 font-semibold">GST Compliance</div>
-                    <div className="text-sm font-extrabold text-white mt-1">CGST + SGST</div>
-                  </div>
-                  <div className="rounded-2xl bg-white/5 p-3.5 border border-white/10">
-                    <div className="text-[10px] text-slate-400 font-semibold">Audit Ready</div>
-                    <div className="text-sm font-extrabold text-emerald-400 mt-1">CSV &amp; Z-Report</div>
-                  </div>
-                </div>
-
-                {/* Clean Bar Chart Illustration */}
-                <div className="bg-white/5 rounded-2xl p-4 border border-white/10">
-                  <div className="text-[11px] font-bold text-slate-300 mb-3">
-                    7-Day Order Volume Trend (Sample Layout)
-                  </div>
-                  <div className="grid grid-cols-7 gap-2 items-end h-28 pt-2">
-                    {[42, 58, 50, 74, 68, 92, 85].map((h, i) => (
-                      <div key={i} className="flex flex-col items-center gap-1.5 h-full justify-end">
-                        <div
-                          className="w-full rounded-t-lg bg-gradient-to-t from-[#B8821E] to-[#E09D3D]"
-                          style={{ height: `${h}%` }}
-                        />
-                        <span className="text-[9px] text-slate-400 font-mono">
-                          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][i]}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div className="lg:col-span-6">
+              <div className="rounded-3xl bg-[#FBF8F3] border border-[#E8E0D0] p-4 shadow-sm">
+                <img
+                  src="/images/pos-hardware-showcase.png"
+                  alt="Aapno Khano POS Terminal, Thermal Printer and QR Standee"
+                  className="w-full h-auto rounded-2xl object-contain"
+                />
               </div>
             </div>
           </div>
         </section>
 
-        {/* 9. Why Choose Aapno Khano */}
-        <section id="about" className="py-20 bg-white border-y border-[#E5DEC9]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-12">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-                Why Choose Aapno Khano
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] mt-2">
-                Engineered for Real Indian Hospitality Workflows
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  title: 'Both 80mm & 58mm Thermal Support',
-                  desc: 'Run standard 80mm counter printers or compact 2-inch 58mm printers per outlet with crisp logos, GSTIN, and FSSAI details.',
-                  icon: Printer,
-                },
-                {
-                  title: 'Strict Tenant & Role Isolation',
-                  desc: 'Every restaurant’s orders, menus, inventory, and staff remain isolated with server-side RBAC and encrypted sessions.',
-                  icon: ShieldCheck,
-                },
-                {
-                  title: 'Built for QSR, Dine-In & Car Service',
-                  desc: 'Dedicated workflows for table service, takeaway, and parking-bay car delivery with vehicle number callouts.',
-                  icon: Car,
-                },
-              ].map((w) => {
-                const Icon = w.icon;
-                return (
-                  <div
-                    key={w.title}
-                    className="rounded-3xl bg-[#FAF6EE] p-7 border border-[#E5DEC9] space-y-3"
-                  >
-                    <div className="w-11 h-11 rounded-2xl bg-[#0F172A] text-[#E09D3D] flex items-center justify-center">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-lg font-extrabold text-[#0F172A]">{w.title}</h3>
-                    <p className="text-sm text-slate-600 leading-relaxed">{w.desc}</p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* 10. Pricing Section (Exact Verified DB Plans) */}
+        {/* Pricing Section (Real DB Plans) */}
         <section id="pricing" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-              Transparent Pricing
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#0F172A] mt-2">
-              Plans That Scale With Your Outlets
-            </h2>
-            <p className="text-sm text-slate-600 mt-2">
-              Verified subscription tiers with clear branch, table, order, and staff allowances.
+            <p className="text-xs font-extrabold uppercase tracking-wider text-[#C88A2E]">
+              Simple Pricing
             </p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-[#141E30] mt-2">
+              Plans for Single QSRs &amp; Multi-Outlet Brands
+            </h2>
 
-            {/* Monthly / Yearly Toggle */}
-            <div className="inline-flex items-center p-1 rounded-2xl bg-white border border-[#E5DEC9] mt-6 shadow-xs">
+            <div className="inline-flex items-center p-1 rounded-xl bg-white border border-[#E8E0D0] mt-6">
               <button
                 type="button"
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  billingCycle === 'monthly'
-                    ? 'bg-[#0F172A] text-[#FAF6EE]'
-                    : 'text-slate-600 hover:text-[#0F172A]'
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                  billingCycle === 'monthly' ? 'bg-[#141E30] text-white' : 'text-slate-600'
                 }`}
               >
                 Monthly
@@ -1197,10 +674,8 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
               <button
                 type="button"
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${
-                  billingCycle === 'yearly'
-                    ? 'bg-[#0F172A] text-[#FAF6EE]'
-                    : 'text-slate-600 hover:text-[#0F172A]'
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-colors ${
+                  billingCycle === 'yearly' ? 'bg-[#141E30] text-white' : 'text-slate-600'
                 }`}
               >
                 Yearly
@@ -1210,79 +685,61 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {plans.map((plan, idx) => {
-              const isFeatured = plan.slug === 'professional' || idx === 1;
+              const featured = plan.slug === 'professional' || idx === 1;
               const price = billingCycle === 'monthly' ? plan.monthlyPrice : plan.yearlyPrice;
               return (
                 <div
                   key={plan.id}
-                  className={`rounded-3xl p-7 flex flex-col justify-between border transition-all ${
-                    isFeatured
-                      ? 'bg-[#0F172A] text-white border-[#D4A037] shadow-2xl shadow-[#0F172A]/20'
-                      : 'bg-white text-[#0F172A] border-[#E5DEC9] shadow-sm'
+                  className={`rounded-3xl p-7 flex flex-col justify-between border ${
+                    featured
+                      ? 'bg-[#141E30] text-white border-[#C88A2E] shadow-xl'
+                      : 'bg-white text-[#141E30] border-[#E8E0D0]'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-extrabold">{plan.name}</h3>
-                      {isFeatured && (
-                        <span className="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-[#D4A037] text-[#0F172A]">
-                          Popular
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-5 flex items-baseline gap-1.5">
+                    <h3 className="text-lg font-extrabold">{plan.name}</h3>
+                    <div className="mt-4 flex items-baseline gap-1">
                       <span className="text-4xl font-extrabold">
                         ₹{price.toLocaleString('en-IN')}
                       </span>
-                      <span
-                        className={`text-xs font-semibold ${
-                          isFeatured ? 'text-slate-300' : 'text-slate-500'
-                        }`}
-                      >
-                        / {billingCycle === 'monthly' ? 'month' : 'year'}
+                      <span className={`text-xs ${featured ? 'text-slate-300' : 'text-slate-500'}`}>
+                        /{billingCycle === 'monthly' ? 'mo' : 'yr'}
                       </span>
                     </div>
 
-                    <ul className="mt-6 space-y-3 text-xs font-semibold">
+                    <ul className="mt-6 space-y-2.5 text-xs font-semibold">
                       <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
+                        <Check className="w-4 h-4 text-[#E09D3D]" />
                         <span>Up to {plan.maxBranches} Branch(es)</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
-                        <span>Up to {plan.maxTables} Tables / QR Endpoints</span>
+                        <Check className="w-4 h-4 text-[#E09D3D]" />
+                        <span>Up to {plan.maxTables} Tables / QR Points</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
+                        <Check className="w-4 h-4 text-[#E09D3D]" />
                         <span>{plan.maxOrdersPerMonth.toLocaleString('en-IN')} Orders / Month</span>
                       </li>
                       <li className="flex items-center gap-2">
-                        <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
-                        <span>Up to {plan.maxStaffUsers} Staff Accounts</span>
+                        <Check className="w-4 h-4 text-[#E09D3D]" />
+                        <span>Up to {plan.maxStaffUsers} Staff Logins</span>
                       </li>
                       {plan.hasKds && (
                         <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
+                          <Check className="w-4 h-4 text-[#E09D3D]" />
                           <span>Kitchen Display System (KDS)</span>
-                        </li>
-                      )}
-                      {plan.hasMultiStation && (
-                        <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
-                          <span>Multi-Station KOT Routing</span>
                         </li>
                       )}
                       {plan.hasInventory && (
                         <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
+                          <Check className="w-4 h-4 text-[#E09D3D]" />
                           <span>Inventory &amp; Recipe BOM</span>
                         </li>
                       )}
                       {plan.hasAdvancedReports && (
                         <li className="flex items-center gap-2">
-                          <Check className="w-4 h-4 text-[#E09D3D] flex-shrink-0" />
-                          <span>Advanced GST &amp; Sales Reports</span>
+                          <Check className="w-4 h-4 text-[#E09D3D]" />
+                          <span>GST &amp; Sales Reports</span>
                         </li>
                       )}
                     </ul>
@@ -1290,14 +747,13 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
 
                   <Link
                     href={`/register?plan=${encodeURIComponent(plan.slug)}`}
-                    className={`mt-8 w-full py-3.5 rounded-2xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
-                      isFeatured
-                        ? 'bg-[#D4A037] hover:bg-[#E09D3D] text-[#0F172A]'
-                        : 'bg-[#0F172A] hover:bg-[#1E293B] text-[#FAF6EE]'
+                    className={`mt-8 w-full py-3 rounded-2xl text-sm font-bold text-center transition-colors ${
+                      featured
+                        ? 'bg-[#C88A2E] hover:bg-[#D4A037] text-white'
+                        : 'bg-[#141E30] hover:bg-[#1E2C45] text-white'
                     }`}
                   >
-                    <span>Get Started</span>
-                    <ArrowRight className="w-4 h-4" />
+                    Get Started
                   </Link>
                 </div>
               );
@@ -1305,344 +761,164 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
           </div>
         </section>
 
-        {/* 11. Verified Live Deployments (No Fake Reviews) */}
-        <section className="py-16 bg-white border-y border-[#E5DEC9]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-2xl mx-auto mb-10">
-              <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-                Verified Live Outlets
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#0F172A] mt-2">
-                Running Live Across Haryana QSRs &amp; Cafés
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {stats.outlets.map((outlet) => (
-                <div
-                  key={outlet.qsrNumber}
-                  className="rounded-3xl bg-[#FAF6EE] border border-[#E5DEC9] p-6 flex items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-3.5 min-w-0">
-                    <img
-                      src={outlet.logoUrl}
-                      alt={outlet.name}
-                      className="w-12 h-12 rounded-2xl bg-white object-contain p-1 border border-[#E5DEC9] flex-shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <div className="text-xs font-mono font-bold text-[#B8821E]">
-                        {outlet.qsrNumber} • {outlet.city}
-                      </div>
-                      <h3 className="text-sm font-extrabold text-[#0F172A] truncate">
-                        {outlet.name}
-                      </h3>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/r/${outlet.slug}`}
-                    target="_blank"
-                    className="px-3 py-2 rounded-xl bg-white border border-[#E5DEC9] hover:border-[#D4A037] text-xs font-bold text-[#0F172A] flex-shrink-0"
-                  >
-                    Menu
-                  </Link>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 12. FAQ Section */}
-        <section id="faq" className="py-20 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#B8821E]">
-              Frequently Asked Questions
-            </span>
-            <h2 className="text-3xl font-extrabold text-[#0F172A] mt-2">
-              Answers for Restaurant Owners &amp; Operators
+        {/* FAQs */}
+        <section id="faq" className="py-16 bg-white border-t border-[#E8E0D0]">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-center text-[#141E30] mb-8">
+              Common Questions
             </h2>
-          </div>
-
-          <div className="space-y-3">
-            {FAQS.map((faq, idx) => {
-              const isOpen = openFaq === idx;
-              return (
-                <div
-                  key={faq.q}
-                  className="bg-white rounded-2xl border border-[#E5DEC9] overflow-hidden"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setOpenFaq(isOpen ? null : idx)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between gap-4 font-bold text-sm sm:text-base text-[#0F172A]"
-                  >
-                    <span>{faq.q}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 text-[#B8821E] flex-shrink-0 transition-transform ${
-                        isOpen ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  {isOpen && (
-                    <div className="px-6 pb-5 text-sm text-slate-600 leading-relaxed border-t border-slate-100 pt-3">
-                      {faq.a}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            <div className="space-y-3">
+              {FAQS.map((faq, idx) => {
+                const open = openFaq === idx;
+                return (
+                  <div key={faq.q} className="rounded-2xl border border-[#E8E0D0] bg-[#FBF8F3]">
+                    <button
+                      type="button"
+                      onClick={() => setOpenFaq(open ? null : idx)}
+                      className="w-full px-5 py-4 text-left flex items-center justify-between gap-4 text-sm font-bold text-[#141E30]"
+                    >
+                      <span>{faq.q}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-[#C88A2E] flex-shrink-0 transition-transform ${
+                          open ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+                    {open && (
+                      <div className="px-5 pb-4 text-sm text-slate-600 leading-relaxed">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </section>
 
-        {/* 13. Final CTA + Contact & Demo Request Form */}
-        <section id="contact" className="py-20 bg-[#0F172A] text-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-6 space-y-6">
-                <span className="text-xs font-extrabold uppercase tracking-widest text-[#E09D3D]">
-                  Start Today
-                </span>
-                <h2 className="text-3xl sm:text-5xl font-extrabold leading-tight">
-                  Your Restaurant Deserves Smarter Management.
-                </h2>
-                <p className="text-slate-300 text-base leading-relaxed">
-                  Register your outlet online in minutes, or request a guided walkthrough from our
-                  onboarding specialists.
-                </p>
-                <div className="flex flex-wrap gap-3.5 pt-2">
-                  <Link
-                    href="/register"
-                    className="px-7 py-4 rounded-2xl bg-[#D4A037] hover:bg-[#E09D3D] text-[#0F172A] font-extrabold text-sm flex items-center gap-2 transition-all"
-                  >
-                    <span>Get Started</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                  <Link
-                    href="/application-status"
-                    className="px-6 py-4 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm border border-white/15 transition-all"
-                  >
-                    Check Application Status
-                  </Link>
-                </div>
+        {/* Contact & Final CTA */}
+        <section id="contact" className="py-20 bg-[#141E30] text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 space-y-5">
+              <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">
+                Your Restaurant Deserves Smarter Management.
+              </h2>
+              <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+                Register your restaurant online or leave your number and our team will help you set
+                up your menu, QR standees, and thermal printer.
+              </p>
 
-                <div className="pt-4 space-y-2.5 text-sm text-slate-300">
-                  <div className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-[#E09D3D]" />
-                    <span>+91 70820 40809 • +91 70820 40892</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Mail className="w-4 h-4 text-[#E09D3D]" />
-                    <span>contact@aapnokhano.com</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <MapPin className="w-4 h-4 text-[#E09D3D]" />
-                    <span>Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053</span>
-                  </div>
-                </div>
+              <div className="flex flex-wrap gap-3 pt-1">
+                <Link
+                  href="/register"
+                  className="px-6 py-3.5 rounded-2xl bg-[#C88A2E] hover:bg-[#D4A037] text-white font-bold text-sm"
+                >
+                  Get Started
+                </Link>
+                <Link
+                  href="/application-status"
+                  className="px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 text-white font-bold text-sm border border-white/15"
+                >
+                  Check Application Status
+                </Link>
               </div>
 
-              {/* Working Contact / Demo Form */}
-              <div className="lg:col-span-6">
-                <form
-                  onSubmit={handleContactSubmit}
-                  className="bg-white text-[#0F172A] rounded-3xl p-6 sm:p-8 shadow-2xl space-y-4"
-                >
-                  <div>
-                    <h3 className="text-xl font-extrabold">Request a Demo or Callback</h3>
-                    <p className="text-xs text-slate-500 mt-1">
-                      Tell us about your restaurant or café and our team will reach out.
-                    </p>
-                  </div>
+              <div className="pt-4 space-y-2 text-sm text-slate-300">
+                <div className="flex items-center gap-2.5">
+                  <Phone className="w-4 h-4 text-[#E09D3D]" />
+                  <span>+91 70820 40809 / +91 70820 40892</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <Mail className="w-4 h-4 text-[#E09D3D]" />
+                  <span>contact@aapnokhano.com</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <MapPin className="w-4 h-4 text-[#E09D3D]" />
+                  <span>Shop No. 50, HUDA Sector 3, Fatehabad, Haryana – 125053</span>
+                </div>
+              </div>
+            </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                    <input
-                      type="text"
-                      required
-                      placeholder="Your Full Name *"
-                      value={contactForm.name}
-                      onChange={(e) => setContactForm({ ...contactForm, name: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Restaurant / Café Name"
-                      value={contactForm.restaurantName}
-                      onChange={(e) =>
-                        setContactForm({ ...contactForm, restaurantName: e.target.value })
-                      }
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
-                    />
-                    <input
-                      type="tel"
-                      required
-                      placeholder="Mobile Number *"
-                      value={contactForm.phone}
-                      onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
-                    />
-                    <input
-                      type="email"
-                      placeholder="Email Address"
-                      value={contactForm.email}
-                      onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
-                    />
-                  </div>
-
+            <div className="lg:col-span-6">
+              <form
+                onSubmit={handleContact}
+                className="bg-white text-[#141E30] rounded-3xl p-6 sm:p-8 shadow-xl space-y-3.5"
+              >
+                <h3 className="text-lg font-extrabold">Request a Callback</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
                     type="text"
-                    placeholder="City (e.g. Hisar, Fatehabad, Panchkula)"
-                    value={contactForm.city}
-                    onChange={(e) => setContactForm({ ...contactForm, city: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
+                    required
+                    placeholder="Your Name *"
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-sm focus:outline-none focus:border-[#141E30]"
                   />
-
-                  <textarea
-                    rows={3}
-                    placeholder="Tell us what you need (POS, QR Menu, 58mm/80mm printer, multi-outlet)..."
-                    value={contactForm.message}
-                    onChange={(e) => setContactForm({ ...contactForm, message: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-[#FAF6EE] border border-[#E5DEC9] text-sm focus:outline-none focus:border-[#0F172A]"
+                  <input
+                    type="text"
+                    placeholder="Restaurant / Café Name"
+                    value={form.restaurantName}
+                    onChange={(e) => setForm({ ...form, restaurantName: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-sm focus:outline-none focus:border-[#141E30]"
                   />
+                  <input
+                    type="tel"
+                    required
+                    placeholder="Phone Number *"
+                    value={form.phone}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-sm focus:outline-none focus:border-[#141E30]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="City"
+                    value={form.city}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-sm focus:outline-none focus:border-[#141E30]"
+                  />
+                </div>
+                <textarea
+                  rows={3}
+                  placeholder="What printer size or setup do you need? (80mm / 58mm, QR menu, etc.)"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#FBF8F3] border border-[#E8E0D0] text-sm focus:outline-none focus:border-[#141E30]"
+                />
 
-                  {contactStatus.type === 'success' && (
-                    <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
-                      {contactStatus.text}
-                    </div>
-                  )}
-                  {contactStatus.type === 'error' && (
-                    <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
-                      {contactStatus.text}
-                    </div>
-                  )}
+                {formState === 'sent' && (
+                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                    {formMsg}
+                  </div>
+                )}
+                {formState === 'error' && (
+                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold">
+                    {formMsg}
+                  </div>
+                )}
 
-                  <button
-                    type="submit"
-                    disabled={contactStatus.type === 'submitting'}
-                    className="w-full py-3.5 rounded-2xl bg-[#0F172A] hover:bg-[#1E293B] text-[#FAF6EE] font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-60"
-                  >
-                    <MessageSquare className="w-4 h-4 text-[#E09D3D]" />
-                    <span>
-                      {contactStatus.type === 'submitting' ? 'Submitting...' : 'Request Demo'}
-                    </span>
-                  </button>
-                </form>
-              </div>
+                <button
+                  type="submit"
+                  disabled={formState === 'sending'}
+                  className="w-full py-3 rounded-xl bg-[#141E30] hover:bg-[#1E2C45] text-white font-bold text-sm transition-colors disabled:opacity-60"
+                >
+                  {formState === 'sending' ? 'Sending...' : 'Send Request'}
+                </button>
+              </form>
             </div>
           </div>
         </section>
       </main>
 
-      {/* 14. Premium Footer */}
-      <footer className="bg-[#080E1B] text-slate-300 border-t border-slate-800 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 pb-10 border-b border-slate-800">
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img
-                  src="/images/aapno-khano-logo.png"
-                  alt="Aapno Khano POS"
-                  className="h-10 w-auto bg-white rounded-xl p-1"
-                />
-                <div>
-                  <div className="text-sm font-extrabold text-white">Aapno Khano POS</div>
-                  <div className="text-[11px] text-[#E09D3D]">Restaurant SaaS Platform</div>
-                </div>
-              </div>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Complete cloud POS, QR ordering, Kitchen Display System (KDS), and GST billing for
-                QSRs, cafés, and multi-outlet hospitality brands.
-              </p>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-4">
-                Product
-              </h4>
-              <ul className="space-y-2.5 text-xs">
-                <li>
-                  <a href="#features" className="hover:text-[#E09D3D] transition-colors">
-                    Features Overview
-                  </a>
-                </li>
-                <li>
-                  <a href="#solutions" className="hover:text-[#E09D3D] transition-colors">
-                    Solutions &amp; Hardware
-                  </a>
-                </li>
-                <li>
-                  <a href="#pricing" className="hover:text-[#E09D3D] transition-colors">
-                    Subscription Pricing
-                  </a>
-                </li>
-                <li>
-                  <Link href="/r/aapno-khano" target="_blank" className="hover:text-[#E09D3D]">
-                    Live QR Menu Demo
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-4">
-                Platform Portals
-              </h4>
-              <ul className="space-y-2.5 text-xs">
-                <li>
-                  <Link href="/login" className="hover:text-[#E09D3D] transition-colors">
-                    Staff &amp; Owner Login
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/register" className="hover:text-[#E09D3D] transition-colors">
-                    Register Restaurant
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/application-status" className="hover:text-[#E09D3D] transition-colors">
-                    Application Status
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/login?redirect=/superadmin" className="hover:text-[#E09D3D]">
-                    Super Admin Portal
-                  </Link>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-white mb-4">
-                Contact &amp; Social
-              </h4>
-              <ul className="space-y-2.5 text-xs text-slate-400">
-                <li>+91 70820 40809 / +91 70820 40892</li>
-                <li>contact@aapnokhano.com</li>
-                <li>HUDA Sector 3, Fatehabad, Haryana</li>
-                <li className="pt-1 flex items-center gap-3">
-                  <a
-                    href="https://www.instagram.com/aapnokhano"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-300 hover:text-[#E09D3D]"
-                  >
-                    Instagram
-                  </a>
-                  <span>•</span>
-                  <a
-                    href="https://www.facebook.com/aapnokhano"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-slate-300 hover:text-[#E09D3D]"
-                  >
-                    Facebook
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-400">
-            <div>
+      {/* Clean Footer */}
+      <footer className="bg-[#0D1420] text-slate-300 py-10 border-t border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+          <div className="flex items-center gap-2.5">
+            <img
+              src="/images/aapno-khano-logo.png"
+              alt="Aapno Khano POS"
+              className="h-8 w-auto bg-white rounded-lg p-0.5"
+            />
+            <span>
               © 2026 Aapno Khano POS • Built by{' '}
               <a
                 href="https://rudrawebx.com/"
@@ -1652,52 +928,46 @@ export default function LandingPageClient({ plans, stats }: LandingPageClientPro
               >
                 Rudra Web X
               </a>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => setLegalModal('privacy')}
-                className="hover:text-white transition-colors"
-              >
-                Privacy Policy
-              </button>
-              <button
-                type="button"
-                onClick={() => setLegalModal('terms')}
-                className="hover:text-white transition-colors"
-              >
-                Terms of Service
-              </button>
-            </div>
+            </span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-5">
+            <Link href="/login" className="hover:text-white">
+              Login
+            </Link>
+            <Link href="/register" className="hover:text-white">
+              Register
+            </Link>
+            <button type="button" onClick={() => setLegalModal('privacy')} className="hover:text-white">
+              Privacy
+            </button>
+            <button type="button" onClick={() => setLegalModal('terms')} className="hover:text-white">
+              Terms
+            </button>
           </div>
         </div>
       </footer>
 
-      {/* Legal Info Modal */}
       {legalModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white text-[#0F172A] rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white text-[#141E30] rounded-3xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-extrabold">
+              <h3 className="text-base font-extrabold">
                 {legalModal === 'privacy' ? 'Privacy Policy' : 'Terms of Service'}
               </h3>
-              <button
-                type="button"
-                onClick={() => setLegalModal(null)}
-                className="p-2 rounded-xl hover:bg-slate-100"
-              >
+              <button type="button" onClick={() => setLegalModal(null)} className="p-1.5">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               {legalModal === 'privacy'
-                ? 'Aapno Khano POS isolates restaurant tenant records, guest orders, and staff credentials using encrypted sessions and role-based access control. Contact inquiries are used solely for onboarding and support.'
-                : 'Aapno Khano POS provides cloud billing, QR menu ordering, Kitchen Display System (KDS), and inventory management under active restaurant subscriptions. Each outlet is responsible for verifying its GSTIN, FSSAI, and tax configurations.'}
+                ? 'Each restaurant account keeps its orders, menus, staff logins, and inventory strictly isolated. Callback inquiries are used only to contact you about onboarding.'
+                : 'Aapno Khano POS provides cloud billing, QR ordering, KDS, and inventory tools for registered restaurants. Each outlet manages its own GSTIN, FSSAI, and tax rates.'}
             </p>
             <button
               type="button"
               onClick={() => setLegalModal(null)}
-              className="w-full py-3 rounded-xl bg-[#0F172A] text-white text-xs font-bold"
+              className="w-full py-2.5 rounded-xl bg-[#141E30] text-white text-xs font-bold"
             >
               Close
             </button>
