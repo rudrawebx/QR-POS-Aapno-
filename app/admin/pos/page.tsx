@@ -156,6 +156,13 @@ export default function AdminPosPage() {
               fssaiNumber: currentRest?.fssaiNumber || '',
               currencySymbol: currentRest?.currencySymbol || '₹',
               defaultReceiptFooter: currentRest?.settings?.defaultReceiptFooter || 'Thank you for your visit!',
+              receiptWidth: (() => {
+                try {
+                  return JSON.parse(currentRest?.settings?.billTemplateConfig || '{}').receiptWidth === '58mm' ? '58mm' : '80mm';
+                } catch {
+                  return '80mm';
+                }
+              })(),
             },
             order: {
               humanOrderId: latest.order?.humanOrderId || latest.humanInvoiceNumber,

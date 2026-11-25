@@ -75,6 +75,7 @@ export interface PrintReceiptData {
     currencySymbol: string;
     logoUrl?: string;
     defaultReceiptFooter?: string;
+    receiptWidth?: '58mm' | '80mm';
   };
   order: {
     humanOrderId: string;

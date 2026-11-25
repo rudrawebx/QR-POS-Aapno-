@@ -93,6 +93,12 @@ export default function PrintDualThermal({
 
   if (!mounted) return null;
 
+  const is58mm =
+    billData?.restaurant?.receiptWidth === '58mm' ||
+    billData?.restaurant?.name?.toLowerCase().includes('love greens');
+  const outerMaxW = is58mm ? '58mm' : '80mm';
+  const innerMaxW = is58mm ? '48mm' : '72mm';
+
   return createPortal(
     <>
       {/* Universal 80mm ESC/POS CSS & Crisp PDF Export */}
@@ -139,7 +145,7 @@ export default function PrintDualThermal({
             left: 0 !important;
             right: 0 !important;
             width: 100% !important;
-            max-width: 80mm !important;
+            max-width: ${outerMaxW} !important;
             margin: 0 auto !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -153,7 +159,7 @@ export default function PrintDualThermal({
           #thermal-print-root {
             position: static !important;
             width: 100% !important;
-            max-width: 80mm !important;
+            max-width: ${outerMaxW} !important;
             margin: 0 auto !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -161,8 +167,8 @@ export default function PrintDualThermal({
             display: block !important;
           }
           .thermal-doc {
-            width: 72mm !important;
-            max-width: 72mm !important;
+            width: ${innerMaxW} !important;
+            max-width: ${innerMaxW} !important;
             margin: 0 auto !important;
             padding: 1mm 1mm 2mm 1mm !important;
             background: #ffffff !important;
@@ -274,12 +280,19 @@ export default function PrintDualThermal({
         </div>
 
         {/* Printable Area */}
-        <div id="thermal-print-root" className="print-container thermal-print-wrapper space-y-4 pb-12 w-full max-w-[330px] mx-auto">
-          {/* Document 1: 80mm Customer GST Tax Bill */}
+        <div
+          id="thermal-print-root"
+          className={`print-container thermal-print-wrapper space-y-4 pb-12 w-full ${
+            is58mm ? "max-w-[230px]" : "max-w-[330px]"
+          } mx-auto`}
+        >
+          {/* Document 1: Thermal Customer GST Tax Bill */}
           {(activeMode === "PRINT_BOTH" || activeMode === "PRINT_BILL") && billData && (
             <div
               id="thermal-bill-doc"
-              className={`thermal-doc bg-white text-black p-4 rounded-xl shadow-2xl w-full font-mono text-[11px] leading-tight border border-slate-300 mx-auto ${
+              className={`thermal-doc bg-white text-black ${
+                is58mm ? "p-2.5 text-[10px]" : "p-4 text-[11px]"
+              } rounded-xl shadow-2xl w-full font-mono leading-tight border border-slate-300 mx-auto ${
                 activeMode === "PRINT_BOTH" ? "thermal-bill-page" : ""
               }`}
             >
