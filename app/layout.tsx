@@ -1,10 +1,27 @@
 import type { Metadata } from 'next';
+import { Manrope } from 'next/font/google';
 import './globals.css';
 
+const manrope = Manrope({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-manrope',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'आपणो खाणो (Aapno Khaano) | Restaurant POS, QR & Drive-In SaaS',
+  metadataBase: new URL('https://pos.aapnokhano.com'),
+  title: 'Aapno Khano POS | Run Your Restaurant. Not Your Paperwork.',
   description:
-    'Complete production-ready multi-tenant restaurant QR ordering, POS terminal, Kitchen Display System (KDS), 80mm thermal KOT printing, Razorpay/UPI payments, and Super Admin SaaS platform.',
+    'Complete multi-outlet restaurant management SaaS: Touch POS Billing, QR Code Menu & Car Drive-In Ordering, Kitchen Display System (KDS), 80mm & 58mm Thermal KOT, Recipe BOM Inventory, and Real-Time GST Analytics.',
+  keywords: [
+    'Restaurant POS India',
+    'QSR POS Software',
+    'QR Code Menu Ordering',
+    'Kitchen Display System KDS',
+    'Thermal GST Billing Software',
+    'Aapno Khano POS',
+  ],
   icons: {
     icon: [
       { url: '/favicon.ico', sizes: 'any' },
@@ -39,8 +56,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full flex flex-col antialiased bg-slate-50 text-slate-900">
+    <html lang="en" className={`h-full scroll-smooth ${manrope.variable}`}>
+      <body className="min-h-full flex flex-col antialiased bg-[#FAF6EE] text-[#0F172A]">
         {children}
       </body>
     </html>
